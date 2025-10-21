@@ -71,6 +71,35 @@ class FileCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Video
+                if (item.videoTracks.isNotEmpty)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Video',
+                            style: Theme.of(context).textTheme.titleSmall),
+                        const SizedBox(height: 8),
+                        for (final track in item.videoTracks)
+                          CheckboxListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(track.description,
+                                style: const TextStyle(fontSize: 12)),
+                            value: item.selectedVideo.contains(track.position),
+                            onChanged: (value) {
+                              if (value == true) {
+                                item.selectedVideo.add(track.position);
+                              } else {
+                                item.selectedVideo.remove(track.position);
+                              }
+                              onChanged();
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                if (item.videoTracks.isNotEmpty) const SizedBox(width: 16),
                 // Audio
                 Expanded(
                   child: Column(

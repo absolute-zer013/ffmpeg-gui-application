@@ -6,14 +6,17 @@ class FileItem {
   final String path;
   String name;
   String outputName;
+  final List<Track> videoTracks;
   final List<Track> audioTracks;
   final List<Track> subtitleTracks;
   // Per-file selections used by UI
+  Set<int> selectedVideo;
   Set<int> selectedAudio;
   // Deprecated in favor of selectedSubtitles + defaultSubtitle, but kept for compatibility if needed
   int? selectedSubtitle;
   // Multiple subtitle selections
   Set<int> selectedSubtitles;
+  int? defaultVideo;
   int? defaultAudio;
   int? defaultSubtitle;
   String exportStatus;
@@ -27,11 +30,14 @@ class FileItem {
     required this.path,
     String? name,
     String? outputName,
+    List<Track>? videoTracks,
     required this.audioTracks,
     required this.subtitleTracks,
+    Set<int>? selectedVideo,
     Set<int>? selectedAudio,
     this.selectedSubtitle,
     Set<int>? selectedSubtitles,
+    this.defaultVideo,
     this.defaultAudio,
     this.defaultSubtitle,
     String? exportStatus,
@@ -41,6 +47,8 @@ class FileItem {
     this.isExpanded = true,
   })  : name = name ?? File(path).uri.pathSegments.last,
         outputName = outputName ?? File(path).uri.pathSegments.last,
+        videoTracks = videoTracks ?? [],
+        selectedVideo = selectedVideo ?? <int>{},
         selectedAudio = selectedAudio ?? <int>{},
         selectedSubtitles = selectedSubtitles ?? <int>{},
         exportStatus = exportStatus ?? '',
