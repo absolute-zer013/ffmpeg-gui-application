@@ -38,51 +38,9 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-# Windows build outputs
+# Windows build outputs (Windows-only project)
 /windows/build/
 /windows/flutter/ephemeral/
-
-# Linux build outputs
-/linux/build/
-/linux/flutter/ephemeral/
-
-# macOS build outputs
-/macos/build/
-/macos/flutter/ephemeral/
-
-# Web build outputs
-/web/build/
-
-# Android build outputs
-/android/.gradle/
-/android/captures/
-/android/.externalNativeBuild/
-/android/gradlew
-/android/gradlew.bat
-/android/local.properties
-/android/**/GeneratedPluginRegistrant.java
-/android/key.properties
-*.jks
-
-# iOS build outputs
-/ios/.symlinks/
-/ios/Flutter/App.framework
-/ios/Flutter/Flutter.framework
-/ios/Flutter/Flutter.podspec
-/ios/Flutter/Generated.xcconfig
-/ios/Flutter/ephemeral/
-/ios/Flutter/flutter_export_environment.sh
-/ios/ServiceDefinitions.json
-/ios/Runner/GeneratedPluginRegistrant.*
-*.perspectivev3
-*.pbxuser
-*.mode1v3
-*.mode2v3
 
 # Project-specific
 Filtered/
