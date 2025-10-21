@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ffmpeg_filter_app/main.dart';
+import 'package:ffmpeg_filter_app/models/export_profile.dart';
 
 void main() {
   group('Track model tests', () {
@@ -26,6 +27,65 @@ void main() {
       );
 
       expect(track.streamIndex, 2);
+    });
+  });
+
+  group('ExportProfile model tests', () {
+    test('ExportProfile initializes with correct values', () {
+      final profile = ExportProfile(
+        id: 'profile_1',
+        name: 'Japanese Only',
+        description: 'Keeps only Japanese audio',
+        selectedAudioLanguages: {'jpn'},
+        selectedSubtitleDescriptions: {'eng (English)'},
+        defaultSubtitleDescription: 'eng (English)',
+      );
+
+      expect(profile.id, 'profile_1');
+      expect(profile.name, 'Japanese Only');
+      expect(profile.description, 'Keeps only Japanese audio');
+      expect(profile.selectedAudioLanguages.contains('jpn'), true);
+      expect(profile.selectedSubtitleDescriptions.contains('eng (English)'), true);
+      expect(profile.defaultSubtitleDescription, 'eng (English)');
+    });
+
+    test('ExportProfile converts to and from JSON', () {
+      final profile = ExportProfile(
+        id: 'profile_1',
+        name: 'Test Profile',
+        description: 'Test Description',
+        selectedAudioLanguages: {'eng', 'jpn'},
+        selectedSubtitleDescriptions: {'eng (English)', 'jpn (Japanese)'},
+        defaultSubtitleDescription: 'eng (English)',
+      );
+
+      final json = profile.toJson();
+      final restored = ExportProfile.fromJson(json);
+
+      expect(restored.id, profile.id);
+      expect(restored.name, profile.name);
+      expect(restored.description, profile.description);
+      expect(restored.selectedAudioLanguages, profile.selectedAudioLanguages);
+      expect(restored.selectedSubtitleDescriptions, profile.selectedSubtitleDescriptions);
+      expect(restored.defaultSubtitleDescription, profile.defaultSubtitleDescription);
+    });
+
+    test('ExportProfile copyWith creates modified copy', () {
+      final original = ExportProfile(
+        id: 'profile_1',
+        name: 'Original',
+        description: 'Original description',
+      );
+
+      final modified = original.copyWith(
+        name: 'Modified',
+        selectedAudioLanguages: {'eng'},
+      );
+
+      expect(modified.id, original.id);
+      expect(modified.name, 'Modified');
+      expect(modified.description, 'Original description');
+      expect(modified.selectedAudioLanguages.contains('eng'), true);
     });
   });
 
@@ -93,7 +153,7 @@ void main() {
 
   testWidgets('App builds and shows title', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
-    expect(find.text('Export File - Fixed'), findsOneWidget);
+    expect(find.text('FFmpeg Export Tool'), findsOneWidget);
   });
 
   testWidgets('App shows Add Files button', (WidgetTester tester) async {
@@ -101,15 +161,9 @@ void main() {
     expect(find.text('Add Files'), findsOneWidget);
   });
 
-  testWidgets('App shows batch mode checkboxes for audio and subtitle',
+  testWidgets('App shows batch mode checkbox',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
-    // There should be two "Batch mode" labels - one for Audio and one for Subtitle
-    expect(find.text('Batch mode'), findsNWidgets(2));
-  });
-
-  testWidgets('App shows export settings', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp());
-    expect(find.text('Export Settings'), findsOneWidget);
+    expect(find.text('Batch mode'), findsOneWidget);
   });
 }

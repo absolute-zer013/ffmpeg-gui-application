@@ -75,3 +75,18 @@ Feel free to modify and extend this example to suit your needs. For example,
 you could add a dialog that reads subtitle tracks from the first file and
 lets you choose one interactively, or display progress indicators for each
 file.
+
+## New Features
+
+### Export Profiles
+The application now supports saving and reusing export configurations:
+
+1. **Save Profile**: After selecting your desired audio/subtitle tracks, click "Save as Profile" to save the configuration
+2. **Apply Profile**: Click "Profiles" to view saved profiles and apply them to new files
+3. **Manage Profiles**: Delete unwanted profiles from the management dialog
+4. **Persistent Storage**: Profiles are saved automatically and persist across sessions
+
+Profiles store:
+- Selected audio languages (e.g., Japanese, English)
+- Selected subtitle descriptions
+- Default subtitle track preference
