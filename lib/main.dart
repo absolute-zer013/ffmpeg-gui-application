@@ -9,6 +9,9 @@ import 'package:flutter/services.dart';
 import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'models/export_profile.dart';
+import 'services/profile_service.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -120,12 +123,15 @@ class _MyHomePageState extends State<MyHomePage> {
   int _maxConcurrentExports = 2;
   String _outputFormat = 'mkv';
   List<Process> _activeProcesses = [];
+  List<ExportProfile> _profiles = [];
+  ExportProfile? _selectedProfile;
 
   @override
   void initState() {
     super.initState();
     _checkFFmpeg();
     _loadPreferences();
+    _loadProfiles();
   }
 
   Future<void> _checkFFmpeg() async {
@@ -162,6 +168,211 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     await prefs.setInt('maxConcurrentExports', _maxConcurrentExports);
     await prefs.setString('outputFormat', _outputFormat);
+  }
+
+  Future<void> _loadProfiles() async {
+    final profiles = await ProfileService.loadProfiles();
+    setState(() {
+      _profiles = profiles;
+    });
+  }
+
+  Future<void> _saveCurrentAsProfile() async {
+    final nameController = TextEditingController();
+    final descriptionController = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Save Current Configuration as Profile'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Profile Name',
+                hintText: 'e.g., Japanese Audio Only',
+              ),
+              autofocus: true,
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description (optional)',
+                hintText: 'e.g., Keeps only Japanese audio',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && nameController.text.isNotEmpty) {
+      // Collect current audio language selections
+      final selectedAudioLanguages = <String>{};
+      for (final file in _files) {
+        for (final track in file.audioTracks) {
+          if (file.selectedAudio.contains(track.position)) {
+            selectedAudioLanguages.add(track.language);
+          }
+        }
+      }
+
+      // Collect current subtitle description selections
+      final selectedSubtitleDescriptions = <String>{};
+      String? defaultSubtitleDescription;
+      for (final file in _files) {
+        for (final track in file.subtitleTracks) {
+          if (file.selectedSubtitles.contains(track.position)) {
+            selectedSubtitleDescriptions.add(track.description);
+            if (file.defaultSubtitle == track.position) {
+              defaultSubtitleDescription = track.description;
+            }
+          }
+        }
+      }
+
+      final profile = ExportProfile(
+        id: ProfileService.generateProfileId(),
+        name: nameController.text,
+        description: descriptionController.text,
+        selectedAudioLanguages: selectedAudioLanguages,
+        selectedSubtitleDescriptions: selectedSubtitleDescriptions,
+        defaultSubtitleDescription: defaultSubtitleDescription,
+      );
+
+      await ProfileService.saveProfile(profile);
+      await _loadProfiles();
+      _appendLog('Profile saved: ${profile.name}');
+    }
+  }
+
+  Future<void> _applyProfile(ExportProfile profile) async {
+    setState(() {
+      _selectedProfile = profile;
+
+      // Apply audio language selections
+      for (final file in _files) {
+        file.selectedAudio.clear();
+        for (int i = 0; i < file.audioTracks.length; i++) {
+          final track = file.audioTracks[i];
+          if (profile.selectedAudioLanguages.contains(track.language)) {
+            file.selectedAudio.add(i);
+          }
+        }
+      }
+
+      // Apply subtitle description selections
+      for (final file in _files) {
+        file.selectedSubtitles.clear();
+        file.defaultSubtitle = null;
+
+        for (int i = 0; i < file.subtitleTracks.length; i++) {
+          final track = file.subtitleTracks[i];
+          if (profile.selectedSubtitleDescriptions
+              .contains(track.description)) {
+            file.selectedSubtitles.add(i);
+            if (profile.defaultSubtitleDescription == track.description) {
+              file.defaultSubtitle = i;
+            }
+          }
+        }
+      }
+    });
+
+    _appendLog('Applied profile: ${profile.name}');
+  }
+
+  void _showProfileManagementDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Manage Profiles'),
+          content: SizedBox(
+            width: 500,
+            height: 400,
+            child: _profiles.isEmpty
+                ? const Center(
+                    child: Text('No profiles saved yet.\nSave your current configuration to create a profile.'),
+                  )
+                : ListView.builder(
+                    itemCount: _profiles.length,
+                    itemBuilder: (context, index) {
+                      final profile = _profiles[index];
+                      return Card(
+                        child: ListTile(
+                          title: Text(profile.name),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (profile.description.isNotEmpty)
+                                Text(profile.description),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Audio: ${profile.selectedAudioLanguages.join(", ")}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              Text(
+                                'Subtitles: ${profile.selectedSubtitleDescriptions.join(", ")}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.check),
+                                tooltip: 'Apply Profile',
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  _applyProfile(profile);
+                                },
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete),
+                                tooltip: 'Delete Profile',
+                                onPressed: () async {
+                                  await ProfileService.deleteProfile(profile.id);
+                                  await _loadProfiles();
+                                  setDialogState(() {});
+                                  setState(() {
+                                    if (_selectedProfile?.id == profile.id) {
+                                      _selectedProfile = null;
+                                    }
+                                  });
+                                  _appendLog('Deleted profile: ${profile.name}');
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _appendLog(String message) {
@@ -825,6 +1036,18 @@ class _MyHomePageState extends State<MyHomePage> {
                           onPressed: _running ? null : _resetSelections,
                           icon: const Icon(Icons.refresh),
                           label: const Text('Reset Selections'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _running ? null : _saveCurrentAsProfile,
+                          icon: const Icon(Icons.save),
+                          label: const Text('Save as Profile'),
+                        ),
+                        OutlinedButton.icon(
+                          onPressed: _running ? null : _showProfileManagementDialog,
+                          icon: const Icon(Icons.library_books),
+                          label: Text(_selectedProfile != null 
+                              ? 'Profiles (${_selectedProfile!.name})'
+                              : 'Profiles (${_profiles.length})'),
                         ),
                       ],
                       if (_files.isNotEmpty)
