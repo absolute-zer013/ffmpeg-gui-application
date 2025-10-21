@@ -56,10 +56,26 @@ class FFmpegExportService {
       }
     }
 
+    // Add file-level metadata if present
+    if (item.fileMetadata != null) {
+      final metadataMap = item.fileMetadata!.toMap();
+      for (final entry in metadataMap.entries) {
+        args.addAll(['-metadata', '${entry.key}=${entry.value}']);
+      }
+    }
+
+    // Add track-level metadata if present
+    for (final entry in item.trackMetadata.entries) {
+      final streamIndex = entry.key;
+      final metadata = entry.value;
+      final metadataMap = metadata.toMap();
+      for (final metaEntry in metadataMap.entries) {
+        args.addAll(['-metadata:s:$streamIndex', '${metaEntry.key}=${metaEntry.value}']);
+      }
+    }
+
     args.addAll([
       '-map_chapters',
-      '0',
-      '-map_metadata',
       '0',
       '-c',
       'copy',

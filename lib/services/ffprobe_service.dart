@@ -1,6 +1,8 @@
 import 'dart:io';
+import 'dart:convert';
 import '../models/track.dart';
 import '../models/file_item.dart';
+import '../models/metadata.dart';
 
 /// Service for probing video files using FFprobe
 class FFprobeService {
@@ -10,24 +12,28 @@ class FFprobeService {
     final file = File(path);
     final fileSize = await file.length();
 
-    // Get duration
+    // Get duration and format metadata
     String? duration;
+    FileMetadata? fileMetadata;
     try {
-      final durationResult = await Process.run(
+      final formatResult = await Process.run(
         'ffprobe',
         [
           '-v',
           'error',
           '-show_entries',
-          'format=duration',
+          'format=duration:format_tags',
           '-of',
-          'default=noprint_wrappers=1:nokey=1',
+          'json',
           path,
         ],
       );
-      final durationStr = durationResult.stdout.toString().trim();
-      if (durationStr.isNotEmpty) {
-        final seconds = double.tryParse(durationStr);
+      final jsonOutput = jsonDecode(formatResult.stdout.toString());
+      
+      // Extract duration
+      final durationValue = jsonOutput['format']?['duration'];
+      if (durationValue != null) {
+        final seconds = double.tryParse(durationValue.toString());
         if (seconds != null) {
           final hours = (seconds ~/ 3600).toString().padLeft(2, '0');
           final minutes = ((seconds % 3600) ~/ 60).toString().padLeft(2, '0');
@@ -35,8 +41,14 @@ class FFprobeService {
           duration = '$hours:$minutes:$secs';
         }
       }
+      
+      // Extract metadata
+      final tags = jsonOutput['format']?['tags'];
+      if (tags != null && tags is Map) {
+        fileMetadata = FileMetadata.fromMap(tags.cast<String, dynamic>());
+      }
     } catch (e) {
-      // Duration probe failed, continue without it
+      // Duration/metadata probe failed, continue without it
     }
 
     // Probe video tracks.
@@ -205,6 +217,7 @@ class FFprobeService {
       defaultSubtitle: defaultSubtitle,
       fileSize: fileSize,
       duration: duration,
+      fileMetadata: fileMetadata,
     );
   }
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'track.dart';
+import 'metadata.dart';
 
 /// Data model representing a file with its streams and selections.
 class FileItem {
@@ -25,6 +26,9 @@ class FileItem {
   String? duration;
   bool isExpanded;
   Process? currentProcess;
+  // Metadata
+  FileMetadata? fileMetadata;
+  Map<int, TrackMetadata> trackMetadata; // keyed by track stream index
 
   FileItem({
     required this.path,
@@ -45,6 +49,8 @@ class FileItem {
     this.fileSize,
     this.duration,
     this.isExpanded = true,
+    this.fileMetadata,
+    Map<int, TrackMetadata>? trackMetadata,
   })  : name = name ?? File(path).uri.pathSegments.last,
         outputName = outputName ?? File(path).uri.pathSegments.last,
         videoTracks = videoTracks ?? [],
@@ -52,5 +58,6 @@ class FileItem {
         selectedAudio = selectedAudio ?? <int>{},
         selectedSubtitles = selectedSubtitles ?? <int>{},
         exportStatus = exportStatus ?? '',
-        exportProgress = exportProgress ?? 0.0;
+        exportProgress = exportProgress ?? 0.0,
+        trackMetadata = trackMetadata ?? {};
 }

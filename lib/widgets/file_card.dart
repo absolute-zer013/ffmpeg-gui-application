@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/file_item.dart';
 import '../utils/file_utils.dart';
+import 'metadata_editor_dialog.dart';
 
 /// Widget for displaying a file card with track selections
 class FileCard extends StatelessWidget {
@@ -12,6 +13,17 @@ class FileCard extends StatelessWidget {
     required this.item,
     required this.onChanged,
   });
+
+  void _showMetadataEditor(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => MetadataEditorDialog(item: item),
+    );
+    
+    if (result == true) {
+      onChanged();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +48,17 @@ class FileCard extends StatelessWidget {
           onChanged();
         },
         leading: statusIcon,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => _showMetadataEditor(context),
+              tooltip: 'Edit Metadata',
+            ),
+            const Icon(Icons.expand_more),
+          ],
+        ),
         title: Row(
           children: [
             Expanded(
