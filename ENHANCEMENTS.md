@@ -51,14 +51,16 @@ Sort files by name, size, duration, or status.
 
 ## Export Enhancements
 
-### 6. Video Stream Selection
+### 6. Video Stream Selection ✅ **IMPLEMENTED**
 Choose specific video tracks (useful for files with multiple video streams).
 
 **Implementation:**
-- Extend `Track` model to include video tracks
-- Update `FFprobeService.probeFile()` to detect video streams
-- Add video track selection UI in `FileCard`
-- Update `FFmpegExportService` to handle video stream mapping
+- ✅ Extend `Track` model to include video tracks with type enum
+- ✅ Update `FFprobeService.probeFile()` to detect video streams
+- ✅ Add video track selection UI in `FileCard`
+- ✅ Update `FFmpegExportService` to handle video stream mapping
+- ✅ Display video codec and resolution information
+- ✅ Update export summary to include video track statistics
 
 ### 7. Codec Conversion
 Re-encode audio/video (e.g., convert HEVC to H.264, AC3 to AAC).
@@ -148,14 +150,18 @@ View, edit, or remove chapter markers.
 - Allow edit/delete/reorder chapters
 - Write chapters back with FFmpeg metadata
 
-### 16. Metadata Editor
+### 16. Metadata Editor ✅ **IMPLEMENTED**
 Edit file metadata, track titles, languages.
 
 **Implementation:**
-- Show all metadata fields from FFprobe
-- Allow editing title, artist, date, etc.
-- Edit per-track metadata (language, title)
-- Use FFmpeg `-metadata` parameter
+- ✅ Create `models/metadata.dart` with FileMetadata and TrackMetadata classes
+- ✅ Update `FileItem` to include metadata fields
+- ✅ Update `FFprobeService` to extract metadata using JSON format
+- ✅ Create `MetadataEditorDialog` widget for editing
+- ✅ Integrate edit button in `FileCard` widget
+- ✅ Update `FFmpegExportService` to write metadata using `-metadata` parameters
+- ✅ Support for file-level metadata: title, artist, album, date, genre, comment
+- ✅ Support for track-level metadata: language, title
 
 ### 17. Audio/Subtitle Sync
 Adjust timing offsets for out-of-sync tracks.
@@ -298,10 +304,10 @@ Desktop notifications, email, or Discord webhooks when exports complete.
 
 ## Implementation Priority Suggestions
 
-### **Phase 1 - Core Enhancements** (Most Impact)
+### **Phase 1 - Core Enhancements** ✅ **COMPLETED**
 1. ✅ Export Profiles (Feature #2) - **COMPLETED**
-2. Video Stream Selection (Feature #6)
-3. Metadata Editor (Feature #16)
+2. ✅ Video Stream Selection (Feature #6) - **COMPLETED**
+3. ✅ Metadata Editor (Feature #16) - **COMPLETED**
 
 ### **Phase 2 - Advanced Export** (Power User Features)
 4. Codec Conversion (Feature #7)
