@@ -178,6 +178,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _saveCurrentAsProfile() async {
+    if (_files.isEmpty) {
+      _appendLog('ERROR: No files loaded. Add files before saving a profile.');
+      return;
+    }
+
     final nameController = TextEditingController();
     final descriptionController = TextEditingController();
 
@@ -260,6 +265,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _applyProfile(ExportProfile profile) async {
+    if (_files.isEmpty) {
+      _appendLog('No files loaded. Add files to apply profile: ${profile.name}');
+      return;
+    }
+
     setState(() {
       _selectedProfile = profile;
 
@@ -1042,6 +1052,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           icon: const Icon(Icons.save),
                           label: const Text('Save as Profile'),
                         ),
+                      ],
+                      if (_profiles.isNotEmpty || _files.isNotEmpty)
                         OutlinedButton.icon(
                           onPressed: _running ? null : _showProfileManagementDialog,
                           icon: const Icon(Icons.library_books),
@@ -1049,7 +1061,6 @@ class _MyHomePageState extends State<MyHomePage> {
                               ? 'Profiles (${_selectedProfile!.name})'
                               : 'Profiles (${_profiles.length})'),
                         ),
-                      ],
                       if (_files.isNotEmpty)
                         Text(
                             '${_files.length} file(s) | ${_formatBytes(_files.fold<int>(0, (sum, f) => sum + (f.fileSize ?? 0)))}'),
