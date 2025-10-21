@@ -12,14 +12,16 @@ Quick access to recently processed files for repeat operations.
 - Add "Recent Files" menu/dropdown
 - Limit to last 10-20 files
 
-### 2. Export Profiles/Templates
+### 2. Export Profiles/Templates ✅ **IMPLEMENTED**
 Save common export configurations (audio/subtitle selections) and apply to new files.
 
 **Implementation:**
-- Create `models/export_profile.dart` with profile data model
-- Create `services/profile_service.dart` for save/load/delete profiles
-- Add profile selector dropdown in UI
-- Store profiles in JSON format via SharedPreferences or local files
+- ✅ Create `models/export_profile.dart` with profile data model
+- ✅ Create `services/profile_service.dart` for save/load/delete profiles
+- ✅ Add profile management UI with "Save as Profile" and "Profiles" buttons
+- ✅ Store profiles in JSON format via SharedPreferences
+- ✅ Profile management dialog for viewing, applying, and deleting profiles
+- ✅ Shows active profile name in UI
 
 ### 3. Undo/Redo
 Reverse recent selection changes.
@@ -297,7 +299,7 @@ Desktop notifications, email, or Discord webhooks when exports complete.
 ## Implementation Priority Suggestions
 
 ### **Phase 1 - Core Enhancements** (Most Impact)
-1. Export Profiles (Feature #2)
+1. ✅ Export Profiles (Feature #2) - **COMPLETED**
 2. Video Stream Selection (Feature #6)
 3. Metadata Editor (Feature #16)
 

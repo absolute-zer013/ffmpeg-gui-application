@@ -117,6 +117,17 @@
     - Timestamped filenames
     - Full log preservation for troubleshooting
 
+## 🆕 New Enhancement Features
+
+### 21. **✓ Export Profiles/Templates**
+   - Save common export configurations for reuse
+   - Store audio language and subtitle selections
+   - Apply saved profiles to new files with one click
+   - Profile management dialog for viewing/applying/deleting profiles
+   - Profiles persist across application sessions
+   - Shows active profile name in UI
+   - JSON-based storage via SharedPreferences
+
 ## Additional Bonus Features
 - **Real-time FFmpeg Progress Parsing**: Reads FFmpeg stdout to calculate accurate progress percentages
 - **Multiple File Format Support**: Accepts MKV, MP4, AVI, MOV input files
@@ -148,6 +159,14 @@
 2. Select languages/tracks to apply across all files
 3. Changes affect all loaded files simultaneously
 
+### Profiles
+1. Set up your desired track selections on loaded files
+2. Click "Save as Profile" button
+3. Enter a profile name and optional description
+4. Profile is saved with your current audio/subtitle selections
+5. Click "Profiles" button to view, apply, or delete saved profiles
+6. Apply a profile to automatically configure all loaded files
+
 ### Settings
 - Click the gear icon in the app bar
 - Adjust parallel export count (1-8)
@@ -167,4 +186,4 @@
 
 ---
 
-**All 20 suggested features have been fully implemented!** 🎉
+**All 20 original features + NEW Export Profiles feature have been fully implemented!** 🎉
