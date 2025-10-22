@@ -386,6 +386,14 @@ Apply selected video/audio codec and audio quality presets to multiple files at 
 
 ### **Phase 5 - Consolidated Backlog** (All Remaining Planned Features)
 
+**Status:** Planning phase - features documented but not yet scheduled for implementation  
+**Total Features:** 17 across 5 categories  
+**Documentation:**
+- Tracking issue: `docs/issues/PHASE5_TRACKING_ISSUE.md`
+- Planning guide: `docs/PHASE5_PLANNING.md` (detailed implementation guidance)
+- Feature reference: `docs/PHASE5_FEATURES.md` (quick lookup table)
+- Phase summary: `docs/PHASES_REPORT.md` (Phase 5 section)
+
 The remaining planned features are grouped into a single phase for clarity and scheduling. Items are organized by category; numbering aligns with the roadmap above.
 
 - Quality of Life

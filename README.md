@@ -155,6 +155,22 @@ Configuration includes:
 - Auto-detect rules
 - Rename patterns
 - Output format and settings
+
+## What's Next?
+
+### Phase 5 - Planned Features
+
+The project roadmap includes 17 additional features planned for future releases, organized into 5 categories:
+
+- **Quality of Life**: Recent files list, undo/redo, search/filter, sorting
+- **Export Enhancements**: Trim/cut functionality, resolution/framerate changes
+- **Batch Operations**: Multi-profile export
+- **Advanced Features**: Chapter editing, audio/subtitle sync, subtitle format conversion, MKV optimization
+- **UI/UX Enhancements**: Dual pane mode, waveform visualization, estimated export times
+- **Integration**: Watch folder, command-line interface, presets import
+
+See `docs/PHASE5_FEATURES.md` for the complete list and `docs/PHASE5_PLANNING.md` for implementation guidance.
+
 ## Testing & Quality Assurance
 
 The project includes comprehensive automated testing:
@@ -217,9 +233,9 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for detailed deployment guide.
 
 ## Documentation
 
-- [`FEATURES.md`](FEATURES.md) - Complete feature list and current capabilities
+- [`docs/FEATURES.md`](docs/FEATURES.md) - Complete feature list and current capabilities
 - [`docs/TESTING.md`](docs/TESTING.md) - Testing guide and CI/CD setup
 - [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Build and distribution instructions
-- [`ENHANCEMENTS.md`](ENHANCEMENTS.md) - Planned features for future releases
+- [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md) - Roadmap with all planned features
+- [`docs/PHASES_REPORT.md`](docs/PHASES_REPORT.md) - Consolidated phase summaries (Phases 1–5)
 - [`CI_CD_SETUP.md`](CI_CD_SETUP.md) - Summary of automated testing setup
-- [`docs/PHASES_REPORT.md`](docs/PHASES_REPORT.md) - Consolidated summaries of Phases 1–4
