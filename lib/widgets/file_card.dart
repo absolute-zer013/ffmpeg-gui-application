@@ -19,7 +19,7 @@ class FileCard extends StatelessWidget {
       context: context,
       builder: (context) => MetadataEditorDialog(item: item),
     );
-    
+
     if (result == true) {
       onChanged();
     }

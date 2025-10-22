@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:path/path.dart' as path;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models/export_profile.dart';
@@ -72,13 +71,20 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _checkFFmpeg();
     _loadPreferences();
     _loadProfiles();
+    // Check FFmpeg and show dialog after check completes
+    _checkFFmpegAndShowDialog();
+  }
+
+  Future<void> _checkFFmpegAndShowDialog() async {
+    await _checkFFmpeg();
     // Schedule dialog after frame is built
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _showFFmpegCheckDialog();
-    });
+    if (mounted) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showFFmpegCheckDialog();
+      });
+    }
   }
 
   Future<void> _checkFFmpeg() async {
@@ -518,7 +524,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Start Export'),
+            child: const Text('Next'),
           ),
         ],
       ),
@@ -526,12 +532,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (confirmed != true) return;
 
-    // Ask user for output directory.
-    final outDirPath = _lastOutputDir != null
-        ? _lastOutputDir
-        : await FilePicker.platform.getDirectoryPath();
+    // Ask user for output directory - always show dialog for confirmation
+    final outDirPath = await showDialog<String>(
+      context: context,
+      builder: (context) => _buildSaveToDialog(),
+    );
 
     if (outDirPath == null) {
+      _appendLog('Export cancelled - no output directory selected');
       return;
     }
 
@@ -620,7 +628,8 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           item.exportStatus = 'failed';
         });
-        _appendLog('✗ Failed: ${item.name}${result.errorMessage != null ? " (${result.errorMessage})" : ""}');
+        _appendLog(
+            '✗ Failed: ${item.name}${result.errorMessage != null ? " (${result.errorMessage})" : ""}');
       }
     } catch (e) {
       setState(() {
@@ -644,6 +653,83 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       );
     }
+  }
+
+  Widget _buildSaveToDialog() {
+    final selectedPath = ValueNotifier<String?>(_lastOutputDir);
+
+    return AlertDialog(
+      title: const Text('Select Output Directory'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Where would you like to save the exported files?'),
+            const SizedBox(height: 16),
+            ValueListenableBuilder<String?>(
+              valueListenable: selectedPath,
+              builder: (context, path, _) => Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (path != null)
+                    Container(
+                      width: double.maxFinite,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('Selected Directory:',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 8),
+                          Text(
+                            path,
+                            style: const TextStyle(fontSize: 12),
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.maxFinite,
+                    child: FilledButton.icon(
+                      onPressed: () async {
+                        final dirPath =
+                            await FilePicker.platform.getDirectoryPath();
+                        if (dirPath != null) {
+                          selectedPath.value = dirPath;
+                        }
+                      },
+                      icon: const Icon(Icons.folder_open),
+                      label: const Text('Browse...'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, null),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: selectedPath.value != null
+              ? () => Navigator.pop(context, selectedPath.value)
+              : null,
+          child: const Text('Export'),
+        ),
+      ],
+    );
   }
 
   @override

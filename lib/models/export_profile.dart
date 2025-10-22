@@ -30,11 +30,10 @@ class ExportProfile {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
-      selectedAudioLanguages:
-          (json['selectedAudioLanguages'] as List<dynamic>?)
-                  ?.map((e) => e.toString())
-                  .toSet() ??
-              <String>{},
+      selectedAudioLanguages: (json['selectedAudioLanguages'] as List<dynamic>?)
+              ?.map((e) => e.toString())
+              .toSet() ??
+          <String>{},
       selectedSubtitleDescriptions:
           (json['selectedSubtitleDescriptions'] as List<dynamic>?)
                   ?.map((e) => e.toString())

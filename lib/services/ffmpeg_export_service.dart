@@ -70,12 +70,17 @@ class FFmpegExportService {
       final metadata = entry.value;
       final metadataMap = metadata.toMap();
       for (final metaEntry in metadataMap.entries) {
-        args.addAll(['-metadata:s:$streamIndex', '${metaEntry.key}=${metaEntry.value}']);
+        args.addAll([
+          '-metadata:s:$streamIndex',
+          '${metaEntry.key}=${metaEntry.value}'
+        ]);
       }
     }
 
     args.addAll([
       '-map_chapters',
+      '0',
+      '-map_metadata',
       '0',
       '-c',
       'copy',
@@ -87,29 +92,39 @@ class FFmpegExportService {
     try {
       final process = await Process.start('ffmpeg', args);
 
-      // Parse progress
+      // Parse progress from stdout
       process.stdout.transform(utf8.decoder).listen((data) {
         // FFmpeg outputs progress in format: out_time_ms=123456
         final match = RegExp(r'out_time_ms=(\d+)').firstMatch(data);
         if (match != null && item.duration != null) {
-          final outTimeMs = int.parse(match.group(1)!);
-          final durationParts = item.duration!.split(':');
-          final totalSeconds = int.parse(durationParts[0]) * 3600 +
-              int.parse(durationParts[1]) * 60 +
-              int.parse(durationParts[2]);
-          final progress = (outTimeMs / 1000000) / totalSeconds;
-          onProgress(progress.clamp(0.0, 1.0));
+          try {
+            final outTimeMs = int.parse(match.group(1)!);
+            final durationParts = item.duration!.split(':');
+            final totalSeconds = int.parse(durationParts[0]) * 3600 +
+                int.parse(durationParts[1]) * 60 +
+                int.parse(durationParts[2]);
+            final progress = (outTimeMs / 1000000) / totalSeconds;
+            onProgress(progress.clamp(0.0, 1.0));
+          } catch (e) {
+            // Progress parsing failed, continue without updating
+          }
         }
+      });
+
+      // Also capture stderr for any errors/warnings
+      process.stderr.transform(utf8.decoder).listen((data) {
+        // Silently capture stderr - FFmpeg writes lots of info here
       });
 
       final exitCode = await process.exitCode;
 
       if (exitCode == 0) {
+        onProgress(1.0); // Ensure progress is set to 100%
         return ExportResult(success: true, process: process);
       } else {
         return ExportResult(
           success: false,
-          errorMessage: 'Exit code: $exitCode',
+          errorMessage: 'FFmpeg exit code: $exitCode',
           process: process,
         );
       }

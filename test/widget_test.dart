@@ -33,7 +33,7 @@ void main() {
 
       expect(track.streamIndex, 2);
     });
-    
+
     test('Track supports video type with codec info', () {
       final track = Track(
         position: 0,
@@ -67,7 +67,8 @@ void main() {
       expect(profile.name, 'Japanese Only');
       expect(profile.description, 'Keeps only Japanese audio');
       expect(profile.selectedAudioLanguages.contains('jpn'), true);
-      expect(profile.selectedSubtitleDescriptions.contains('eng (English)'), true);
+      expect(
+          profile.selectedSubtitleDescriptions.contains('eng (English)'), true);
       expect(profile.defaultSubtitleDescription, 'eng (English)');
     });
 
@@ -88,8 +89,10 @@ void main() {
       expect(restored.name, profile.name);
       expect(restored.description, profile.description);
       expect(restored.selectedAudioLanguages, profile.selectedAudioLanguages);
-      expect(restored.selectedSubtitleDescriptions, profile.selectedSubtitleDescriptions);
-      expect(restored.defaultSubtitleDescription, profile.defaultSubtitleDescription);
+      expect(restored.selectedSubtitleDescriptions,
+          profile.selectedSubtitleDescriptions);
+      expect(restored.defaultSubtitleDescription,
+          profile.defaultSubtitleDescription);
     });
 
     test('ExportProfile copyWith creates modified copy', () {
@@ -130,13 +133,26 @@ void main() {
     });
 
     test('FileItem can track selected video, audio and subtitle positions', () {
-      final video1 =
-          Track(position: 0, language: 'und', description: 'Video 1', type: TrackType.video);
-      final audio1 =
-          Track(position: 0, language: 'eng', description: 'Audio 1', type: TrackType.audio);
-      final audio2 =
-          Track(position: 1, language: 'spa', description: 'Audio 2', type: TrackType.audio);
-      final sub1 = Track(position: 0, language: 'eng', description: 'Sub 1', type: TrackType.subtitle);
+      final video1 = Track(
+          position: 0,
+          language: 'und',
+          description: 'Video 1',
+          type: TrackType.video);
+      final audio1 = Track(
+          position: 0,
+          language: 'eng',
+          description: 'Audio 1',
+          type: TrackType.audio);
+      final audio2 = Track(
+          position: 1,
+          language: 'spa',
+          description: 'Audio 2',
+          type: TrackType.audio);
+      final sub1 = Track(
+          position: 0,
+          language: 'eng',
+          description: 'Sub 1',
+          type: TrackType.subtitle);
 
       final file = FileItem(
         path: '/test/file.mkv',
@@ -192,8 +208,7 @@ void main() {
     expect(find.text('Add Files'), findsOneWidget);
   });
 
-  testWidgets('App shows batch mode checkbox',
-      (WidgetTester tester) async {
+  testWidgets('App shows batch mode checkbox', (WidgetTester tester) async {
     await tester.pumpWidget(const MyApp());
     expect(find.text('Batch mode'), findsOneWidget);
   });

@@ -30,7 +30,7 @@ class _MetadataEditorDialogState extends State<MetadataEditorDialog> {
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize file metadata
     _fileMetadata = widget.item.fileMetadata ?? FileMetadata();
     _trackMetadata = Map.from(widget.item.trackMetadata);
@@ -57,12 +57,18 @@ class _MetadataEditorDialogState extends State<MetadataEditorDialog> {
 
   void _saveMetadata() {
     // Update file metadata from controllers
-    _fileMetadata.title = _titleController.text.isEmpty ? null : _titleController.text;
-    _fileMetadata.artist = _artistController.text.isEmpty ? null : _artistController.text;
-    _fileMetadata.album = _albumController.text.isEmpty ? null : _albumController.text;
-    _fileMetadata.date = _dateController.text.isEmpty ? null : _dateController.text;
-    _fileMetadata.comment = _commentController.text.isEmpty ? null : _commentController.text;
-    _fileMetadata.genre = _genreController.text.isEmpty ? null : _genreController.text;
+    _fileMetadata.title =
+        _titleController.text.isEmpty ? null : _titleController.text;
+    _fileMetadata.artist =
+        _artistController.text.isEmpty ? null : _artistController.text;
+    _fileMetadata.album =
+        _albumController.text.isEmpty ? null : _albumController.text;
+    _fileMetadata.date =
+        _dateController.text.isEmpty ? null : _dateController.text;
+    _fileMetadata.comment =
+        _commentController.text.isEmpty ? null : _commentController.text;
+    _fileMetadata.genre =
+        _genreController.text.isEmpty ? null : _genreController.text;
 
     // Update the file item
     widget.item.fileMetadata = _fileMetadata;
@@ -75,8 +81,7 @@ class _MetadataEditorDialogState extends State<MetadataEditorDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('File Metadata',
-            style: Theme.of(context).textTheme.titleMedium),
+        Text('File Metadata', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         TextField(
           controller: _titleController,
@@ -150,8 +155,7 @@ class _MetadataEditorDialogState extends State<MetadataEditorDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Track Metadata',
-            style: Theme.of(context).textTheme.titleMedium),
+        Text('Track Metadata', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 8),
         ...allTracks.map((track) {
           final streamIndex = track.streamIndex;

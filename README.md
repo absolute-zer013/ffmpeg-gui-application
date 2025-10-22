@@ -90,3 +90,71 @@ Profiles store:
 - Selected audio languages (e.g., Japanese, English)
 - Selected subtitle descriptions
 - Default subtitle track preference
+
+## Testing & Quality Assurance
+
+The project includes comprehensive automated testing:
+
+- **Unit Tests**: 23+ tests covering all models and utilities
+- **Code Quality**: Automatic format checking and linting
+- **CI/CD Pipeline**: GitHub Actions for continuous integration and deployment
+
+### Running Tests Locally
+
+```bash
+# Run all tests
+.\run_tests.ps1 test
+
+# Check code formatting
+.\run_tests.ps1 format-check
+
+# Run all quality checks
+.\run_tests.ps1 all
+```
+
+See [`TESTING.md`](TESTING.md) for detailed testing documentation.
+
+## Building & Deployment
+
+### Quick Build
+
+```bash
+# Build and package for distribution
+.\build_package.ps1 all
+```
+
+### Manual Build
+
+```bash
+# Build Windows release
+flutter build windows --release
+```
+
+The executable is created at: `build\windows\x64\runner\Release\export_file.exe`
+
+### Creating Distribution Package
+
+```bash
+# Package for distribution (includes all required files)
+.\build_package.ps1 package
+```
+
+Creates a ZIP file in `dist/` folder ready for distribution.
+
+### Continuous Deployment
+
+When you push a version tag to GitHub:
+- GitHub Actions automatically builds the release
+- Tests are run automatically
+- Windows executable is created
+- Release is published with artifacts
+
+See [`DEPLOYMENT.md`](DEPLOYMENT.md) for detailed deployment guide.
+
+## Documentation
+
+- [`FEATURES.md`](FEATURES.md) - Complete feature list and current capabilities
+- [`TESTING.md`](TESTING.md) - Testing guide and CI/CD setup
+- [`DEPLOYMENT.md`](DEPLOYMENT.md) - Build and distribution instructions
+- [`ENHANCEMENTS.md`](ENHANCEMENTS.md) - Planned features for future releases
+- [`CI_CD_SETUP.md`](CI_CD_SETUP.md) - Summary of automated testing setup

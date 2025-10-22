@@ -29,7 +29,7 @@ class FFprobeService {
         ],
       );
       final jsonOutput = jsonDecode(formatResult.stdout.toString());
-      
+
       // Extract duration
       final durationValue = jsonOutput['format']?['duration'];
       if (durationValue != null) {
@@ -41,7 +41,7 @@ class FFprobeService {
           duration = '$hours:$minutes:$secs';
         }
       }
-      
+
       // Extract metadata
       final tags = jsonOutput['format']?['tags'];
       if (tags != null && tags is Map) {
@@ -73,21 +73,25 @@ class FFprobeService {
       if (line.trim().isEmpty) continue;
       final parts = line.split('|');
       if (parts.isEmpty) continue;
-      
+
       final streamIndex = int.tryParse(parts[0]) ?? videoPos;
-      final codec = parts.length > 1 && parts[1].isNotEmpty ? parts[1] : 'unknown';
+      final codec =
+          parts.length > 1 && parts[1].isNotEmpty ? parts[1] : 'unknown';
       final width = parts.length > 2 ? int.tryParse(parts[2]) : null;
       final height = parts.length > 3 ? int.tryParse(parts[3]) : null;
-      final frameRate = parts.length > 4 && parts[4].isNotEmpty ? parts[4] : null;
-      final language = parts.length > 5 && parts[5].isNotEmpty ? parts[5] : 'und';
+      final frameRate =
+          parts.length > 4 && parts[4].isNotEmpty ? parts[4] : null;
+      final language =
+          parts.length > 5 && parts[5].isNotEmpty ? parts[5] : 'und';
       final title = parts.length > 6 && parts[6].isNotEmpty ? parts[6] : null;
-      
-      final resolutionStr = (width != null && height != null) ? '${width}x$height' : '';
+
+      final resolutionStr =
+          (width != null && height != null) ? '${width}x$height' : '';
       final codecStr = codec.toUpperCase();
-      final description = title != null 
+      final description = title != null
           ? '$language ($title) [$codecStr${resolutionStr.isNotEmpty ? " $resolutionStr" : ""}]'
           : 'Video $language [$codecStr${resolutionStr.isNotEmpty ? " $resolutionStr" : ""}]';
-      
+
       videoTracks.add(Track(
         position: videoPos,
         language: language,

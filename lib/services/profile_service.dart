@@ -64,8 +64,7 @@ class ProfileService {
   /// Save all profiles to SharedPreferences
   static Future<void> _saveProfiles(List<ExportProfile> profiles) async {
     final prefs = await SharedPreferences.getInstance();
-    final profilesJson =
-        json.encode(profiles.map((p) => p.toJson()).toList());
+    final profilesJson = json.encode(profiles.map((p) => p.toJson()).toList());
     await prefs.setString(_profilesKey, profilesJson);
   }
 

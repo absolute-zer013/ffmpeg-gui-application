@@ -7,7 +7,7 @@ class FileMetadata {
   String? comment;
   String? genre;
   String? encoder;
-  
+
   // Additional custom metadata
   Map<String, String> customFields;
 
@@ -25,13 +25,13 @@ class FileMetadata {
   /// Create from map (e.g., from FFprobe JSON)
   factory FileMetadata.fromMap(Map<String, dynamic> map) {
     final metadata = FileMetadata();
-    
+
     for (final entry in map.entries) {
       final key = entry.key.toLowerCase();
       final value = entry.value?.toString();
-      
+
       if (value == null || value.isEmpty) continue;
-      
+
       switch (key) {
         case 'title':
           metadata.title = value;
@@ -58,14 +58,14 @@ class FileMetadata {
           metadata.customFields[entry.key] = value;
       }
     }
-    
+
     return metadata;
   }
 
   /// Convert to map for saving
   Map<String, String> toMap() {
     final map = <String, String>{};
-    
+
     if (title != null && title!.isNotEmpty) map['title'] = title!;
     if (artist != null && artist!.isNotEmpty) map['artist'] = artist!;
     if (album != null && album!.isNotEmpty) map['album'] = album!;
@@ -73,9 +73,9 @@ class FileMetadata {
     if (comment != null && comment!.isNotEmpty) map['comment'] = comment!;
     if (genre != null && genre!.isNotEmpty) map['genre'] = genre!;
     if (encoder != null && encoder!.isNotEmpty) map['encoder'] = encoder!;
-    
+
     map.addAll(customFields);
-    
+
     return map;
   }
 
@@ -109,7 +109,7 @@ class TrackMetadata {
   String? title;
   bool? isDefault;
   bool? isForced;
-  
+
   TrackMetadata({
     this.language,
     this.title,
@@ -130,10 +130,10 @@ class TrackMetadata {
   /// Convert to map
   Map<String, String> toMap() {
     final map = <String, String>{};
-    
+
     if (language != null && language!.isNotEmpty) map['language'] = language!;
     if (title != null && title!.isNotEmpty) map['title'] = title!;
-    
+
     return map;
   }
 
