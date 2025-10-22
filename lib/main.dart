@@ -5,12 +5,14 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as path;
 
 import 'models/export_profile.dart';
 import 'models/file_item.dart';
 import 'services/profile_service.dart';
 import 'services/ffprobe_service.dart';
 import 'services/ffmpeg_export_service.dart';
+import 'services/verification_service.dart';
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
@@ -67,6 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<Process> _activeProcesses = [];
   List<ExportProfile> _profiles = [];
   ExportProfile? _selectedProfile;
+  bool _enableVerification = true;
 
   @override
   void initState() {
@@ -158,6 +161,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _lastOutputDir = prefs.getString('lastOutputDir');
       _maxConcurrentExports = prefs.getInt('maxConcurrentExports') ?? 2;
       _outputFormat = prefs.getString('outputFormat') ?? 'mkv';
+      _enableVerification = prefs.getBool('enableVerification') ?? true;
     });
   }
 
@@ -168,6 +172,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     await prefs.setInt('maxConcurrentExports', _maxConcurrentExports);
     await prefs.setString('outputFormat', _outputFormat);
+    await prefs.setBool('enableVerification', _enableVerification);
   }
 
   Future<void> _loadProfiles() async {
@@ -628,6 +633,34 @@ class _MyHomePageState extends State<MyHomePage> {
           item.exportProgress = 1.0;
         });
         _appendLog('✓ Completed: ${item.name}');
+
+        // Run verification if enabled
+        if (_enableVerification) {
+          _appendLog('Verifying: ${item.name}');
+          final extension = _outputFormat;
+          final outputFileName =
+              '${path.basenameWithoutExtension(item.outputName)}.$extension';
+          final outPath = path.join(outDir.path, outputFileName);
+
+          final verificationResult = await VerificationService.verifyFile(
+            filePath: outPath,
+            expectedVideoStreams: item.selectedVideo.length,
+            expectedAudioStreams: item.selectedAudio.length,
+            expectedSubtitleStreams: item.selectedSubtitles.length,
+          );
+
+          setState(() {
+            item.verificationPassed = verificationResult.passed;
+            item.verificationMessage = verificationResult.message;
+          });
+
+          if (verificationResult.passed) {
+            _appendLog('✓ Verification passed: ${item.name}');
+          } else {
+            _appendLog(
+                '⚠ Verification warning: ${item.name} - ${verificationResult.message}');
+          }
+        }
       } else {
         setState(() {
           item.exportStatus = 'failed';
@@ -1072,6 +1105,20 @@ class _MyHomePageState extends State<MyHomePage> {
                     });
                     this.setState(() {});
                   }
+                },
+              ),
+              const SizedBox(height: 16),
+              const Text('Verification:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              SwitchListTile(
+                title: const Text('Verify exports after completion'),
+                subtitle: const Text('Check exported files for errors'),
+                value: _enableVerification,
+                onChanged: (value) {
+                  setState(() {
+                    _enableVerification = value;
+                  });
+                  this.setState(() {});
                 },
               ),
             ],

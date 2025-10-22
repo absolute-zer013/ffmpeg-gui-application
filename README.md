@@ -91,6 +91,30 @@ Profiles store:
 - Selected subtitle descriptions
 - Default subtitle track preference
 
+### Codec Conversion
+The application supports re-encoding video and audio streams:
+
+1. **Video Codecs**: Convert between H.264, H.265/HEVC, VP9, AV1, or keep original (Copy)
+2. **Audio Codecs**: Convert between AAC, MP3, Opus, AC3, FLAC, Vorbis, or keep original (Copy)
+3. **Audio Settings**: Configure bitrate, channels (mono/stereo/5.1/7.1), and sample rate
+4. **Per-Track Settings**: Click the tune button on file cards to configure codec settings
+
+### Quality Presets
+Apply predefined quality presets for consistent encoding:
+
+1. **Fast**: Quick encoding (CRF 28, 128k audio) - acceptable quality
+2. **Balanced**: Medium speed (CRF 23, 192k audio) - good quality (default)
+3. **High Quality**: Slow encoding (CRF 18, 256k audio) - best quality
+4. **Visual Feedback**: Active preset shown as a chip on file cards
+
+### Verification Mode
+Automatically verify exported files for errors:
+
+1. **Enable**: Toggle verification in Settings (gear icon)
+2. **Automatic**: Runs after each export completes
+3. **Stream Verification**: Checks video, audio, subtitle counts match expected
+4. **Integrity Check**: Detects file corruption
+5. **Visual Status**: Pass (✓) or warning (⚠) badges in file cards
 ## Testing & Quality Assurance
 
 The project includes comprehensive automated testing:
