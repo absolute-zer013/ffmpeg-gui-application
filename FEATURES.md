@@ -143,6 +143,39 @@
    - Existing metadata preserved and editable
    - Organized dialog with file and track sections
 
+## 🆕 Phase 2 Enhancement Features
+
+### 24. **✓ Codec Conversion**
+   - Re-encode video streams to different codecs
+   - Video codec support: H.264, H.265/HEVC, VP9, AV1, or Copy (no re-encoding)
+   - Re-encode audio streams to different codecs
+   - Audio codec support: AAC, MP3, Opus, AC3, FLAC, Vorbis, or Copy
+   - Configure audio bitrate (kbps)
+   - Set audio channels (Mono, Stereo, 5.1, 7.1)
+   - Adjust audio sample rate (44100, 48000, 96000 Hz)
+   - Per-track codec settings via dialog
+   - Automatic copy mode when no conversion specified
+
+### 25. **✓ Quality/CRF Presets**
+   - Predefined quality presets for video encoding
+   - Fast preset: CRF 28, fast encoding, acceptable quality
+   - Balanced preset: CRF 23, medium encoding, good quality
+   - High Quality preset: CRF 18, slow encoding, best quality
+   - Automatic audio bitrate settings per preset
+   - Visual display of active quality preset in file card
+   - Quality settings accessible via tune button
+   - Presets apply FFmpeg CRF and preset parameters
+
+### 26. **✓ Verification Mode**
+   - Automatic verification of exported files
+   - Checks stream counts match expected (video, audio, subtitle)
+   - Detects file corruption using FFmpeg integrity check
+   - Visual verification status badges in file cards
+   - Pass/fail indicators with detailed messages
+   - Toggle verification on/off in settings
+   - Verification report logged for each file
+   - Warnings for mismatched streams or errors
+
 ## Additional Bonus Features
 - **Real-time FFmpeg Progress Parsing**: Reads FFmpeg stdout to calculate accurate progress percentages
 - **Multiple File Format Support**: Accepts MKV, MP4, AVI, MOV input files
@@ -201,10 +234,13 @@
 
 ---
 
-**All 20 original features + 3 NEW enhancement features have been fully implemented!** 🎉
+**All 20 original features + 6 NEW enhancement features have been fully implemented!** 🎉
 
 ### Summary
 - ✅ 20 Original core features (progress, cancellation, drag-drop, profiles, etc.)
 - ✅ Export Profiles/Templates (Feature #21)
 - ✅ Video Stream Selection (Feature #22)
 - ✅ Metadata Editor (Feature #23)
+- ✅ Codec Conversion (Feature #24)
+- ✅ Quality/CRF Presets (Feature #25)
+- ✅ Verification Mode (Feature #26)

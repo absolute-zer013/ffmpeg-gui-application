@@ -62,22 +62,27 @@ Choose specific video tracks (useful for files with multiple video streams).
 - ✅ Display video codec and resolution information
 - ✅ Update export summary to include video track statistics
 
-### 7. Codec Conversion
+### 7. Codec Conversion ✅ **IMPLEMENTED**
 Re-encode audio/video (e.g., convert HEVC to H.264, AC3 to AAC).
 
 **Implementation:**
-- Add codec selection dropdowns per track type
-- Replace `-c copy` with specific codec parameters
-- Add quality/bitrate settings
-- Show estimated time/size based on codec
+- ✅ Create `models/codec_options.dart` with VideoCodec and AudioCodec enums
+- ✅ Create CodecConversionSettings model for per-track codec settings
+- ✅ Add codec selection dropdowns per track type in CodecSettingsDialog
+- ✅ Replace `-c copy` with specific codec parameters in FFmpegExportService
+- ✅ Add quality/bitrate settings for audio (bitrate, channels, sample rate)
+- ✅ Support multiple codecs: H.264, H.265, VP9, AV1 for video; AAC, MP3, Opus, AC3, FLAC for audio
 
-### 8. Quality Presets
+### 8. Quality Presets ✅ **IMPLEMENTED**
 CRF/bitrate settings for re-encoding.
 
 **Implementation:**
-- Add preset selector (Fast, Balanced, High Quality, Custom)
-- Map presets to FFmpeg parameters (-crf, -preset, -bitrate)
-- Show preview of expected quality/size trade-off
+- ✅ Create `models/quality_preset.dart` with QualityPreset class
+- ✅ Add preset selector (Fast, Balanced, High Quality) in codec settings dialog
+- ✅ Map presets to FFmpeg parameters (-crf, -preset, -bitrate)
+- ✅ Show active preset as chip in file card
+- ✅ Predefined presets with CRF values: Fast (28), Balanced (23), High Quality (18)
+- ✅ Support for custom audio bitrates per preset
 
 ### 9. Trim/Cut Functionality
 Set start/end timestamps to export only portions of files.
@@ -190,15 +195,18 @@ Reorder streams, optimize header compression.
 - Remove unnecessary metadata
 - Show file size savings
 
-### 20. Verification Mode
+### 20. Verification Mode ✅ **IMPLEMENTED**
 Check exported files for errors after completion.
 
 **Implementation:**
-- Run FFprobe on exported files
-- Verify stream counts match expected
-- Check for corruption/errors in output
-- Generate verification report
-- Mark files with issues
+- ✅ Create `services/verification_service.dart` for file verification
+- ✅ Run FFprobe on exported files to verify stream counts
+- ✅ Verify stream counts match expected (video, audio, subtitle)
+- ✅ Check for corruption/errors using FFmpeg integrity check
+- ✅ Generate verification report with pass/fail status
+- ✅ Mark files with issues in UI with verification badge
+- ✅ Add verification toggle in settings dialog
+- ✅ Display verification status in file card subtitle
 
 ---
 
@@ -309,10 +317,10 @@ Desktop notifications, email, or Discord webhooks when exports complete.
 2. ✅ Video Stream Selection (Feature #6) - **COMPLETED**
 3. ✅ Metadata Editor (Feature #16) - **COMPLETED**
 
-### **Phase 2 - Advanced Export** (Power User Features)
-4. Codec Conversion (Feature #7)
-5. Quality/CRF Presets (Feature #8)
-6. Verification Mode (Feature #20)
+### **Phase 2 - Advanced Export** ✅ **COMPLETED**
+4. ✅ Codec Conversion (Feature #7) - **COMPLETED**
+5. ✅ Quality/CRF Presets (Feature #8) - **COMPLETED**
+6. ✅ Verification Mode (Feature #20) - **COMPLETED**
 
 ### **Phase 3 - Batch Power** (Automation)
 7. Advanced Rename Patterns (Feature #11)
