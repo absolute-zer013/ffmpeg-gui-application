@@ -60,6 +60,9 @@ devtools_options.yaml
 *.exe
 *.msi
 
+# Local-only scripts (do not publish)
+build_package.ps1
+
 # IDE and OS
 *.swp
 *.swo
