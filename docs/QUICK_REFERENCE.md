@@ -5,40 +5,40 @@
 ### Testing
 ```bash
 # Run all tests
-.\run_tests.ps1 test
+.\scripts\run_tests.ps1 test
 
 # Run model tests only
-.\run_tests.ps1 test-models
+.\scripts\run_tests.ps1 test-models
 
 # Run utility tests only
-.\run_tests.ps1 test-utils
+.\scripts\run_tests.ps1 test-utils
 
 # Run tests with coverage
-.\run_tests.ps1 coverage
+.\scripts\run_tests.ps1 coverage
 ```
 
 ### Code Quality
 ```bash
 # Check code formatting
-.\run_tests.ps1 format-check
+.\scripts\run_tests.ps1 format-check
 
 # Auto-format code
-.\run_tests.ps1 format
+.\scripts\run_tests.ps1 format
 
 # Run static analysis
-.\run_tests.ps1 analyze
+.\scripts\run_tests.ps1 analyze
 
 # Run strict linting
-.\run_tests.ps1 lint
+.\scripts\run_tests.ps1 lint
 
 # Run all quality checks
-.\run_tests.ps1 all
+.\scripts\run_tests.ps1 all
 ```
 
 ### Cleaning
 ```bash
 # Clean build artifacts
-.\run_tests.ps1 clean
+.\scripts\run_tests.ps1 clean
 
 # Full flutter clean
 flutter clean
@@ -49,13 +49,13 @@ flutter clean
 ### Quick Build & Package
 ```bash
 # Build and create distribution package
-.\build_package.ps1 all
+.\scripts\build_package.ps1 all
 
 # Build only
-.\build_package.ps1 build
+.\scripts\build_package.ps1 build
 
 # Package only (requires build first)
-.\build_package.ps1 package
+.\scripts\build_package.ps1 package
 ```
 
 ### Manual Build
@@ -104,11 +104,11 @@ git push origin master v1.0.1
 |------|---------|---------|
 | `README.md` | Main overview | Features, setup, quick start |
 | `FEATURES.md` | Feature list | All 20+ implemented features |
-| `TESTING.md` | Testing guide | Test execution, CI/CD details |
-| `DEPLOYMENT.md` | Release guide | Build, package, distribute |
+| `docs/TESTING.md` | Testing guide | Test execution, CI/CD details |
+| `docs/DEPLOYMENT.md` | Release guide | Build, package, distribute |
 | `CI_CD_SETUP.md` | CI/CD summary | Workflow overview, features |
 | `ENHANCEMENTS.md` | Future features | 30 planned features by phase |
-| `COMPLETION_SUMMARY.md` | Phase summary | What was completed, status |
+| `docs/PHASES_REPORT.md` | Phase summary | Combined Phases 1–4 |
 
 ## Project Structure
 
@@ -131,6 +131,12 @@ lib/
     ├── audio_batch_card.dart # Batch audio widget
     └── subtitle_batch_card.dart # Batch subtitle widget
 
+scripts/
+├── run_tests.ps1            # Test/format/analyze orchestration (PowerShell)
+├── run_tests.bat            # Test/format/analyze orchestration (Batch)
+├── build_package.ps1        # Build and package (PowerShell)
+└── build_package.bat        # Build and package (Batch)
+
 test/
 ├── widget_test.dart         # Widget tests
 ├── models/
@@ -152,7 +158,7 @@ test/
 # Clean and rebuild
 flutter clean
 flutter pub get
-.\run_tests.ps1 test
+.\scripts\run_tests.ps1 test
 ```
 
 ### Build Fails
@@ -173,10 +179,10 @@ flutter build windows --release
 ### Code Formatting Issues
 ```bash
 # Auto-fix formatting
-.\run_tests.ps1 format
+.\scripts\run_tests.ps1 format
 
 # Verify format
-.\run_tests.ps1 format-check
+.\scripts\run_tests.ps1 format-check
 ```
 
 ## Performance Tips
@@ -191,7 +197,8 @@ flutter build windows --release
 ```
 build/windows/x64/runner/Release/    # Release executable
 dist/                                # Distribution packages
-coverage/                            # Test coverage reports
+docs/                                # Documentation
+scripts/                             # Build and test scripts
 .github/workflows/                   # GitHub Actions
 ```
 
@@ -212,7 +219,7 @@ coverage/                            # Test coverage reports
 
 ### Before Committing
 ```bash
-.\run_tests.ps1 all
+.\scripts\run_tests.ps1 all
 git add .
 git commit -m "Your message"
 git push
@@ -222,7 +229,7 @@ git push
 ```bash
 # 1. Update version in pubspec.yaml
 # 2. Build everything
-.\build_package.ps1 all
+.\scripts\build_package.ps1 all
 
 # 3. Test the executable
 .\build\windows\x64\runner\Release\export_file.exe
@@ -231,7 +238,7 @@ git push
 git add .
 git commit -m "Release v1.0.0"
 git tag v1.0.0
-git push origin master v1.0.0
+git push origin v1.0.0
 
 # 5. GitHub Actions builds automatically
 # 6. Release appears in GitHub
@@ -240,7 +247,7 @@ git push origin master v1.0.0
 ### Testing Specific Feature
 ```bash
 # Run model tests
-.\run_tests.ps1 test-models
+.\scripts\run_tests.ps1 test-models
 
 # Add new tests in test/models/
 # Run again to verify

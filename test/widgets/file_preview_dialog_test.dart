@@ -62,7 +62,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -87,7 +87,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -112,7 +112,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -138,7 +138,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -164,7 +164,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -195,7 +195,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -224,7 +224,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -250,7 +250,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -273,7 +273,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -285,11 +285,11 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Close'), findsNWidgets(2)); // Header X and footer button
+      // Only one visible Close button in the footer
+      expect(find.text('Close'), findsOneWidget);
     });
 
-    testWidgets('Dialog has Open Location button',
-        (WidgetTester tester) async {
+    testWidgets('Dialog has Open Location button', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -297,7 +297,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -320,7 +320,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),
@@ -349,7 +349,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => FilePreviewDialog(item: fileItem),
+                  builder: (context) => FilePreviewDialog(fileItem: fileItem),
                 ),
                 child: const Text('Open'),
               ),

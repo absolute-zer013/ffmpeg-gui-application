@@ -167,13 +167,13 @@ The project includes comprehensive automated testing:
 
 ```bash
 # Run all tests
-.\run_tests.ps1 test
+.\scripts\run_tests.ps1 test
 
 # Check code formatting
-.\run_tests.ps1 format-check
+.\scripts\run_tests.ps1 format-check
 
 # Run all quality checks
-.\run_tests.ps1 all
+.\scripts\run_tests.ps1 all
 ```
 
 See [`TESTING.md`](TESTING.md) for detailed testing documentation.
@@ -184,7 +184,7 @@ See [`TESTING.md`](TESTING.md) for detailed testing documentation.
 
 ```bash
 # Build and package for distribution
-.\build_package.ps1 all
+.\scripts\build_package.ps1 all
 ```
 
 ### Manual Build
@@ -200,7 +200,7 @@ The executable is created at: `build\windows\x64\runner\Release\export_file.exe`
 
 ```bash
 # Package for distribution (includes all required files)
-.\build_package.ps1 package
+.\scripts\build_package.ps1 package
 ```
 
 Creates a ZIP file in `dist/` folder ready for distribution.
@@ -213,12 +213,13 @@ When you push a version tag to GitHub:
 - Windows executable is created
 - Release is published with artifacts
 
-See [`DEPLOYMENT.md`](DEPLOYMENT.md) for detailed deployment guide.
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for detailed deployment guide.
 
 ## Documentation
 
 - [`FEATURES.md`](FEATURES.md) - Complete feature list and current capabilities
-- [`TESTING.md`](TESTING.md) - Testing guide and CI/CD setup
-- [`DEPLOYMENT.md`](DEPLOYMENT.md) - Build and distribution instructions
+- [`docs/TESTING.md`](docs/TESTING.md) - Testing guide and CI/CD setup
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Build and distribution instructions
 - [`ENHANCEMENTS.md`](ENHANCEMENTS.md) - Planned features for future releases
 - [`CI_CD_SETUP.md`](CI_CD_SETUP.md) - Summary of automated testing setup
+- [`docs/PHASES_REPORT.md`](docs/PHASES_REPORT.md) - Consolidated summaries of Phases 1–4

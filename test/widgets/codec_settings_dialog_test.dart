@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ffmpeg_filter_app/widgets/codec_settings_dialog.dart';
-import 'package:ffmpeg_filter_app/models/codec_options.dart';
-import 'package:ffmpeg_filter_app/models/quality_preset.dart';
 
 void main() {
   group('CodecSettingsDialog', () {

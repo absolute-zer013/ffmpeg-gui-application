@@ -11,6 +11,7 @@ class ExportQueueService {
   final List<ExportQueueItem> _queue = [];
   final StreamController<List<ExportQueueItem>> _queueController =
       StreamController<List<ExportQueueItem>>.broadcast();
+  int _idCounter = 0;
 
   /// Stream of queue updates
   Stream<List<ExportQueueItem>> get queueStream => _queueController.stream;
@@ -25,7 +26,8 @@ class ExportQueueService {
 
   /// Adds an item to the queue
   void addToQueue(FileItem fileItem, {int priority = 0}) {
-    final id = DateTime.now().millisecondsSinceEpoch.toString();
+    // Ensure unique, monotonic IDs even when adding multiple items quickly
+    final id = (++_idCounter).toString();
     final queueItem = ExportQueueItem(
       id: id,
       fileItem: fileItem,
@@ -92,7 +94,8 @@ class ExportQueueService {
     final index = _queue.indexWhere((item) => item.id == id);
     if (index != -1) {
       _queue[index] = _queue[index].copyWith(
-        status: error != null ? QueueItemStatus.failed : QueueItemStatus.completed,
+        status:
+            error != null ? QueueItemStatus.failed : QueueItemStatus.completed,
         completedAt: DateTime.now(),
         error: error,
       );
@@ -167,17 +170,23 @@ class ExportQueueService {
 
   /// Gets all pending items
   List<ExportQueueItem> getPendingItems() {
-    return _queue.where((item) => item.status == QueueItemStatus.pending).toList();
+    return _queue
+        .where((item) => item.status == QueueItemStatus.pending)
+        .toList();
   }
 
   /// Gets all processing items
   List<ExportQueueItem> getProcessingItems() {
-    return _queue.where((item) => item.status == QueueItemStatus.processing).toList();
+    return _queue
+        .where((item) => item.status == QueueItemStatus.processing)
+        .toList();
   }
 
   /// Gets all completed items
   List<ExportQueueItem> getCompletedItems() {
-    return _queue.where((item) => item.status == QueueItemStatus.completed).toList();
+    return _queue
+        .where((item) => item.status == QueueItemStatus.completed)
+        .toList();
   }
 
   /// Checks if the queue has any pending or processing items

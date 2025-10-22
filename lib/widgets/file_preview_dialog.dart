@@ -5,7 +5,7 @@ import '../models/file_item.dart';
 import '../utils/file_utils.dart';
 
 /// Dialog for previewing file information before export
-/// 
+///
 /// Shows detailed information about the video file including:
 /// - File size and duration
 /// - Video, audio, and subtitle tracks
@@ -137,7 +137,7 @@ class FilePreviewDialog extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _buildInfoRow('Path', fileItem.path),
-            _buildInfoRow('Name', fileItem.name),
+            // Removed duplicate name row to avoid duplicating file name in UI (header already shows name)
             if (fileItem.fileSize != null)
               _buildInfoRow('Size', FileUtils.formatBytes(fileItem.fileSize!)),
             if (fileItem.duration != null)
@@ -285,7 +285,8 @@ class FilePreviewDialog extends StatelessWidget {
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(width: 8),
-                          if (fileItem.selectedSubtitles.contains(track.position))
+                          if (fileItem.selectedSubtitles
+                              .contains(track.position))
                             const Chip(
                               label: Text('Selected',
                                   style: TextStyle(fontSize: 11)),

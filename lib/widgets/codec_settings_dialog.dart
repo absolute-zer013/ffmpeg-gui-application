@@ -54,7 +54,9 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
   Widget build(BuildContext context) {
     final title = widget.showBatchOptions
         ? 'Batch ${widget.isVideoTrack ? 'Video' : 'Audio'} Codec Settings (${widget.fileCount ?? 0} files)'
-        : (widget.isVideoTrack ? 'Video Codec Settings' : 'Audio Codec Settings');
+        : (widget.isVideoTrack
+            ? 'Video Codec Settings'
+            : 'Audio Codec Settings');
 
     return AlertDialog(
       title: Text(title),

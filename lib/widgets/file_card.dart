@@ -47,7 +47,7 @@ class FileCard extends StatelessWidget {
   void _showPreview(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => FilePreviewDialog(item: item),
+      builder: (context) => FilePreviewDialog(fileItem: item),
     );
   }
 

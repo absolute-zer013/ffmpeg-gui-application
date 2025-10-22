@@ -17,6 +17,7 @@ import 'services/ffmpeg_export_service.dart';
 import 'services/verification_service.dart';
 import 'services/rule_service.dart';
 import 'services/notification_service.dart';
+import 'models/quality_preset.dart';
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
@@ -76,7 +77,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ExportProfile? _selectedProfile;
   bool _enableVerification = true;
   List<AutoDetectRule> _rules = [];
-  bool _autoApplyRules = true;
+  final bool _autoApplyRules = true;
   bool _enableDesktopNotifications = true;
 
   @override
@@ -416,7 +417,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _showBatchVideoCodecDialog() async {
     if (_files.isEmpty) {
-      _appendLog('ERROR: No files loaded. Add files before applying batch codec settings.');
+      _appendLog(
+          'ERROR: No files loaded. Add files before applying batch codec settings.');
       return;
     }
 
@@ -444,7 +446,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _showBatchAudioCodecDialog() async {
     if (_files.isEmpty) {
-      _appendLog('ERROR: No files loaded. Add files before applying batch codec settings.');
+      _appendLog(
+          'ERROR: No files loaded. Add files before applying batch codec settings.');
       return;
     }
 
@@ -463,7 +466,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (result != null && result['applyToAll'] == true) {
       setState(() {
-        final codecSettings = result['codecSettings'] as CodecConversionSettings?;
+        final codecSettings =
+            result['codecSettings'] as CodecConversionSettings?;
         if (codecSettings != null) {
           for (final file in _files) {
             // Apply codec settings to all audio tracks in each file
@@ -829,21 +833,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  void _showNotification(String title, String message) {
-    // Simple in-app notification using SnackBar
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('$title: $message'),
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: 'OK',
-            onPressed: () {},
-          ),
-        ),
-      );
-    }
-  }
+  // Deprecated: in-app notifications handled by NotificationService.showDesktopNotification
 
   Widget _buildSaveToDialog() {
     final selectedPath = ValueNotifier<String?>(_lastOutputDir);
@@ -1169,8 +1159,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 onPressed: _running
                                                     ? null
                                                     : _showBatchAudioCodecDialog,
-                                                icon:
-                                                    const Icon(Icons.audio_file),
+                                                icon: const Icon(
+                                                    Icons.audio_file),
                                                 label:
                                                     const Text('Audio Codec'),
                                               ),
@@ -1366,8 +1356,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   style: TextStyle(fontWeight: FontWeight.bold)),
               SwitchListTile(
                 title: const Text('Desktop notifications'),
-                subtitle:
-                    const Text('Show Windows notifications on export completion'),
+                subtitle: const Text(
+                    'Show Windows notifications on export completion'),
                 value: _enableDesktopNotifications,
                 onChanged: (value) {
                   setState(() {

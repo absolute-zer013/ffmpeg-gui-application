@@ -1,12 +1,12 @@
 import 'dart:io';
 
 /// Service for managing application notifications
-/// 
-/// Provides both in-app notifications (via callbacks) and 
+///
+/// Provides both in-app notifications (via callbacks) and
 /// Windows desktop notifications (via PowerShell)
 class NotificationService {
   /// Shows a Windows desktop notification using PowerShell
-  /// 
+  ///
   /// [title] The notification title
   /// [message] The notification message body
   /// [type] The notification type: 'info', 'success', 'warning', or 'error'

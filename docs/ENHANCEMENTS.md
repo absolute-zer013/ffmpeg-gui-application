@@ -352,7 +352,7 @@ Apply selected video/audio codec and audio quality presets to multiple files at 
 
 **Implementation:**
 - ✅ Extended `CodecSettingsDialog` with batch mode support and "Apply to All" option
-- ✅ Added batch toolbar actions in batch mode section: Video Quality and Audio Codec buttons
+- ✅ Added batch toolbar actions in batch                                       mode section: Video Quality and Audio Codec buttons
 - ✅ Created `_showBatchVideoCodecDialog` and `_showBatchAudioCodecDialog` methods in main.dart
 - ✅ Batch apply respects the dialog settings and applies to all loaded files
 - ✅ Added comprehensive widget tests for batch codec dialog functionality
@@ -383,6 +383,40 @@ Apply selected video/audio codec and audio quality presets to multiple files at 
 13. ✅ Batch Codec/Quality Apply (Feature #30) - **COMPLETED**
 
 ---
+
+### **Phase 5 - Consolidated Backlog** (All Remaining Planned Features)
+
+The remaining planned features are grouped into a single phase for clarity and scheduling. Items are organized by category; numbering aligns with the roadmap above.
+
+- Quality of Life
+  1. Recent Files List (Feature #1)
+  2. Undo/Redo (Feature #3)
+  3. Search/Filter (Feature #4)
+  4. Sorting Options (Feature #5)
+
+- Export Enhancements
+  5. Trim/Cut Functionality (Feature #9)
+  6. Resolution/Framerate Changes (Feature #10)
+
+- Batch Operations
+  7. Multi-Profile Export (Feature #14)
+
+- Advanced Features
+  8. Chapter Editing (Feature #15)
+  9. Audio/Subtitle Sync (Feature #17)
+  10. Subtitle Format Conversion (Feature #18)
+  11. MKV Optimization (Feature #19)
+
+- UI/UX Enhancements
+  12. Dual Pane Mode (Feature #21)
+  13. Waveform Visualization (Feature #23)
+  14. Estimated Export Times (Feature #25)
+
+- Integration Features
+  15. Watch Folder (Feature #26)
+  16. Command-Line Interface (Feature #27)
+  17. Presets Import (Feature #28)
+
 
 ## Notes for Implementation
 

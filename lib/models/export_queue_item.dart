@@ -68,7 +68,8 @@ class ExportQueueItem {
   }
 
   /// Creates a queue item from a JSON map
-  static ExportQueueItem fromJson(Map<String, dynamic> json, FileItem fileItem) {
+  static ExportQueueItem fromJson(
+      Map<String, dynamic> json, FileItem fileItem) {
     return ExportQueueItem(
       id: json['id'] as String,
       fileItem: fileItem,
