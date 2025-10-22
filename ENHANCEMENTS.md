@@ -106,32 +106,48 @@ Downscale or change framerate during export.
 
 ## Batch Operations
 
-### 11. Batch Rename Patterns
+### 11. Batch Rename Patterns ✅ **IMPLEMENTED**
 More advanced templates with regex support.
 
 **Implementation:**
-- Add rename pattern input with variables: `{name}`, `{date}`, `{index}`, `{episode}`
-- Support regex find/replace
-- Live preview of renamed files
-- Common presets (TV shows, movies, etc.)
+- ✅ Create `models/rename_pattern.dart` with pattern model and predefined patterns
+- ✅ Create `utils/rename_utils.dart` for pattern parsing and variable substitution
+- ✅ Update `FileItem` to include rename pattern fields
+- ✅ Integrate pattern application in `FFmpegExportService`
+- ✅ Support variables: {name}, {episode}, {season}, {year}, {date}, {index}, {ext}
+- ✅ Variable padding support (e.g., {episode:3} = 001)
+- ✅ Pattern validation with error checking
+- ✅ Predefined patterns for TV shows, movies, anime
+- ✅ Add comprehensive unit tests
 
-### 12. Auto-Detect Patterns
+### 12. Auto-Detect Patterns ✅ **IMPLEMENTED**
 Automatically select tracks based on rules (e.g., "always include Japanese audio").
 
 **Implementation:**
-- Create rule builder UI (if language = X, then select)
-- Store rules as JSON
-- Apply rules automatically when files are added
-- Allow rule priorities/ordering
+- ✅ Create `models/auto_detect_rule.dart` with rule model and enums
+- ✅ Create `services/rule_service.dart` for rule evaluation and application
+- ✅ Support rule types: audio, subtitle, video
+- ✅ Support conditions: language, title, codec, channels
+- ✅ Support actions: select, deselect, set default
+- ✅ Priority-based rule ordering
+- ✅ Enable/disable individual rules
+- ✅ Apply rules automatically when files are added
+- ✅ Predefined rules for common scenarios
+- ✅ Add comprehensive unit tests
 
-### 13. Import/Export Configurations
+### 13. Import/Export Configurations ✅ **IMPLEMENTED**
 Save entire batch setups to JSON files for reuse.
 
 **Implementation:**
-- Export current file list + selections to JSON
-- Import JSON to restore exact configuration
-- Share configurations between users
-- Include metadata (creation date, description)
+- ✅ Create `models/batch_configuration.dart` with full configuration model
+- ✅ Create `services/config_service.dart` for import/export operations
+- ✅ Export configuration to JSON with all selections and settings
+- ✅ Import configuration to restore exact setup
+- ✅ Include file selections, profiles, rules, and preferences
+- ✅ Configuration metadata (name, description, date, version)
+- ✅ Configuration validation on import
+- ✅ Default configuration directory management
+- ✅ Add comprehensive unit tests
 
 ### 14. Multi-Profile Export
 Export each file with multiple different configurations at once.
@@ -288,27 +304,25 @@ Import HandBrake or other tool presets.
 - Show compatibility warnings
 - Convert and save as native profiles
 
-### 29. Cloud Storage Integration
-Export directly to Google Drive/Dropbox.
-
-**Implementation:**
-- Add cloud storage package dependencies
-- OAuth authentication flow
-- Upload exported files to cloud
-- Show upload progress
-- Option to delete local after upload
-
-### 30. Notification System
-Desktop notifications, email, or Discord webhooks when exports complete.
+### 29. Notification System
+Desktop notifications when exports complete.
 
 **Implementation:**
 - Use Windows notifications API
-- Add optional email settings (SMTP)
-- Discord webhook URL input
-- Customize notification message
 - Only notify on all complete or on errors
 
 ---
+
+### 30. Batch Codec/Quality Apply
+Apply selected video/audio codec and audio quality presets to multiple files at once.
+
+**Implementation:**
+- Add an "Apply to selected files" option in `CodecSettingsDialog` to bulk-apply current selections.
+- Provide batch toolbar actions: Set Video Codec, Set Audio Codec, Set Audio Quality (presets).
+- Extend `ExportProfile` (if necessary) to include codec and quality preset fields for easy reuse.
+- Ensure `FFmpegExportService` respects the batch-applied settings per file.
+- Add unit tests: bulk apply preserves per-file overrides; batch apply integrates with profiles and configurations.
+
 
 ## Implementation Priority Suggestions
 
@@ -322,15 +336,19 @@ Desktop notifications, email, or Discord webhooks when exports complete.
 5. ✅ Quality/CRF Presets (Feature #8) - **COMPLETED**
 6. ✅ Verification Mode (Feature #20) - **COMPLETED**
 
-### **Phase 3 - Batch Power** (Automation)
-7. Advanced Rename Patterns (Feature #11)
-8. Auto-Detect Rules (Feature #12)
-9. Configuration Import/Export (Feature #13)
+### **Phase 3 - Batch Power** ✅ **COMPLETED** (Automation)
+7. ✅ Advanced Rename Patterns (Feature #11) - **COMPLETED**
+8. ✅ Auto-Detect Rules (Feature #12) - **COMPLETED**
+9. ✅ Configuration Import/Export (Feature #13) - **COMPLETED**
 
 ### **Phase 4 - UI Polish** (User Experience)
 10. File Preview (Feature #22)
 11. Export Queue Management (Feature #24)
-12. Better Notifications (Feature #30)
+12. Better Notifications (Feature #29)
+13. Batch Codec/Quality Apply (leverages Features #7 and #8)
+  - Add "Apply to selected files" action in the Codec Settings dialog
+  - Provide batch toolbar actions: Set Video Codec, Set Audio Codec, Set Audio Quality
+  - Respect per-file overrides; enable quick bulk updates across the selection
 
 ---
 

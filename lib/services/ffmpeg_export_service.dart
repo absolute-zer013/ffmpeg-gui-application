@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../models/file_item.dart';
 import '../models/codec_options.dart';
+import '../utils/rename_utils.dart';
 
 /// Service for exporting files using FFmpeg
 class FFmpegExportService {
@@ -14,8 +15,26 @@ class FFmpegExportService {
     required Function(double progress) onProgress,
   }) async {
     final extension = outputFormat;
-    final outputFileName =
-        '${path.basenameWithoutExtension(item.outputName)}.$extension';
+
+    // Apply rename pattern if present
+    String outputFileName;
+    if (item.renamePattern != null) {
+      outputFileName = RenameUtils.applyPattern(
+        item.renamePattern!.pattern,
+        item.path,
+        index: item.renameIndex,
+        episode: item.renameEpisode,
+        season: item.renameSeason,
+        year: item.renameYear,
+      );
+      // Ensure correct extension
+      outputFileName =
+          '${path.basenameWithoutExtension(outputFileName)}.$extension';
+    } else {
+      outputFileName =
+          '${path.basenameWithoutExtension(item.outputName)}.$extension';
+    }
+
     final outPath = path.join(outputDir.path, outputFileName);
 
     final args = <String>[
