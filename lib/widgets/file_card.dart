@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../models/file_item.dart';
-import '../models/codec_options.dart';
 import '../models/quality_preset.dart';
 import '../utils/file_utils.dart';
 import 'metadata_editor_dialog.dart';
@@ -37,7 +36,7 @@ class FileCard extends StatelessWidget {
         isVideoTrack: true,
       ),
     );
-    
+
     if (result != null) {
       item.qualityPreset = result['qualityPreset'] as QualityPreset?;
       onChanged();
@@ -72,7 +71,8 @@ class FileCard extends StatelessWidget {
           children: [
             if (item.qualityPreset != null)
               Chip(
-                label: Text(item.qualityPreset!.name, style: const TextStyle(fontSize: 11)),
+                label: Text(item.qualityPreset!.name,
+                    style: const TextStyle(fontSize: 11)),
                 padding: EdgeInsets.zero,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
@@ -127,7 +127,8 @@ class FileCard extends StatelessWidget {
                   Icon(
                     item.verificationPassed! ? Icons.verified : Icons.warning,
                     size: 16,
-                    color: item.verificationPassed! ? Colors.green : Colors.orange,
+                    color:
+                        item.verificationPassed! ? Colors.green : Colors.orange,
                   ),
                   const SizedBox(width: 4),
                   Expanded(
@@ -135,7 +136,9 @@ class FileCard extends StatelessWidget {
                       item.verificationMessage ?? 'Verification completed',
                       style: TextStyle(
                         fontSize: 12,
-                        color: item.verificationPassed! ? Colors.green : Colors.orange,
+                        color: item.verificationPassed!
+                            ? Colors.green
+                            : Colors.orange,
                       ),
                     ),
                   ),

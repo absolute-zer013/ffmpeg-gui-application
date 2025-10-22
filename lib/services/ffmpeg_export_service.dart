@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:path/path.dart' as path;
 import '../models/file_item.dart';
 import '../models/codec_options.dart';
-import '../models/track.dart';
 
 /// Service for exporting files using FFmpeg
 class FFmpegExportService {
@@ -81,11 +80,11 @@ class FFmpegExportService {
 
     // Handle codec conversion settings
     bool needsEncoding = false;
-    
+
     // Apply quality preset if present
     if (item.qualityPreset != null) {
       final preset = item.qualityPreset!;
-      
+
       // Add video encoding parameters
       if (preset.crf != null) {
         args.addAll(['-crf', preset.crf.toString()]);
@@ -107,30 +106,35 @@ class FFmpegExportService {
     // Apply codec conversion settings per track
     if (item.codecSettings.isNotEmpty) {
       needsEncoding = true;
-      
+
       // Group settings by type
       final videoSettings = <int, CodecConversionSettings>{};
       final audioSettings = <int, CodecConversionSettings>{};
-      
+
       for (final entry in item.codecSettings.entries) {
         final streamIndex = entry.key;
         final settings = entry.value;
-        
+
         // Determine if this is a video or audio stream
-        final videoTrack = item.videoTracks.where((t) => t.streamIndex == streamIndex).firstOrNull;
-        final audioTrack = item.audioTracks.where((t) => t.streamIndex == streamIndex).firstOrNull;
-        
+        final videoTrack = item.videoTracks
+            .where((t) => t.streamIndex == streamIndex)
+            .firstOrNull;
+        final audioTrack = item.audioTracks
+            .where((t) => t.streamIndex == streamIndex)
+            .firstOrNull;
+
         if (videoTrack != null && settings.videoCodec != null) {
           videoSettings[streamIndex] = settings;
         } else if (audioTrack != null && settings.audioCodec != null) {
           audioSettings[streamIndex] = settings;
         }
       }
-      
+
       // Apply video codec settings
       if (videoSettings.isNotEmpty) {
         // If all video tracks use the same codec, use global setting
-        final allSameCodec = videoSettings.values.map((s) => s.videoCodec).toSet().length == 1;
+        final allSameCodec =
+            videoSettings.values.map((s) => s.videoCodec).toSet().length == 1;
         if (allSameCodec && videoSettings.length == item.selectedVideo.length) {
           final codec = videoSettings.values.first.videoCodec!;
           args.addAll(['-c:v', codec.ffmpegName]);
@@ -140,18 +144,19 @@ class FFmpegExportService {
             final streamIndex = entry.key;
             final settings = entry.value;
             if (settings.videoCodec != null) {
-              args.addAll(['-c:v:$streamIndex', settings.videoCodec!.ffmpegName]);
+              args.addAll(
+                  ['-c:v:$streamIndex', settings.videoCodec!.ffmpegName]);
             }
           }
         }
       }
-      
+
       // Apply audio codec settings
       if (audioSettings.isNotEmpty) {
         for (final entry in audioSettings.entries) {
           final streamIndex = entry.key;
           final settings = entry.value;
-          
+
           if (settings.audioCodec != null) {
             args.addAll(['-c:a:$streamIndex', settings.audioCodec!.ffmpegName]);
           }
@@ -159,10 +164,12 @@ class FFmpegExportService {
             args.addAll(['-b:a:$streamIndex', '${settings.audioBitrate}k']);
           }
           if (settings.audioChannels != null) {
-            args.addAll(['-ac:$streamIndex', settings.audioChannels.toString()]);
+            args.addAll(
+                ['-ac:$streamIndex', settings.audioChannels.toString()]);
           }
           if (settings.audioSampleRate != null) {
-            args.addAll(['-ar:$streamIndex', settings.audioSampleRate.toString()]);
+            args.addAll(
+                ['-ar:$streamIndex', settings.audioSampleRate.toString()]);
           }
         }
       }

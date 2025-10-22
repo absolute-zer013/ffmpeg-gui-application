@@ -12,7 +12,8 @@ class QualityPreset {
   final String name;
   final String description;
   final int? crf; // Constant Rate Factor (0-51, lower = better quality)
-  final String? preset; // FFmpeg preset: ultrafast, fast, medium, slow, veryslow
+  final String?
+      preset; // FFmpeg preset: ultrafast, fast, medium, slow, veryslow
   final int? videoBitrate; // in kbps, used if CRF is null
   final int? audioBitrate; // in kbps
 

@@ -130,8 +130,7 @@ class VerificationService {
   }
 
   /// Check file integrity by attempting to decode a small portion
-  static Future<VerificationResult> _checkFileIntegrity(
-      String filePath) async {
+  static Future<VerificationResult> _checkFileIntegrity(String filePath) async {
     try {
       // Try to read a few frames from the file to check for corruption
       final result = await Process.run('ffmpeg', [
@@ -192,7 +191,8 @@ class VerificationService {
 
       if (result.details != null) {
         final details = result.details!;
-        if (details['errors'] != null && (details['errors'] as List).isNotEmpty) {
+        if (details['errors'] != null &&
+            (details['errors'] as List).isNotEmpty) {
           for (final error in details['errors'] as List) {
             buffer.writeln('  - $error');
           }

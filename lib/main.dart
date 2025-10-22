@@ -5,6 +5,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path/path.dart' as path;
 
 import 'models/export_profile.dart';
 import 'models/file_item.dart';
@@ -632,31 +633,32 @@ class _MyHomePageState extends State<MyHomePage> {
           item.exportProgress = 1.0;
         });
         _appendLog('✓ Completed: ${item.name}');
-        
+
         // Run verification if enabled
         if (_enableVerification) {
           _appendLog('Verifying: ${item.name}');
           final extension = _outputFormat;
           final outputFileName =
-              path.basenameWithoutExtension(item.outputName) + '.$extension';
-          final outPath = path.join(outputDir.path, outputFileName);
-          
+              '${path.basenameWithoutExtension(item.outputName)}.$extension';
+          final outPath = path.join(outDir.path, outputFileName);
+
           final verificationResult = await VerificationService.verifyFile(
             filePath: outPath,
             expectedVideoStreams: item.selectedVideo.length,
             expectedAudioStreams: item.selectedAudio.length,
             expectedSubtitleStreams: item.selectedSubtitles.length,
           );
-          
+
           setState(() {
             item.verificationPassed = verificationResult.passed;
             item.verificationMessage = verificationResult.message;
           });
-          
+
           if (verificationResult.passed) {
             _appendLog('✓ Verification passed: ${item.name}');
           } else {
-            _appendLog('⚠ Verification warning: ${item.name} - ${verificationResult.message}');
+            _appendLog(
+                '⚠ Verification warning: ${item.name} - ${verificationResult.message}');
           }
         }
       } else {

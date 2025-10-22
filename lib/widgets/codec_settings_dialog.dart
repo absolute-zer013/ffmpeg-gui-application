@@ -49,7 +49,9 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.isVideoTrack ? 'Video Codec Settings' : 'Audio Codec Settings'),
+      title: Text(
+        widget.isVideoTrack ? 'Video Codec Settings' : 'Audio Codec Settings',
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -61,60 +63,152 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...VideoCodec.values.map((codec) {
-                return RadioListTile<VideoCodec>(
-                  title: Text(codec.displayName),
-                  subtitle: Text(codec.description),
-                  value: codec,
-                  groupValue: _selectedVideoCodec,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedVideoCodec = value;
-                    });
+              // Two-column side-by-side Video Codec options using Table, responsive to screen width
+              Builder(builder: (context) {
+                final isNarrow = MediaQuery.of(context).size.width < 520;
+                final colCount = isNarrow ? 1 : 2;
+                final videoCodecTiles = <Widget>[
+                  for (final codec in VideoCodec.values)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12, bottom: 8),
+                      child: RadioListTile<VideoCodec>(
+                        title: Text(codec.displayName),
+                        subtitle: Text(
+                          codec.description,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        value: codec,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: EdgeInsets.zero,
+                        // ignore: deprecated_member_use
+                        groupValue: _selectedVideoCodec,
+                        // ignore: deprecated_member_use
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedVideoCodec = value;
+                          });
+                        },
+                      ),
+                    ),
+                ];
+
+                final rows = <TableRow>[];
+                for (var i = 0; i < videoCodecTiles.length; i += colCount) {
+                  final rowChildren = <Widget>[];
+                  for (var j = 0; j < colCount; j++) {
+                    final idx = i + j;
+                    rowChildren.add(
+                      idx < videoCodecTiles.length
+                          ? videoCodecTiles[idx]
+                          : const SizedBox.shrink(),
+                    );
+                  }
+                  rows.add(TableRow(children: rowChildren));
+                }
+
+                return Table(
+                  columnWidths: {
+                    for (var c = 0; c < colCount; c++)
+                      c: const FlexColumnWidth(1),
                   },
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: rows,
                 );
               }),
               const Divider(),
               const SizedBox(height: 8),
+
               const Text(
-                'Quality Preset',
+                'Audio Quality',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 8),
-              DropdownButtonFormField<QualityPreset?>(
-                value: _qualityPreset,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Select Quality Preset',
-                ),
-                items: [
-                  const DropdownMenuItem<QualityPreset?>(
-                    value: null,
-                    child: Text('None'),
-                  ),
-                  ...QualityPreset.predefinedPresets.map((preset) {
-                    return DropdownMenuItem<QualityPreset?>(
-                      value: preset,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(preset.name),
-                          Text(
-                            preset.description,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    );
-                  }),
-                ],
-                onChanged: (value) {
-                  setState(() {
-                    _qualityPreset = value;
-                  });
-                },
+              const SizedBox(height: 6),
+              Text(
+                'Choose an audio quality preset for consistent results. It adjusts encoding parameters (CRF, preset speed, audio bitrate).',
+                style: Theme.of(context).textTheme.bodySmall,
               ),
+              const SizedBox(height: 8),
+              // Two-column options using Table (intrinsics-safe for AlertDialog), responsive to screen width
+              Builder(builder: (context) {
+                final isNarrow = MediaQuery.of(context).size.width < 520;
+                final colCount = isNarrow ? 1 : 2;
+                // Build all tiles first
+                final tiles = <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12, bottom: 8),
+                    child: RadioListTile<QualityPreset?>(
+                      title: const Text('None'),
+                      subtitle: Text(
+                        'No audio quality preset applied',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      value: null,
+                      visualDensity: VisualDensity.compact,
+                      contentPadding: EdgeInsets.zero,
+                      // ignore: deprecated_member_use
+                      groupValue: _qualityPreset,
+                      // ignore: deprecated_member_use
+                      onChanged: (value) {
+                        setState(() {
+                          _qualityPreset = value;
+                        });
+                      },
+                    ),
+                  ),
+                  for (final preset in QualityPreset.predefinedPresets)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12, bottom: 8),
+                      child: RadioListTile<QualityPreset?>(
+                        title: Text(preset.name),
+                        subtitle: Text(
+                          [
+                            preset.description,
+                            if (preset.crf != null) '• CRF ${preset.crf}',
+                            if (preset.preset != null)
+                              '• preset ${preset.preset}',
+                            if (preset.audioBitrate != null)
+                              '• ${preset.audioBitrate}k audio',
+                          ].join('\n'),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        value: preset,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: EdgeInsets.zero,
+                        // ignore: deprecated_member_use
+                        groupValue: _qualityPreset,
+                        // ignore: deprecated_member_use
+                        onChanged: (value) {
+                          setState(() {
+                            _qualityPreset = value;
+                          });
+                        },
+                      ),
+                    ),
+                ];
+
+                // Chunk tiles into rows of colCount
+                final rows = <TableRow>[];
+                for (var i = 0; i < tiles.length; i += colCount) {
+                  final rowChildren = <Widget>[];
+                  for (var j = 0; j < colCount; j++) {
+                    final idx = i + j;
+                    rowChildren.add(
+                      idx < tiles.length ? tiles[idx] : const SizedBox.shrink(),
+                    );
+                  }
+                  rows.add(TableRow(children: rowChildren));
+                }
+
+                return Table(
+                  columnWidths: {
+                    for (var c = 0; c < colCount; c++)
+                      c: const FlexColumnWidth(1),
+                  },
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: rows,
+                );
+              }),
+
               if (_qualityPreset != null) ...[
                 const SizedBox(height: 8),
                 Card(
@@ -128,7 +222,8 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
                         if (_qualityPreset!.preset != null)
                           Text('Preset: ${_qualityPreset!.preset}'),
                         if (_qualityPreset!.audioBitrate != null)
-                          Text('Audio Bitrate: ${_qualityPreset!.audioBitrate}k'),
+                          Text(
+                              'Audio Bitrate: ${_qualityPreset!.audioBitrate}k'),
                       ],
                     ),
                   ),
@@ -140,17 +235,56 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              ...AudioCodec.values.map((codec) {
-                return RadioListTile<AudioCodec>(
-                  title: Text(codec.displayName),
-                  subtitle: Text(codec.description),
-                  value: codec,
-                  groupValue: _selectedAudioCodec,
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedAudioCodec = value;
-                    });
+              // Two-column side-by-side Audio Codec options using Table, responsive to screen width
+              Builder(builder: (context) {
+                final isNarrow = MediaQuery.of(context).size.width < 520;
+                final colCount = isNarrow ? 1 : 2;
+                final codecTiles = <Widget>[
+                  for (final codec in AudioCodec.values)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12, bottom: 8),
+                      child: RadioListTile<AudioCodec>(
+                        title: Text(codec.displayName),
+                        subtitle: Text(
+                          codec.description,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        value: codec,
+                        visualDensity: VisualDensity.compact,
+                        contentPadding: EdgeInsets.zero,
+                        // ignore: deprecated_member_use
+                        groupValue: _selectedAudioCodec,
+                        // ignore: deprecated_member_use
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedAudioCodec = value;
+                          });
+                        },
+                      ),
+                    ),
+                ];
+
+                final rows = <TableRow>[];
+                for (var i = 0; i < codecTiles.length; i += colCount) {
+                  final rowChildren = <Widget>[];
+                  for (var j = 0; j < colCount; j++) {
+                    final idx = i + j;
+                    rowChildren.add(
+                      idx < codecTiles.length
+                          ? codecTiles[idx]
+                          : const SizedBox.shrink(),
+                    );
+                  }
+                  rows.add(TableRow(children: rowChildren));
+                }
+
+                return Table(
+                  columnWidths: {
+                    for (var c = 0; c < colCount; c++)
+                      c: const FlexColumnWidth(1),
                   },
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  children: rows,
                 );
               }),
               const Divider(),
@@ -174,7 +308,7 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int?>(
-                value: _audioChannels,
+                initialValue: _audioChannels,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Channels',
@@ -183,8 +317,10 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
                   DropdownMenuItem<int?>(value: null, child: Text('Auto')),
                   DropdownMenuItem<int?>(value: 1, child: Text('1 (Mono)')),
                   DropdownMenuItem<int?>(value: 2, child: Text('2 (Stereo)')),
-                  DropdownMenuItem<int?>(value: 6, child: Text('6 (5.1 Surround)')),
-                  DropdownMenuItem<int?>(value: 8, child: Text('8 (7.1 Surround)')),
+                  DropdownMenuItem<int?>(
+                      value: 6, child: Text('6 (5.1 Surround)')),
+                  DropdownMenuItem<int?>(
+                      value: 8, child: Text('8 (7.1 Surround)')),
                 ],
                 onChanged: (value) {
                   setState(() {
@@ -194,7 +330,7 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int?>(
-                value: _audioSampleRate,
+                initialValue: _audioSampleRate,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Sample Rate (Hz)',

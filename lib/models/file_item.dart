@@ -32,7 +32,8 @@ class FileItem {
   FileMetadata? fileMetadata;
   Map<int, TrackMetadata> trackMetadata; // keyed by track stream index
   // Codec conversion settings
-  Map<int, CodecConversionSettings> codecSettings; // keyed by track stream index
+  Map<int, CodecConversionSettings>
+      codecSettings; // keyed by track stream index
   QualityPreset? qualityPreset;
   // Verification results
   bool? verificationPassed;
