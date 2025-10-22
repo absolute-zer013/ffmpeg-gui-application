@@ -4,6 +4,7 @@ import '../models/quality_preset.dart';
 import '../utils/file_utils.dart';
 import 'metadata_editor_dialog.dart';
 import 'codec_settings_dialog.dart';
+import 'file_preview_dialog.dart';
 
 /// Widget for displaying a file card with track selections
 class FileCard extends StatelessWidget {
@@ -43,6 +44,13 @@ class FileCard extends StatelessWidget {
     }
   }
 
+  void _showPreview(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => FilePreviewDialog(item: item),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusIcon = item.exportStatus == 'completed'
@@ -76,6 +84,11 @@ class FileCard extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: () => _showPreview(context),
+              tooltip: 'Preview',
+            ),
             IconButton(
               icon: const Icon(Icons.tune),
               onPressed: () => _showQualitySettings(context),
