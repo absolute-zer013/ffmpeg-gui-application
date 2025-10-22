@@ -1003,7 +1003,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 color: Theme.of(context)
                     .colorScheme
                     .primary
-                    .withValues(alpha: 0.1),
+                    // ignore: deprecated_member_use
+                    .withOpacity(0.1),
                 child: Center(
                   child: Card(
                     child: Padding(
