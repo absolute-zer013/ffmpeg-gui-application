@@ -2,11 +2,8 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ master, develop ]
     tags:
-      - 'v*'   # run on version tags to build installer/release
-  pull_request:
-    branches: [ master, develop ]
+      - 'vt*'   # Only run on version tags to build and release artifacts
 
 jobs:
   analyze:
@@ -103,7 +100,33 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         run: |
-          choco install innosetup -y
+          # Try Chocolatey first (quiet, no progress)
+          $installed = $false
+          try {
+            choco install innosetup -y --no-progress
+            $installed = $true
+          } catch {
+            Write-Host "Chocolatey install failed or not available. Falling back to direct download." -ForegroundColor Yellow
+          }
+
+          # Check typical install locations
+          $candidatePaths = @(
+            "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
+            "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+          )
+          $found = $candidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+          if (-not $found) {
+            $url = "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"
+            $installer = Join-Path $env:TEMP "innosetup.exe"
+            Write-Host "Downloading Inno Setup from $url" -ForegroundColor Cyan
+            Invoke-WebRequest -Uri $url -OutFile $installer
+            Write-Host "Running silent installer..." -ForegroundColor Cyan
+            Start-Process $installer -ArgumentList "/VERYSILENT" -Wait
+          }
+
+          # Ensure ISCC is on PATH for this session
+          $env:Path += ";$env:ProgramFiles(x86)\Inno Setup 6;$env:ProgramFiles\Inno Setup 6"
 
       - name: Build Windows installer (tagged builds)
         if: startsWith(github.ref, 'refs/tags/v')
@@ -118,10 +141,20 @@ jobs:
           # Ensure dist exists
           if (-not (Test-Path 'dist')) { New-Item -ItemType Directory -Path dist | Out-Null }
 
-          # Build installer via ISCC
-          $iscc = (Get-Command ISCC -ErrorAction SilentlyContinue)
-          if (-not $iscc) { $iscc = 'C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe' }
-          & "$iscc" "/DMyAppVersion=$env:APP_VERSION" "installer\\installer.iss"
+          # Build installer via ISCC (robust resolution)
+          $isccCmd = (Get-Command ISCC -ErrorAction SilentlyContinue)
+          if ($isccCmd) {
+            $isccPath = $isccCmd.Path
+          } else {
+            $pathsToCheck = @(
+              "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
+              "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
+            )
+            $isccPath = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
+          }
+          if (-not $isccPath) { throw 'ISCC.exe not found after installation.' }
+
+          & "$isccPath" "/DMyAppVersion=$env:APP_VERSION" "installer\\installer.iss"
           if ($LASTEXITCODE -ne 0) { throw 'Inno Setup compilation failed.' }
 
       - name: Upload Windows installer artifact (tagged builds)
