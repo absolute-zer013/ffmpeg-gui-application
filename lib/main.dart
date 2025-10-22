@@ -75,6 +75,10 @@ class _MyHomePageState extends State<MyHomePage> {
     _checkFFmpeg();
     _loadPreferences();
     _loadProfiles();
+    // Schedule dialog after frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _showFFmpegCheckDialog();
+    });
   }
 
   Future<void> _checkFFmpeg() async {
@@ -92,6 +96,50 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       _appendLog(
           'ERROR: FFmpeg not found. Please install FFmpeg and add it to PATH');
+    }
+  }
+
+  void _showFFmpegCheckDialog() {
+    if (!_ffmpegAvailable && mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('FFmpeg Not Detected'),
+          content: const Text(
+            'FFmpeg is not installed or not found in your system PATH.\n\n'
+            'To use this application, you need to:\n\n'
+            '1. Download FFmpeg from https://ffmpeg.org/download.html\n'
+            '2. Extract it to a folder\n'
+            '3. Add the folder to your system PATH environment variable\n'
+            '4. Restart this application\n\n'
+            'Some features will be disabled until FFmpeg is properly installed.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Retry'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.pop(context);
+                // Open FFmpeg download page
+                _openFFmpegDownloadPage();
+              },
+              child: const Text('Download FFmpeg'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  Future<void> _openFFmpegDownloadPage() async {
+    const url = 'https://ffmpeg.org/download.html';
+    try {
+      await Process.run('start', [url], runInShell: true);
+    } catch (e) {
+      _appendLog('ERROR: Could not open FFmpeg download page: $e');
     }
   }
 
@@ -209,7 +257,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> _applyProfile(ExportProfile profile) async {
     if (_files.isEmpty) {
-      _appendLog('No files loaded. Add files to apply profile: ${profile.name}');
+      _appendLog(
+          'No files loaded. Add files to apply profile: ${profile.name}');
       return;
     }
 
@@ -259,7 +308,8 @@ class _MyHomePageState extends State<MyHomePage> {
             height: 400,
             child: _profiles.isEmpty
                 ? const Center(
-                    child: Text('No profiles saved yet.\nSave your current configuration to create a profile.'),
+                    child: Text(
+                        'No profiles saved yet.\nSave your current configuration to create a profile.'),
                   )
                 : ListView.builder(
                     itemCount: _profiles.length,
@@ -299,7 +349,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                 icon: const Icon(Icons.delete),
                                 tooltip: 'Delete Profile',
                                 onPressed: () async {
-                                  await ProfileService.deleteProfile(profile.id);
+                                  await ProfileService.deleteProfile(
+                                      profile.id);
                                   await _loadProfiles();
                                   setDialogState(() {});
                                   setState(() {
@@ -307,7 +358,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                       _selectedProfile = null;
                                     }
                                   });
-                                  _appendLog('Deleted profile: ${profile.name}');
+                                  _appendLog(
+                                      'Deleted profile: ${profile.name}');
                                 },
                               ),
                             ],
@@ -658,9 +710,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       ],
                       if (_profiles.isNotEmpty || _files.isNotEmpty)
                         OutlinedButton.icon(
-                          onPressed: _running ? null : _showProfileManagementDialog,
+                          onPressed:
+                              _running ? null : _showProfileManagementDialog,
                           icon: const Icon(Icons.library_books),
-                          label: Text(_selectedProfile != null 
+                          label: Text(_selectedProfile != null
                               ? 'Profiles (${_selectedProfile!.name})'
                               : 'Profiles (${_profiles.length})'),
                         ),
