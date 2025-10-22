@@ -233,9 +233,18 @@ See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for detailed deployment guide.
 
 ## Documentation
 
+→ **[Documentation Index](docs/DOCUMENTATION_INDEX.md)** - Complete guide to all project documentation
+
+### Core Documentation
 - [`docs/FEATURES.md`](docs/FEATURES.md) - Complete feature list and current capabilities
-- [`docs/TESTING.md`](docs/TESTING.md) - Testing guide and CI/CD setup
-- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Build and distribution instructions
 - [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md) - Roadmap with all planned features
 - [`docs/PHASES_REPORT.md`](docs/PHASES_REPORT.md) - Consolidated phase summaries (Phases 1–5)
+
+### Development & Deployment
+- [`docs/TESTING.md`](docs/TESTING.md) - Testing guide and CI/CD setup
+- [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) - Build and distribution instructions
 - [`CI_CD_SETUP.md`](CI_CD_SETUP.md) - Summary of automated testing setup
+
+### Phase 5 Planning
+- [`docs/PHASE5_FEATURES.md`](docs/PHASE5_FEATURES.md) - Quick reference for planned features
+- [`docs/PHASE5_PLANNING.md`](docs/PHASE5_PLANNING.md) - Implementation guidance
