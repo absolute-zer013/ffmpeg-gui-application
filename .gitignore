@@ -60,8 +60,12 @@ devtools_options.yaml
 *.exe
 *.msi
 
+# Installer config (keep private/local)
+/installer/
+
 # Local-only scripts (do not publish)
-build_package.ps1
+*.ps1
+*.bat
 
 # IDE and OS
 *.swp
