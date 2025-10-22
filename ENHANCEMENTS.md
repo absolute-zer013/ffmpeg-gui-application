@@ -255,14 +255,27 @@ Visual representation of audio tracks.
 - Click to jump to position
 - Useful for detecting silence/issues
 
-### 24. Export Queue Management
+### 24. Export Queue Management ✅ **IMPLEMENTED**
 Pause/resume/reorder export queue.
 
 **Implementation:**
-- Show queue as separate panel
-- Drag-drop to reorder pending files
-- Pause/resume individual exports
-- Save queue state between sessions
+- ✅ Created `ExportQueueItem` model with status tracking
+- ✅ Created `ExportQueueService` for queue management with stream-based updates
+- ✅ Created `ExportQueuePanel` widget for queue visualization
+- ✅ Drag-and-drop reordering with ReorderableListView
+- ✅ Pause/resume/cancel individual queue items
+- ✅ Move up/down and priority management
+- ✅ Status indicators with color coding (pending, processing, paused, completed, failed, cancelled)
+- ✅ Queue persistence support with JSON serialization
+- ✅ Real-time progress updates in queue display
+- ✅ Clear queue and remove individual items
+- ✅ Comprehensive unit tests (25+ test cases) covering:
+  - Queue item creation and serialization
+  - Adding, removing, and clearing items
+  - Status updates and lifecycle management
+  - Priority-based sorting and reordering
+  - Pause/resume/cancel operations
+  - Stream-based notifications
 
 ### 25. Estimated Export Times
 Show time remaining based on file size and system performance.
@@ -350,7 +363,7 @@ Apply selected video/audio codec and audio quality presets to multiple files at 
 
 ### **Phase 4 - UI Polish** (User Experience) 🔄 **IN PROGRESS**
 10. File Preview (Feature #22)
-11. Export Queue Management (Feature #24)
+11. ✅ Export Queue Management (Feature #24) - **COMPLETED**
 12. ✅ Better Notifications (Feature #29) - **COMPLETED**
 13. ✅ Batch Codec/Quality Apply (Feature #30) - **COMPLETED**
 
