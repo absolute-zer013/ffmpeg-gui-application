@@ -183,17 +183,17 @@ jobs:
           }
 
           # Ensure ISCC is available (PATH + typical locations)
-          $env:Path += ";$env:ProgramFiles(x86)\Inno Setup 6;$env:ProgramFiles\Inno Setup 6"
+          $env:Path += ";$env:ProgramFilesx86\Inno Setup 6;$env:ProgramFiles\Inno Setup 6"
           $iscc = (Get-Command ISCC -ErrorAction SilentlyContinue)
           if (-not $iscc) {
             $candidatePaths = @(
-              "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
+              "$env:ProgramFilesx86\Inno Setup 6\ISCC.exe",
               "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
             )
             $isccPath = $candidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
             if (-not $isccPath) {
               Write-Host "ISCC.exe not found in default locations. Searching Program Files recursively..." -ForegroundColor Yellow
-              $pfCandidates = @($env:ProgramFiles, $env:ProgramFiles(x86)) | Where-Object { $_ -and (Test-Path $_) }
+              $pfCandidates = @($env:ProgramFiles, $env:ProgramFilesx86) | Where-Object { $_ -and (Test-Path $_) }
               foreach ($root in $pfCandidates) {
                 try {
                   $hit = Get-ChildItem -Path $root -Recurse -Filter ISCC.exe -ErrorAction SilentlyContinue | Select-Object -First 1
@@ -222,7 +222,7 @@ jobs:
           if ($isccCmd) { $isccPath = $isccCmd.Path }
           if (-not $isccPath) {
             $pathsToCheck = @(
-              "$env:ProgramFiles(x86)\Inno Setup 6\ISCC.exe",
+              "$env:ProgramFilesx86\Inno Setup 6\ISCC.exe",
               "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
             )
             $isccPath = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
