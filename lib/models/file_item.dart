@@ -3,6 +3,7 @@ import 'track.dart';
 import 'metadata.dart';
 import 'codec_options.dart';
 import 'quality_preset.dart';
+import 'rename_pattern.dart';
 
 /// Data model representing a file with its streams and selections.
 class FileItem {
@@ -38,6 +39,12 @@ class FileItem {
   // Verification results
   bool? verificationPassed;
   String? verificationMessage;
+  // Rename pattern
+  RenamePattern? renamePattern;
+  int? renameIndex;
+  int? renameEpisode;
+  int? renameSeason;
+  int? renameYear;
 
   FileItem({
     required this.path,
@@ -64,6 +71,11 @@ class FileItem {
     this.qualityPreset,
     this.verificationPassed,
     this.verificationMessage,
+    this.renamePattern,
+    this.renameIndex,
+    this.renameEpisode,
+    this.renameSeason,
+    this.renameYear,
   })  : name = name ?? File(path).uri.pathSegments.last,
         outputName = outputName ?? File(path).uri.pathSegments.last,
         videoTracks = videoTracks ?? [],
