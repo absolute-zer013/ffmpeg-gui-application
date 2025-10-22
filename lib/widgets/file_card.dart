@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../models/file_item.dart';
+import '../models/codec_options.dart';
+import '../models/quality_preset.dart';
 import '../utils/file_utils.dart';
 import 'metadata_editor_dialog.dart';
+import 'codec_settings_dialog.dart';
 
 /// Widget for displaying a file card with track selections
 class FileCard extends StatelessWidget {
@@ -21,6 +24,22 @@ class FileCard extends StatelessWidget {
     );
 
     if (result == true) {
+      onChanged();
+    }
+  }
+
+  void _showQualitySettings(BuildContext context) async {
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) => CodecSettingsDialog(
+        initialVideoCodec: null,
+        initialQualityPreset: item.qualityPreset,
+        isVideoTrack: true,
+      ),
+    );
+    
+    if (result != null) {
+      item.qualityPreset = result['qualityPreset'] as QualityPreset?;
       onChanged();
     }
   }
@@ -51,6 +70,17 @@ class FileCard extends StatelessWidget {
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (item.qualityPreset != null)
+              Chip(
+                label: Text(item.qualityPreset!.name, style: const TextStyle(fontSize: 11)),
+                padding: EdgeInsets.zero,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            IconButton(
+              icon: const Icon(Icons.tune),
+              onPressed: () => _showQualitySettings(context),
+              tooltip: 'Quality Settings',
+            ),
             IconButton(
               icon: const Icon(Icons.edit),
               onPressed: () => _showMetadataEditor(context),
@@ -86,8 +116,33 @@ class FileCard extends StatelessWidget {
             ],
           ],
         ),
-        subtitle: Text(
-            '${item.name} ${item.fileSize != null ? "• ${FileUtils.formatBytes(item.fileSize!)}" : ""} ${item.duration != null ? "• ${item.duration}" : ""}'),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+                '${item.name} ${item.fileSize != null ? "• ${FileUtils.formatBytes(item.fileSize!)}" : ""} ${item.duration != null ? "• ${item.duration}" : ""}'),
+            if (item.verificationPassed != null)
+              Row(
+                children: [
+                  Icon(
+                    item.verificationPassed! ? Icons.verified : Icons.warning,
+                    size: 16,
+                    color: item.verificationPassed! ? Colors.green : Colors.orange,
+                  ),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      item.verificationMessage ?? 'Verification completed',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: item.verificationPassed! ? Colors.green : Colors.orange,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),

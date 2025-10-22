@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'track.dart';
 import 'metadata.dart';
+import 'codec_options.dart';
+import 'quality_preset.dart';
 
 /// Data model representing a file with its streams and selections.
 class FileItem {
@@ -29,6 +31,12 @@ class FileItem {
   // Metadata
   FileMetadata? fileMetadata;
   Map<int, TrackMetadata> trackMetadata; // keyed by track stream index
+  // Codec conversion settings
+  Map<int, CodecConversionSettings> codecSettings; // keyed by track stream index
+  QualityPreset? qualityPreset;
+  // Verification results
+  bool? verificationPassed;
+  String? verificationMessage;
 
   FileItem({
     required this.path,
@@ -51,6 +59,10 @@ class FileItem {
     this.isExpanded = true,
     this.fileMetadata,
     Map<int, TrackMetadata>? trackMetadata,
+    Map<int, CodecConversionSettings>? codecSettings,
+    this.qualityPreset,
+    this.verificationPassed,
+    this.verificationMessage,
   })  : name = name ?? File(path).uri.pathSegments.last,
         outputName = outputName ?? File(path).uri.pathSegments.last,
         videoTracks = videoTracks ?? [],
@@ -59,5 +71,6 @@ class FileItem {
         selectedSubtitles = selectedSubtitles ?? <int>{},
         exportStatus = exportStatus ?? '',
         exportProgress = exportProgress ?? 0.0,
-        trackMetadata = trackMetadata ?? {};
+        trackMetadata = trackMetadata ?? {},
+        codecSettings = codecSettings ?? {};
 }
