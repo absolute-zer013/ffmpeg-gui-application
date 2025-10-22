@@ -176,6 +176,39 @@
    - Verification report logged for each file
    - Warnings for mismatched streams or errors
 
+## 🆕 Phase 3 Enhancement Features (Batch Power)
+
+### 27. **✓ Advanced Rename Patterns**
+   - Dynamic filename templates with variable substitution
+   - Supported variables: {name}, {episode}, {season}, {year}, {date}, {index}
+   - Variable padding support (e.g., {episode:3} = 001)
+   - Predefined patterns for TV shows, movies, anime, and more
+   - Pattern validation with error checking
+   - Live preview of renamed files
+   - Per-file pattern application with custom parameters
+   - Automatic extension handling
+
+### 28. **✓ Auto-Detect Rules**
+   - Automatic track selection based on configurable rules
+   - Rule types: audio, subtitle, and video tracks
+   - Condition matching: language, title, codec, channels
+   - Actions: select, deselect, or set as default
+   - Priority-based rule ordering
+   - Enable/disable individual rules
+   - Predefined rules for common scenarios (Japanese audio, forced subtitles, etc.)
+   - Rules applied automatically when files are added
+   - Rule summary displayed in logs
+
+### 29. **✓ Configuration Import/Export**
+   - Save complete batch configurations to JSON files
+   - Export includes: file selections, profiles, rules, and settings
+   - Import configurations to restore exact setup
+   - Configuration metadata: name, description, creation date
+   - Share configurations between users or sessions
+   - Default configuration directory management
+   - Configuration validation on import
+   - Quick configuration info preview
+
 ## Additional Bonus Features
 - **Real-time FFmpeg Progress Parsing**: Reads FFmpeg stdout to calculate accurate progress percentages
 - **Multiple File Format Support**: Accepts MKV, MP4, AVI, MOV input files
@@ -234,7 +267,7 @@
 
 ---
 
-**All 20 original features + 6 NEW enhancement features have been fully implemented!** 🎉
+**All 20 original features + 9 NEW enhancement features have been fully implemented!** 🎉
 
 ### Summary
 - ✅ 20 Original core features (progress, cancellation, drag-drop, profiles, etc.)
@@ -244,3 +277,6 @@
 - ✅ Codec Conversion (Feature #24)
 - ✅ Quality/CRF Presets (Feature #25)
 - ✅ Verification Mode (Feature #26)
+- ✅ Advanced Rename Patterns (Feature #27)
+- ✅ Auto-Detect Rules (Feature #28)
+- ✅ Configuration Import/Export (Feature #29)

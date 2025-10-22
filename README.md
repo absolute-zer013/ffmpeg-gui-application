@@ -115,6 +115,46 @@ Automatically verify exported files for errors:
 3. **Stream Verification**: Checks video, audio, subtitle counts match expected
 4. **Integrity Check**: Detects file corruption
 5. **Visual Status**: Pass (✓) or warning (⚠) badges in file cards
+
+### Advanced Rename Patterns (Phase 3)
+Apply dynamic filename templates with variable substitution:
+
+1. **Variables**: Use {name}, {episode}, {season}, {year}, {date}, {index}
+2. **Padding**: Format with padding (e.g., {episode:3} = 001)
+3. **Presets**: TV Show, Movie, Anime, and more predefined patterns
+4. **Per-File**: Set different patterns for each file
+5. **Auto-Apply**: Patterns applied automatically during export
+
+Examples:
+- TV Show: `{name} - S{season:2}E{episode:2}` → "Show - S01E05.mkv"
+- Anime: `{name} - {episode:3}` → "Anime - 012.mkv"
+- Movie: `{name} ({year})` → "Movie (2024).mkv"
+
+### Auto-Detect Rules (Phase 3)
+Automatically select tracks based on configurable rules:
+
+1. **Rule Types**: Create rules for audio, subtitle, or video tracks
+2. **Conditions**: Match by language, title, codec, or channels
+3. **Actions**: Select, deselect, or set tracks as default
+4. **Priority**: Rules applied in priority order
+5. **Auto-Apply**: Rules applied automatically when files are added
+6. **Predefined**: Common rules included (Japanese audio, forced subtitles, etc.)
+
+### Configuration Import/Export (Phase 3)
+Save and restore complete batch configurations:
+
+1. **Export**: Save all selections, profiles, and rules to JSON file
+2. **Import**: Restore exact configuration from saved file
+3. **Share**: Transfer configurations between users or sessions
+4. **Metadata**: Includes name, description, and creation date
+5. **Validation**: Automatic validation on import
+
+Configuration includes:
+- File selections (all tracks)
+- Export profiles
+- Auto-detect rules
+- Rename patterns
+- Output format and settings
 ## Testing & Quality Assurance
 
 The project includes comprehensive automated testing:
