@@ -73,7 +73,7 @@ class _MyHomePageState extends State<MyHomePage> {
   ExportProfile? _selectedProfile;
   bool _enableVerification = true;
   List<AutoDetectRule> _rules = [];
-  bool _autoApplyRules = true;
+  final bool _autoApplyRules = true;
 
   @override
   void initState() {

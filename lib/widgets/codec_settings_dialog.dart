@@ -308,7 +308,8 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int?>(
-                initialValue: _audioChannels,
+                // ignore: deprecated_member_use
+                value: _audioChannels,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Channels',
@@ -330,7 +331,8 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<int?>(
-                initialValue: _audioSampleRate,
+                // ignore: deprecated_member_use
+                value: _audioSampleRate,
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   labelText: 'Sample Rate (Hz)',

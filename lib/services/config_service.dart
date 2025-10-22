@@ -37,7 +37,8 @@ class ConfigService {
     );
 
     // Convert to JSON
-    final jsonString = JsonEncoder.withIndent('  ').convert(config.toJson());
+    final jsonString =
+        const JsonEncoder.withIndent('  ').convert(config.toJson());
 
     // Write to file
     final file = File(filePath);
