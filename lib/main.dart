@@ -15,6 +15,7 @@ import 'models/file_item.dart';
 import 'services/profile_service.dart';
 import 'services/ffprobe_service.dart';
 import 'services/ffmpeg_export_service.dart';
+import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
 import 'widgets/subtitle_batch_card.dart';
