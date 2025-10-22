@@ -3,7 +3,7 @@ name: CI/CD Pipeline
 on:
   push:
     tags:
-      - 'v*'   # Only run on version tags to build and release artifacts
+      - 'vt*'   # Only run on version tags to build and release artifacts
 
 jobs:
   analyze:
