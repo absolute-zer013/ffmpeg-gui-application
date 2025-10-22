@@ -14,7 +14,7 @@ class FFmpegExportService {
   }) async {
     final extension = outputFormat;
     final outputFileName =
-        path.basenameWithoutExtension(item.outputName) + '.$extension';
+        '${path.basenameWithoutExtension(item.outputName)}.$extension';
     final outPath = path.join(outputDir.path, outputFileName);
 
     final args = <String>[

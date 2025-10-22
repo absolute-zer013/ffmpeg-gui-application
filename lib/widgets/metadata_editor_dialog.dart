@@ -224,7 +224,7 @@ class _MetadataEditorDialogState extends State<MetadataEditorDialog> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }

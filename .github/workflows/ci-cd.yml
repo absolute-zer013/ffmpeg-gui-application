@@ -75,13 +75,61 @@ jobs:
       - name: Build Windows release
         run: flutter build windows --release
       
+      - name: Zip Windows portable
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist | Out-Null
+          $zipPath = "dist/windows-portable.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+          Compress-Archive -Path "build/windows/x64/runner/Release/*" -DestinationPath $zipPath
+
       - name: Upload Windows build artifact
         uses: actions/upload-artifact@v3
         with:
           name: windows-build
           path: build/windows/x64/runner/Release/
           retention-days: 7
+
+      - name: Upload Windows portable zip
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-portable-zip
+          path: dist/windows-portable.zip
+          retention-days: 7
       
+      - name: Install Inno Setup (tagged builds)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          choco install innosetup -y
+
+      - name: Build Windows installer (tagged builds)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          # Parse version from pubspec.yaml (fallback to 1.0.0)
+          $pub = Get-Content -Raw pubspec.yaml
+          $m = [regex]::Match($pub, 'version:\s*([0-9]+\.[0-9]+\.[0-9]+)')
+          $env:APP_VERSION = if ($m.Success) { $m.Groups[1].Value } else { '1.0.0' }
+          Write-Host "Using version $env:APP_VERSION"
+
+          # Ensure dist exists
+          if (-not (Test-Path 'dist')) { New-Item -ItemType Directory -Path dist | Out-Null }
+
+          # Build installer via ISCC
+          $iscc = (Get-Command ISCC -ErrorAction SilentlyContinue)
+          if (-not $iscc) { $iscc = 'C:\\Program Files (x86)\\Inno Setup 6\\ISCC.exe' }
+          & "$iscc" "/DMyAppVersion=$env:APP_VERSION" "installer\\installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw 'Inno Setup compilation failed.' }
+
+      - name: Upload Windows installer artifact (tagged builds)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-installer
+          path: dist/*.exe
+          retention-days: 14
+
       - name: Create release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: actions/create-release@v1
