@@ -304,12 +304,18 @@ Import HandBrake or other tool presets.
 - Show compatibility warnings
 - Convert and save as native profiles
 
-### 29. Notification System
+### 29. Better Notifications ✅ **IMPLEMENTED**
 Desktop notifications when exports complete.
 
 **Implementation:**
-- Use Windows notifications API
-- Only notify on all complete or on errors
+- ✅ Created `NotificationService` for managing notifications
+- ✅ Windows desktop notifications using PowerShell and Windows Toast API
+- ✅ Enhanced in-app SnackBar notifications with detailed statistics
+- ✅ Notification includes: success/failed/cancelled counts and duration
+- ✅ Configurable via Settings dialog (enable/disable desktop notifications)
+- ✅ Different notification types: success (✓), error (✗), warning (⚠)
+- ✅ Graceful fallback for non-Windows platforms
+- ✅ Comprehensive unit tests for notification formatting and logic
 
 ---
 
@@ -345,7 +351,7 @@ Apply selected video/audio codec and audio quality presets to multiple files at 
 ### **Phase 4 - UI Polish** (User Experience) 🔄 **IN PROGRESS**
 10. File Preview (Feature #22)
 11. Export Queue Management (Feature #24)
-12. Better Notifications (Feature #29)
+12. ✅ Better Notifications (Feature #29) - **COMPLETED**
 13. ✅ Batch Codec/Quality Apply (Feature #30) - **COMPLETED**
 
 ---

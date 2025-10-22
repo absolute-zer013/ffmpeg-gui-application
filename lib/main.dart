@@ -16,6 +16,7 @@ import 'services/ffprobe_service.dart';
 import 'services/ffmpeg_export_service.dart';
 import 'services/verification_service.dart';
 import 'services/rule_service.dart';
+import 'services/notification_service.dart';
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
@@ -75,7 +76,8 @@ class _MyHomePageState extends State<MyHomePage> {
   ExportProfile? _selectedProfile;
   bool _enableVerification = true;
   List<AutoDetectRule> _rules = [];
-  final bool _autoApplyRules = true;
+  bool _autoApplyRules = true;
+  bool _enableDesktopNotifications = true;
 
   @override
   void initState() {
@@ -169,6 +171,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _maxConcurrentExports = prefs.getInt('maxConcurrentExports') ?? 2;
       _outputFormat = prefs.getString('outputFormat') ?? 'mkv';
       _enableVerification = prefs.getBool('enableVerification') ?? true;
+      _enableDesktopNotifications =
+          prefs.getBool('enableDesktopNotifications') ?? true;
     });
   }
 
@@ -180,6 +184,8 @@ class _MyHomePageState extends State<MyHomePage> {
     await prefs.setInt('maxConcurrentExports', _maxConcurrentExports);
     await prefs.setString('outputFormat', _outputFormat);
     await prefs.setBool('enableVerification', _enableVerification);
+    await prefs.setBool(
+        'enableDesktopNotifications', _enableDesktopNotifications);
   }
 
   Future<void> _loadProfiles() async {
@@ -657,6 +663,8 @@ class _MyHomePageState extends State<MyHomePage> {
     _appendLog(
         'Max concurrent: $_maxConcurrentExports, Format: $_outputFormat');
 
+    final startTime = DateTime.now();
+
     // Process files in parallel batches
     for (var i = 0; i < _files.length; i += _maxConcurrentExports) {
       final batch = _files.skip(i).take(_maxConcurrentExports).toList();
@@ -667,19 +675,24 @@ class _MyHomePageState extends State<MyHomePage> {
       _running = false;
     });
 
+    final duration = DateTime.now().difference(startTime);
     final successCount =
         _files.where((f) => f.exportStatus == 'completed').length;
+    final failedCount = _files.where((f) => f.exportStatus == 'failed').length;
+    final cancelledCount =
+        _files.where((f) => f.exportStatus == 'cancelled').length;
+
     _appendLog(
         'Export finished: $successCount/${_files.length} files successful');
 
-    // Show notification
-    if (successCount == _files.length) {
-      _showNotification(
-          'Export Complete', 'All $successCount files exported successfully');
-    } else {
-      _showNotification(
-          'Export Finished', '$successCount/${_files.length} files exported');
-    }
+    // Show enhanced notification
+    _showEnhancedNotification(
+      successCount: successCount,
+      failedCount: failedCount,
+      cancelledCount: cancelledCount,
+      totalFiles: _files.length,
+      duration: duration,
+    );
   }
 
   String _generateExportSummary() {
@@ -763,6 +776,56 @@ class _MyHomePageState extends State<MyHomePage> {
         item.exportStatus = 'failed';
       });
       _appendLog('✗ Error processing ${item.name}: $e');
+    }
+  }
+
+  void _showEnhancedNotification({
+    required int successCount,
+    required int failedCount,
+    required int cancelledCount,
+    required int totalFiles,
+    required Duration duration,
+  }) {
+    final title = NotificationService.getNotificationTitle(
+      successCount: successCount,
+      totalFiles: totalFiles,
+    );
+
+    final message = NotificationService.formatExportSummary(
+      totalFiles: totalFiles,
+      successCount: successCount,
+      failedCount: failedCount,
+      cancelledCount: cancelledCount,
+      duration: duration,
+    );
+
+    // Show in-app notification using SnackBar
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$title\n$message'),
+          duration: const Duration(seconds: 8),
+          action: SnackBarAction(
+            label: 'OK',
+            onPressed: () {},
+          ),
+        ),
+      );
+    }
+
+    // Show desktop notification if enabled
+    if (_enableDesktopNotifications) {
+      final notificationType = NotificationService.getNotificationType(
+        successCount: successCount,
+        failedCount: failedCount,
+        totalFiles: totalFiles,
+      );
+
+      NotificationService.showDesktopNotification(
+        title: title,
+        message: message,
+        type: notificationType,
+      );
     }
   }
 
@@ -1294,6 +1357,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChanged: (value) {
                   setState(() {
                     _enableVerification = value;
+                  });
+                  this.setState(() {});
+                },
+              ),
+              const SizedBox(height: 16),
+              const Text('Notifications:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              SwitchListTile(
+                title: const Text('Desktop notifications'),
+                subtitle:
+                    const Text('Show Windows notifications on export completion'),
+                value: _enableDesktopNotifications,
+                onChanged: (value) {
+                  setState(() {
+                    _enableDesktopNotifications = value;
                   });
                   this.setState(() {});
                 },
