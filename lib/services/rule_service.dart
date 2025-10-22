@@ -19,7 +19,9 @@ class RuleService {
 
     try {
       final List<dynamic> decoded = json.decode(rulesJson);
-      return decoded.map((ruleJson) => AutoDetectRule.fromJson(ruleJson)).toList();
+      return decoded
+          .map((ruleJson) => AutoDetectRule.fromJson(ruleJson))
+          .toList();
     } catch (e) {
       return [];
     }
@@ -144,13 +146,12 @@ class RuleService {
 
     switch (condition) {
       case RuleCondition.languageEquals:
-        return track.language?.toLowerCase() == conditionValue.toLowerCase();
+        return track.language.toLowerCase() == conditionValue.toLowerCase();
 
       case RuleCondition.languageContains:
         return track.language
-                ?.toLowerCase()
-                .contains(conditionValue.toLowerCase()) ??
-            false;
+            .toLowerCase()
+            .contains(conditionValue.toLowerCase());
 
       case RuleCondition.titleEquals:
         return track.title?.toLowerCase() == conditionValue.toLowerCase();
@@ -197,17 +198,20 @@ class RuleService {
       switch (rule.type) {
         case RuleType.audio:
           audioMatches += file.audioTracks
-              .where((t) => _matchesCondition(t, rule.condition, rule.conditionValue))
+              .where((t) =>
+                  _matchesCondition(t, rule.condition, rule.conditionValue))
               .length;
           break;
         case RuleType.subtitle:
           subtitleMatches += file.subtitleTracks
-              .where((t) => _matchesCondition(t, rule.condition, rule.conditionValue))
+              .where((t) =>
+                  _matchesCondition(t, rule.condition, rule.conditionValue))
               .length;
           break;
         case RuleType.video:
           videoMatches += file.videoTracks
-              .where((t) => _matchesCondition(t, rule.condition, rule.conditionValue))
+              .where((t) =>
+                  _matchesCondition(t, rule.condition, rule.conditionValue))
               .length;
           break;
       }

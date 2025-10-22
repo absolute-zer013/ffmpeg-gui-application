@@ -486,14 +486,14 @@ class _MyHomePageState extends State<MyHomePage> {
     for (final filePath in paths) {
       try {
         final item = await _probeFile(filePath);
-        
+
         // Apply auto-detect rules if enabled
         if (_autoApplyRules && _rules.isNotEmpty) {
           RuleService.applyRules(item, _rules);
           final summary = RuleService.getRuleSummary(item, _rules);
           _appendLog('Auto-detect rules applied: $summary');
         }
-        
+
         setState(() {
           _files.add(item);
         });

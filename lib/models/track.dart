@@ -10,6 +10,7 @@ class Track {
   final int streamIndex;
   final TrackType type;
   final String? codec;
+  final int? channels;
   final int? width;
   final int? height;
   final String? frameRate;
@@ -22,6 +23,7 @@ class Track {
     int? streamIndex,
     this.type = TrackType.audio,
     this.codec,
+    this.channels,
     this.width,
     this.height,
     this.frameRate,

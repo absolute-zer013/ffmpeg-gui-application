@@ -15,7 +15,7 @@ class FFmpegExportService {
     required Function(double progress) onProgress,
   }) async {
     final extension = outputFormat;
-    
+
     // Apply rename pattern if present
     String outputFileName;
     if (item.renamePattern != null) {
@@ -28,12 +28,13 @@ class FFmpegExportService {
         year: item.renameYear,
       );
       // Ensure correct extension
-      outputFileName = '${path.basenameWithoutExtension(outputFileName)}.$extension';
+      outputFileName =
+          '${path.basenameWithoutExtension(outputFileName)}.$extension';
     } else {
       outputFileName =
           '${path.basenameWithoutExtension(item.outputName)}.$extension';
     }
-    
+
     final outPath = path.join(outputDir.path, outputFileName);
 
     final args = <String>[

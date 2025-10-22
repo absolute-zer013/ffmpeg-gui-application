@@ -304,27 +304,25 @@ Import HandBrake or other tool presets.
 - Show compatibility warnings
 - Convert and save as native profiles
 
-### 29. Cloud Storage Integration
-Export directly to Google Drive/Dropbox.
-
-**Implementation:**
-- Add cloud storage package dependencies
-- OAuth authentication flow
-- Upload exported files to cloud
-- Show upload progress
-- Option to delete local after upload
-
-### 30. Notification System
-Desktop notifications, email, or Discord webhooks when exports complete.
+### 29. Notification System
+Desktop notifications when exports complete.
 
 **Implementation:**
 - Use Windows notifications API
-- Add optional email settings (SMTP)
-- Discord webhook URL input
-- Customize notification message
 - Only notify on all complete or on errors
 
 ---
+
+### 30. Batch Codec/Quality Apply
+Apply selected video/audio codec and audio quality presets to multiple files at once.
+
+**Implementation:**
+- Add an "Apply to selected files" option in `CodecSettingsDialog` to bulk-apply current selections.
+- Provide batch toolbar actions: Set Video Codec, Set Audio Codec, Set Audio Quality (presets).
+- Extend `ExportProfile` (if necessary) to include codec and quality preset fields for easy reuse.
+- Ensure `FFmpegExportService` respects the batch-applied settings per file.
+- Add unit tests: bulk apply preserves per-file overrides; batch apply integrates with profiles and configurations.
+
 
 ## Implementation Priority Suggestions
 
@@ -346,7 +344,11 @@ Desktop notifications, email, or Discord webhooks when exports complete.
 ### **Phase 4 - UI Polish** (User Experience)
 10. File Preview (Feature #22)
 11. Export Queue Management (Feature #24)
-12. Better Notifications (Feature #30)
+12. Better Notifications (Feature #29)
+13. Batch Codec/Quality Apply (leverages Features #7 and #8)
+  - Add "Apply to selected files" action in the Codec Settings dialog
+  - Provide batch toolbar actions: Set Video Codec, Set Audio Codec, Set Audio Quality
+  - Respect per-file overrides; enable quick bulk updates across the selection
 
 ---
 

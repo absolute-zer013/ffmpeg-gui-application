@@ -59,7 +59,8 @@ void main() {
       expect(decoded.name, equals(original.name));
       expect(decoded.description, equals(original.description));
       expect(decoded.outputFormat, equals(original.outputFormat));
-      expect(decoded.maxConcurrentExports, equals(original.maxConcurrentExports));
+      expect(
+          decoded.maxConcurrentExports, equals(original.maxConcurrentExports));
       expect(decoded.enableVerification, equals(original.enableVerification));
     });
 

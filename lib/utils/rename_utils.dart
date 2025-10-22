@@ -1,10 +1,9 @@
-import 'dart:io';
 import 'package:path/path.dart' as path;
 
 /// Utility class for applying rename patterns to filenames
 class RenameUtils {
   /// Apply a rename pattern to a file with variable substitution
-  /// 
+  ///
   /// Supported variables:
   /// - {name} - Original filename without extension
   /// - {ext} - File extension (e.g., mkv)
@@ -16,7 +15,7 @@ class RenameUtils {
   /// - {index} - File index in batch (requires index parameter)
   /// - {episode} - Episode number (requires episode parameter)
   /// - {season} - Season number (requires season parameter)
-  /// 
+  ///
   /// Format modifiers:
   /// - {variable:N} - Pad with zeros to N digits (e.g., {index:3} = 001)
   static String applyPattern(
@@ -45,8 +44,8 @@ class RenameUtils {
     result = _replaceVariable(result, 'ext', extension);
     result = _replaceVariable(
         result, 'date', '${now.year}-${_pad(now.month)}-${_pad(now.day)}');
-    result = _replaceVariable(
-        result, 'time', '${_pad(now.hour)}-${_pad(now.minute)}-${_pad(now.second)}');
+    result = _replaceVariable(result, 'time',
+        '${_pad(now.hour)}-${_pad(now.minute)}-${_pad(now.second)}');
     result = _replaceVariable(result, 'year', currentYear.toString());
     result = _replaceVariable(result, 'month', _pad(currentMonth));
     result = _replaceVariable(result, 'day', _pad(currentDay));
@@ -68,6 +67,9 @@ class RenameUtils {
     // Clean up multiple spaces
     result = result.replaceAll(RegExp(r'\s+'), ' ').trim();
 
+    // Remove dangling separators at the end (e.g., trailing '-' or '_' or '.')
+    result = result.replaceAll(RegExp(r'[\-_.]+$'), '').trim();
+
     // Add extension back if not already included
     if (!result.endsWith('.$extension')) {
       result = '$result.$extension';
@@ -77,7 +79,8 @@ class RenameUtils {
   }
 
   /// Replace a variable in the pattern
-  static String _replaceVariable(String pattern, String variable, String value) {
+  static String _replaceVariable(
+      String pattern, String variable, String value) {
     // Replace {variable} with value
     return pattern.replaceAll('{$variable}', value);
   }
@@ -128,10 +131,11 @@ class RenameUtils {
       return 'Unmatched opening brace';
     }
 
-    // Check for invalid characters in filename
+    // Check for invalid characters in the literal output (ignore variables)
+    final literal = pattern.replaceAll(RegExp(r'\{[^}]+\}'), '');
     final invalidChars = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
     for (final char in invalidChars) {
-      if (pattern.contains(char)) {
+      if (literal.contains(char)) {
         return 'Pattern contains invalid character: $char';
       }
     }

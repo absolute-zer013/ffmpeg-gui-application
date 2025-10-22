@@ -85,7 +85,8 @@ void main() {
     });
 
     test('validatePattern returns null for valid pattern', () {
-      final error = RenameUtils.validatePattern('{name} - S{season:2}E{episode:2}');
+      final error =
+          RenameUtils.validatePattern('{name} - S{season:2}E{episode:2}');
       expect(error, isNull);
     });
 

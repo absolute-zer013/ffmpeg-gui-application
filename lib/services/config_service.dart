@@ -151,7 +151,8 @@ class ConfigService {
       matchingFile.outputName = fileConfig.outputName ?? matchingFile.name;
       matchingFile.selectedVideo = Set.from(fileConfig.selectedVideoTracks);
       matchingFile.selectedAudio = Set.from(fileConfig.selectedAudioTracks);
-      matchingFile.selectedSubtitles = Set.from(fileConfig.selectedSubtitleTracks);
+      matchingFile.selectedSubtitles =
+          Set.from(fileConfig.selectedSubtitleTracks);
       matchingFile.defaultVideo = fileConfig.defaultVideo;
       matchingFile.defaultAudio = fileConfig.defaultAudio;
       matchingFile.defaultSubtitle = fileConfig.defaultSubtitle;
@@ -175,18 +176,18 @@ class ConfigService {
   /// Get suggested save location for configurations
   static Future<String> getDefaultConfigDirectory() async {
     // Use user's home directory + .ffmpeg_configs
-    final home = Platform.environment['USERPROFILE'] ?? 
-                 Platform.environment['HOME'] ?? 
-                 Directory.current.path;
-    
+    final home = Platform.environment['USERPROFILE'] ??
+        Platform.environment['HOME'] ??
+        Directory.current.path;
+
     final configDir = path.join(home, '.ffmpeg_configs');
-    
+
     // Create directory if it doesn't exist
     final dir = Directory(configDir);
     if (!await dir.exists()) {
       await dir.create(recursive: true);
     }
-    
+
     return configDir;
   }
 }
