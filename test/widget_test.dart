@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ffmpeg_filter_app/main.dart';
 import 'package:ffmpeg_filter_app/models/export_profile.dart';
+import 'package:ffmpeg_filter_app/models/track.dart';
+import 'package:ffmpeg_filter_app/models/file_item.dart';
 
 void main() {
   group('Track model tests', () {
@@ -11,12 +13,14 @@ void main() {
         title: 'English',
         description: 'Audio [eng]',
         streamIndex: 1,
+        type: TrackType.audio,
       );
 
       expect(track.position, 0);
       expect(track.language, 'eng');
       expect(track.title, 'English');
       expect(track.streamIndex, 1);
+      expect(track.type, TrackType.audio);
     });
 
     test('Track uses position as default streamIndex', () {
@@ -24,9 +28,27 @@ void main() {
         position: 2,
         language: 'spa',
         description: 'Spanish audio',
+        type: TrackType.audio,
       );
 
       expect(track.streamIndex, 2);
+    });
+    
+    test('Track supports video type with codec info', () {
+      final track = Track(
+        position: 0,
+        language: 'und',
+        description: 'Video [H264 1920x1080]',
+        type: TrackType.video,
+        codec: 'h264',
+        width: 1920,
+        height: 1080,
+      );
+
+      expect(track.type, TrackType.video);
+      expect(track.codec, 'h264');
+      expect(track.width, 1920);
+      expect(track.height, 1080);
     });
   });
 
@@ -97,35 +119,44 @@ void main() {
         subtitleTracks: [],
       );
 
+      expect(file.selectedVideo.isEmpty, true);
       expect(file.selectedAudio.isEmpty, true);
       expect(file.selectedSubtitles.isEmpty, true);
+      expect(file.defaultVideo, null);
       expect(file.defaultAudio, null);
       expect(file.defaultSubtitle, null);
       expect(file.exportStatus, '');
       expect(file.exportProgress, 0.0);
     });
 
-    test('FileItem can track selected audio and subtitle positions', () {
+    test('FileItem can track selected video, audio and subtitle positions', () {
+      final video1 =
+          Track(position: 0, language: 'und', description: 'Video 1', type: TrackType.video);
       final audio1 =
-          Track(position: 0, language: 'eng', description: 'Audio 1');
+          Track(position: 0, language: 'eng', description: 'Audio 1', type: TrackType.audio);
       final audio2 =
-          Track(position: 1, language: 'spa', description: 'Audio 2');
-      final sub1 = Track(position: 0, language: 'eng', description: 'Sub 1');
+          Track(position: 1, language: 'spa', description: 'Audio 2', type: TrackType.audio);
+      final sub1 = Track(position: 0, language: 'eng', description: 'Sub 1', type: TrackType.subtitle);
 
       final file = FileItem(
         path: '/test/file.mkv',
+        videoTracks: [video1],
         audioTracks: [audio1, audio2],
         subtitleTracks: [sub1],
       );
 
+      file.selectedVideo.add(0);
       file.selectedAudio.add(0);
       file.selectedAudio.add(1);
       file.selectedSubtitles.add(0);
+      file.defaultVideo = 0;
       file.defaultAudio = 1;
       file.defaultSubtitle = 0;
 
+      expect(file.selectedVideo.length, 1);
       expect(file.selectedAudio.length, 2);
       expect(file.selectedSubtitles.length, 1);
+      expect(file.defaultVideo, 0);
       expect(file.defaultAudio, 1);
       expect(file.defaultSubtitle, 0);
     });

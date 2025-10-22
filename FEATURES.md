@@ -128,6 +128,21 @@
    - Shows active profile name in UI
    - JSON-based storage via SharedPreferences
 
+### 22. **✓ Video Stream Selection**
+   - Select which video streams to include in exports
+   - Display video codec (H264, HEVC, etc.) and resolution
+   - Multiple video stream support for files with multiple angles/versions
+   - All video streams selected by default
+   - Remove unwanted video streams before export
+
+### 23. **✓ Metadata Editor**
+   - Edit file-level metadata: title, artist, album, date, genre, comment
+   - Edit track-level metadata: language and title for each stream
+   - Accessible via edit button on file cards
+   - Changes applied during export using FFmpeg metadata parameters
+   - Existing metadata preserved and editable
+   - Organized dialog with file and track sections
+
 ## Additional Bonus Features
 - **Real-time FFmpeg Progress Parsing**: Reads FFmpeg stdout to calculate accurate progress percentages
 - **Multiple File Format Support**: Accepts MKV, MP4, AVI, MOV input files
@@ -186,4 +201,10 @@
 
 ---
 
-**All 20 original features + NEW Export Profiles feature have been fully implemented!** 🎉
+**All 20 original features + 3 NEW enhancement features have been fully implemented!** 🎉
+
+### Summary
+- ✅ 20 Original core features (progress, cancellation, drag-drop, profiles, etc.)
+- ✅ Export Profiles/Templates (Feature #21)
+- ✅ Video Stream Selection (Feature #22)
+- ✅ Metadata Editor (Feature #23)

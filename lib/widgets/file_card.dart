@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/file_item.dart';
 import '../utils/file_utils.dart';
+import 'metadata_editor_dialog.dart';
 
 /// Widget for displaying a file card with track selections
 class FileCard extends StatelessWidget {
@@ -12,6 +13,17 @@ class FileCard extends StatelessWidget {
     required this.item,
     required this.onChanged,
   });
+
+  void _showMetadataEditor(BuildContext context) async {
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (context) => MetadataEditorDialog(item: item),
+    );
+    
+    if (result == true) {
+      onChanged();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +48,17 @@ class FileCard extends StatelessWidget {
           onChanged();
         },
         leading: statusIcon,
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () => _showMetadataEditor(context),
+              tooltip: 'Edit Metadata',
+            ),
+            const Icon(Icons.expand_more),
+          ],
+        ),
         title: Row(
           children: [
             Expanded(
@@ -71,6 +94,35 @@ class FileCard extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Video
+                if (item.videoTracks.isNotEmpty)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Video',
+                            style: Theme.of(context).textTheme.titleSmall),
+                        const SizedBox(height: 8),
+                        for (final track in item.videoTracks)
+                          CheckboxListTile(
+                            dense: true,
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(track.description,
+                                style: const TextStyle(fontSize: 12)),
+                            value: item.selectedVideo.contains(track.position),
+                            onChanged: (value) {
+                              if (value == true) {
+                                item.selectedVideo.add(track.position);
+                              } else {
+                                item.selectedVideo.remove(track.position);
+                              }
+                              onChanged();
+                            },
+                          ),
+                      ],
+                    ),
+                  ),
+                if (item.videoTracks.isNotEmpty) const SizedBox(width: 16),
                 // Audio
                 Expanded(
                   child: Column(

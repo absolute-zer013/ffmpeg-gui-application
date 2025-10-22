@@ -23,6 +23,13 @@ class FFmpegExportService {
       '-y', // Overwrite output files
     ];
 
+    // Remove unselected video streams.
+    for (final track in item.videoTracks) {
+      if (!item.selectedVideo.contains(track.position)) {
+        args.addAll(['-map', '-0:v:${track.position}']);
+      }
+    }
+
     // Remove unselected audio streams.
     for (final track in item.audioTracks) {
       if (!item.selectedAudio.contains(track.position)) {
@@ -49,10 +56,26 @@ class FFmpegExportService {
       }
     }
 
+    // Add file-level metadata if present
+    if (item.fileMetadata != null) {
+      final metadataMap = item.fileMetadata!.toMap();
+      for (final entry in metadataMap.entries) {
+        args.addAll(['-metadata', '${entry.key}=${entry.value}']);
+      }
+    }
+
+    // Add track-level metadata if present
+    for (final entry in item.trackMetadata.entries) {
+      final streamIndex = entry.key;
+      final metadata = entry.value;
+      final metadataMap = metadata.toMap();
+      for (final metaEntry in metadataMap.entries) {
+        args.addAll(['-metadata:s:$streamIndex', '${metaEntry.key}=${metaEntry.value}']);
+      }
+    }
+
     args.addAll([
       '-map_chapters',
-      '0',
-      '-map_metadata',
       '0',
       '-c',
       'copy',
@@ -108,15 +131,19 @@ class FFmpegExportService {
     buffer.writeln('Output format: $outputFormat');
     buffer.writeln('');
 
+    int totalVideoRemoved = 0;
     int totalAudioRemoved = 0;
     int totalSubtitlesKept = 0;
 
     for (final file in files) {
+      final videoRemoved = file.videoTracks.length - file.selectedVideo.length;
+      totalVideoRemoved += videoRemoved;
       final audioRemoved = file.audioTracks.length - file.selectedAudio.length;
       totalAudioRemoved += audioRemoved;
       totalSubtitlesKept += file.selectedSubtitles.length;
     }
 
+    buffer.writeln('Total video tracks to remove: $totalVideoRemoved');
     buffer.writeln('Total audio tracks to remove: $totalAudioRemoved');
     buffer.writeln('Total subtitle tracks to keep: $totalSubtitlesKept');
     buffer.writeln('');
@@ -124,6 +151,8 @@ class FFmpegExportService {
 
     for (final file in files) {
       buffer.writeln('• ${file.name}');
+      buffer.writeln(
+          '  Video: ${file.selectedVideo.length}/${file.videoTracks.length}');
       buffer.writeln(
           '  Audio: ${file.selectedAudio.length}/${file.audioTracks.length}');
       buffer.writeln(
