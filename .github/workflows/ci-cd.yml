@@ -3,6 +3,8 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ master, develop ]
+    tags:
+      - 'v*'   # run on version tags to build installer/release
   pull_request:
     branches: [ master, develop ]
 
