@@ -9,10 +9,12 @@ import 'package:path/path.dart' as path;
 
 import 'models/export_profile.dart';
 import 'models/file_item.dart';
+import 'models/auto_detect_rule.dart';
 import 'services/profile_service.dart';
 import 'services/ffprobe_service.dart';
 import 'services/ffmpeg_export_service.dart';
 import 'services/verification_service.dart';
+import 'services/rule_service.dart';
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
@@ -70,12 +72,15 @@ class _MyHomePageState extends State<MyHomePage> {
   List<ExportProfile> _profiles = [];
   ExportProfile? _selectedProfile;
   bool _enableVerification = true;
+  List<AutoDetectRule> _rules = [];
+  bool _autoApplyRules = true;
 
   @override
   void initState() {
     super.initState();
     _loadPreferences();
     _loadProfiles();
+    _loadRules();
     // Check FFmpeg and show dialog after check completes, but skip during tests
     final isRunningTests = Platform.environment.containsKey('FLUTTER_TEST');
     if (!isRunningTests) {
@@ -179,6 +184,13 @@ class _MyHomePageState extends State<MyHomePage> {
     final profiles = await ProfileService.loadProfiles();
     setState(() {
       _profiles = profiles;
+    });
+  }
+
+  Future<void> _loadRules() async {
+    final rules = await RuleService.loadRules();
+    setState(() {
+      _rules = rules;
     });
   }
 
@@ -474,6 +486,14 @@ class _MyHomePageState extends State<MyHomePage> {
     for (final filePath in paths) {
       try {
         final item = await _probeFile(filePath);
+        
+        // Apply auto-detect rules if enabled
+        if (_autoApplyRules && _rules.isNotEmpty) {
+          RuleService.applyRules(item, _rules);
+          final summary = RuleService.getRuleSummary(item, _rules);
+          _appendLog('Auto-detect rules applied: $summary');
+        }
+        
         setState(() {
           _files.add(item);
         });
