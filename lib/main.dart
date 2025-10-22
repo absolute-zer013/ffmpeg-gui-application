@@ -10,6 +10,7 @@ import 'package:path/path.dart' as path;
 import 'models/export_profile.dart';
 import 'models/file_item.dart';
 import 'models/auto_detect_rule.dart';
+import 'models/codec_options.dart';
 import 'services/profile_service.dart';
 import 'services/ffprobe_service.dart';
 import 'services/ffmpeg_export_service.dart';
@@ -19,6 +20,7 @@ import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
 import 'widgets/subtitle_batch_card.dart';
+import 'widgets/codec_settings_dialog.dart';
 
 void main() {
   runApp(const MyApp());
@@ -404,6 +406,74 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> _showBatchVideoCodecDialog() async {
+    if (_files.isEmpty) {
+      _appendLog('ERROR: No files loaded. Add files before applying batch codec settings.');
+      return;
+    }
+
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) => CodecSettingsDialog(
+        initialVideoCodec: null,
+        initialQualityPreset: null,
+        isVideoTrack: true,
+        showBatchOptions: true,
+        fileCount: _files.length,
+      ),
+    );
+
+    if (result != null && result['applyToAll'] == true) {
+      setState(() {
+        final qualityPreset = result['qualityPreset'] as QualityPreset?;
+        for (final file in _files) {
+          file.qualityPreset = qualityPreset;
+        }
+      });
+      _appendLog('Applied video quality preset to ${_files.length} file(s)');
+    }
+  }
+
+  Future<void> _showBatchAudioCodecDialog() async {
+    if (_files.isEmpty) {
+      _appendLog('ERROR: No files loaded. Add files before applying batch codec settings.');
+      return;
+    }
+
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) => CodecSettingsDialog(
+        initialAudioCodec: null,
+        initialAudioBitrate: null,
+        initialAudioChannels: null,
+        initialAudioSampleRate: null,
+        isVideoTrack: false,
+        showBatchOptions: true,
+        fileCount: _files.length,
+      ),
+    );
+
+    if (result != null && result['applyToAll'] == true) {
+      setState(() {
+        final codecSettings = result['codecSettings'] as CodecConversionSettings?;
+        if (codecSettings != null) {
+          for (final file in _files) {
+            // Apply codec settings to all audio tracks in each file
+            for (final track in file.audioTracks) {
+              file.codecSettings[track.streamIndex] = CodecConversionSettings(
+                audioCodec: codecSettings.audioCodec,
+                audioBitrate: codecSettings.audioBitrate,
+                audioChannels: codecSettings.audioChannels,
+                audioSampleRate: codecSettings.audioSampleRate,
+              );
+            }
+          }
+        }
+      });
+      _appendLog('Applied audio codec settings to ${_files.length} file(s)');
+    }
   }
 
   void _appendLog(String message) {
@@ -936,6 +1006,50 @@ class _MyHomePageState extends State<MyHomePage> {
                                       ),
                                       if (_batchMode) ...[
                                         const SizedBox(height: 8),
+                                        // Batch Codec/Quality Actions
+                                        Card(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Batch Codec/Quality',
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const SizedBox(height: 8),
+                                                Wrap(
+                                                  spacing: 8,
+                                                  runSpacing: 8,
+                                                  children: [
+                                                    OutlinedButton.icon(
+                                                      onPressed: _running
+                                                          ? null
+                                                          : _showBatchVideoCodecDialog,
+                                                      icon: const Icon(
+                                                          Icons.video_settings),
+                                                      label: const Text(
+                                                          'Video Quality'),
+                                                    ),
+                                                    OutlinedButton.icon(
+                                                      onPressed: _running
+                                                          ? null
+                                                          : _showBatchAudioCodecDialog,
+                                                      icon: const Icon(
+                                                          Icons.audio_file),
+                                                      label: const Text(
+                                                          'Audio Codec'),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
                                         _buildAudioBatchCard(),
                                         const SizedBox(height: 8),
                                         _buildSubtitleBatchCard(),
@@ -960,6 +1074,49 @@ class _MyHomePageState extends State<MyHomePage> {
                                       setState(() => _batchMode = v ?? false),
                                 ),
                                 if (_batchMode) ...[
+                                  const SizedBox(height: 8),
+                                  // Batch Codec/Quality Actions
+                                  Card(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            'Batch Codec/Quality',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Wrap(
+                                            spacing: 8,
+                                            runSpacing: 8,
+                                            children: [
+                                              OutlinedButton.icon(
+                                                onPressed: _running
+                                                    ? null
+                                                    : _showBatchVideoCodecDialog,
+                                                icon: const Icon(
+                                                    Icons.video_settings),
+                                                label:
+                                                    const Text('Video Quality'),
+                                              ),
+                                              OutlinedButton.icon(
+                                                onPressed: _running
+                                                    ? null
+                                                    : _showBatchAudioCodecDialog,
+                                                icon:
+                                                    const Icon(Icons.audio_file),
+                                                label:
+                                                    const Text('Audio Codec'),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                   const SizedBox(height: 8),
                                   _buildAudioBatchCard(),
                                   const SizedBox(height: 8),

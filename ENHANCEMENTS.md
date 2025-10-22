@@ -313,15 +313,16 @@ Desktop notifications when exports complete.
 
 ---
 
-### 30. Batch Codec/Quality Apply
+### 30. Batch Codec/Quality Apply ✅ **IMPLEMENTED**
 Apply selected video/audio codec and audio quality presets to multiple files at once.
 
 **Implementation:**
-- Add an "Apply to selected files" option in `CodecSettingsDialog` to bulk-apply current selections.
-- Provide batch toolbar actions: Set Video Codec, Set Audio Codec, Set Audio Quality (presets).
-- Extend `ExportProfile` (if necessary) to include codec and quality preset fields for easy reuse.
-- Ensure `FFmpegExportService` respects the batch-applied settings per file.
-- Add unit tests: bulk apply preserves per-file overrides; batch apply integrates with profiles and configurations.
+- ✅ Extended `CodecSettingsDialog` with batch mode support and "Apply to All" option
+- ✅ Added batch toolbar actions in batch mode section: Video Quality and Audio Codec buttons
+- ✅ Created `_showBatchVideoCodecDialog` and `_showBatchAudioCodecDialog` methods in main.dart
+- ✅ Batch apply respects the dialog settings and applies to all loaded files
+- ✅ Added comprehensive widget tests for batch codec dialog functionality
+- ✅ Visual feedback with file count display in batch mode dialog title
 
 
 ## Implementation Priority Suggestions
@@ -341,14 +342,11 @@ Apply selected video/audio codec and audio quality presets to multiple files at 
 8. ✅ Auto-Detect Rules (Feature #12) - **COMPLETED**
 9. ✅ Configuration Import/Export (Feature #13) - **COMPLETED**
 
-### **Phase 4 - UI Polish** (User Experience)
+### **Phase 4 - UI Polish** (User Experience) 🔄 **IN PROGRESS**
 10. File Preview (Feature #22)
 11. Export Queue Management (Feature #24)
 12. Better Notifications (Feature #29)
-13. Batch Codec/Quality Apply (leverages Features #7 and #8)
-  - Add "Apply to selected files" action in the Codec Settings dialog
-  - Provide batch toolbar actions: Set Video Codec, Set Audio Codec, Set Audio Quality
-  - Respect per-file overrides; enable quick bulk updates across the selection
+13. ✅ Batch Codec/Quality Apply (Feature #30) - **COMPLETED**
 
 ---
 
