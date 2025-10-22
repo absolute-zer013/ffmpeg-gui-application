@@ -16,18 +16,18 @@ This guide covers building, packaging, and distributing the FFmpeg Export Tool f
 
 **Using PowerShell:**
 ```bash
-.\build_package.ps1 all
+.\scripts\build_package.ps1 all
 ```
 
 **Using Batch:**
 ```bash
-build_package.bat all
+scripts\build_package.bat all
 ```
 
 **Or manually:**
 ```bash
 # Run all checks
-.\run_tests.ps1 all
+.\scripts\run_tests.ps1 all
 
 # Build release
 flutter build windows --release
@@ -51,12 +51,12 @@ Test locally:
 
 **Using PowerShell:**
 ```bash
-.\build_package.ps1 package
+.\scripts\build_package.ps1 package
 ```
 
 **Using Batch:**
 ```bash
-build_package.bat package
+scripts\build_package.bat package
 ```
 
 ### Package Contents
@@ -125,7 +125,7 @@ Format: `MAJOR.MINOR.PATCH+BUILD`
 
 ```bash
 # Build and package everything
-.\build_package.ps1 all
+.\scripts\build_package.ps1 all
 
 # Commit changes
 git add .
@@ -155,7 +155,7 @@ The GitHub Actions workflow automatically creates a release. You can then:
 
 ```bash
 # Build release locally
-.\build_package.ps1 all
+.\scripts\build_package.ps1 all
 
 # Create GitHub release and upload
 # 1. Go to: https://github.com/absolute-zer013/ffmpeg-gui-application/releases
@@ -232,10 +232,10 @@ To update version and create new release:
 ```bash
 # 1. Update version in pubspec.yaml
 # 2. Run all checks and build
-.\build_package.ps1 all
+.\scripts\build_package.ps1 all
 
 # 3. Commit and tag
-git add pubspec.yaml build_package.ps1
+git add pubspec.yaml scripts/build_package.ps1
 git commit -m "Prepare v1.0.2"
 git tag v1.0.2
 git push origin master v1.0.2
@@ -275,13 +275,13 @@ Users can:
 
 **Quick Release Process:**
 1. Update version in `pubspec.yaml`
-2. Run: `.\build_package.ps1 all`
+2. Run: `.\scripts\build_package.ps1 all`
 3. Commit and create version tag
 4. Push to GitHub
 5. GitHub Actions builds and releases automatically
 
 **Manual Distribution:**
-1. Run: `.\build_package.ps1 all`
+1. Run: `.\scripts\build_package.ps1 all`
 2. Find package in `dist/` folder
 3. Share ZIP file with users
 4. Users extract and run `bin\export_file.exe`

@@ -11,6 +11,8 @@ class CodecSettingsDialog extends StatefulWidget {
   final int? initialAudioSampleRate;
   final QualityPreset? initialQualityPreset;
   final bool isVideoTrack;
+  final bool showBatchOptions;
+  final int? fileCount;
 
   const CodecSettingsDialog({
     super.key,
@@ -21,6 +23,8 @@ class CodecSettingsDialog extends StatefulWidget {
     this.initialAudioSampleRate,
     this.initialQualityPreset,
     this.isVideoTrack = false,
+    this.showBatchOptions = false,
+    this.fileCount,
   });
 
   @override
@@ -48,10 +52,14 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final title = widget.showBatchOptions
+        ? 'Batch ${widget.isVideoTrack ? 'Video' : 'Audio'} Codec Settings (${widget.fileCount ?? 0} files)'
+        : (widget.isVideoTrack
+            ? 'Video Codec Settings'
+            : 'Audio Codec Settings');
+
     return AlertDialog(
-      title: Text(
-        widget.isVideoTrack ? 'Video Codec Settings' : 'Audio Codec Settings',
-      ),
+      title: Text(title),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -370,9 +378,10 @@ class _CodecSettingsDialogState extends State<CodecSettingsDialog> {
             Navigator.pop(context, {
               'codecSettings': settings,
               'qualityPreset': _qualityPreset,
+              'applyToAll': widget.showBatchOptions,
             });
           },
-          child: const Text('Apply'),
+          child: Text(widget.showBatchOptions ? 'Apply to All' : 'Apply'),
         ),
       ],
     );

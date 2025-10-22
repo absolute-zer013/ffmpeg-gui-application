@@ -112,15 +112,6 @@ After successful test and build:
 - Artifacts retained for 7 days
 - Automatic release creation on version tags
 
-## Setting Up Codecov
-
-To enable coverage reporting in GitHub:
-
-1. Go to https://codecov.io
-2. Connect your GitHub account
-3. Select the repository
-4. No additional setup needed - the workflow will automatically upload coverage
-
 ## Running Tests in CI Locally
 
 To simulate the CI environment locally:
