@@ -5,7 +5,7 @@ Quick reference for all Phase 5 planned features. See `PHASE5_PLANNING.md` for d
 ## Summary
 
 **Status:** Planning phase (not yet implemented)  
-**Total Features:** 17  
+**Total Features:** 19  
 **Categories:** 5 (Quality of Life, Export Enhancements, Batch Operations, Advanced Features, UI/UX Enhancements, Integration Features)
 
 ## Feature List
@@ -26,11 +26,13 @@ Quick reference for all Phase 5 planned features. See `PHASE5_PLANNING.md` for d
 | 9 | Trim/Cut Functionality | Export portions of files with start/end timestamps | High | Medium |
 | 10 | Resolution/Framerate Changes | Downscale video or change framerate during export | Medium | Medium |
 
-### Batch Operations (1 feature)
+### Batch Operations (3 features)
 
 | # | Feature | Description | Priority | Complexity |
 |---|---------|-------------|----------|------------|
 | 14 | Multi-Profile Export | Export each file with multiple profiles simultaneously | Medium | Medium |
+| 31 | Batch Rename v2 | Advanced batch renaming: find/replace, conflict policy, dry-run preview, per-file overrides | Medium | Low-Medium |
+ | 32 | Batch Rename UX Quick Wins | Presets, variable hints, and export preview to CSV/Markdown | High | Low-Medium |
 
 ### Advanced Features (4 features)
 
@@ -71,12 +73,12 @@ Quick reference for all Phase 5 planned features. See `PHASE5_PLANNING.md` for d
 - **High:** 4 features (Dual Pane, Waveform, CLI, Presets Import)
 
 ### By Category
-- **Quality of Life:** 4 features (23.5%)
-- **Export Enhancements:** 2 features (11.8%)
-- **Batch Operations:** 1 feature (5.9%)
-- **Advanced Features:** 4 features (23.5%)
-- **UI/UX Enhancements:** 3 features (17.6%)
-- **Integration Features:** 3 features (17.6%)
+- **Quality of Life:** 4 features (21.1%)
+- **Export Enhancements:** 2 features (10.5%)
+- **Batch Operations:** 3 features (15.8%)
+- **Advanced Features:** 4 features (21.1%)
+- **UI/UX Enhancements:** 3 features (15.8%)
+- **Integration Features:** 3 features (15.8%)
 
 ## Implementation Tiers
 
@@ -86,6 +88,7 @@ Low effort, high impact features that can be implemented quickly:
 - Feature #5: Sorting Options
 - Feature #1: Recent Files List
 - Feature #18: Subtitle Format Conversion
+ - Feature #32: Batch Rename UX Quick Wins (presets + preview export)
 
 **Total:** 4 features | **Estimated:** 7-11 days
 
@@ -105,6 +108,8 @@ Medium effort features for power users:
 - Feature #19: MKV Optimization
 - Feature #14: Multi-Profile Export
 - Feature #26: Watch Folder
+  
+Also consider incorporating "Batch Rename v2" (Feature #31) here if prioritized.
 
 **Total:** 5 features | **Estimated:** 22-31 days
 
@@ -248,6 +253,21 @@ CLI entry point separate from GUI. Accept file paths, selections, output as argu
 **UI:** None (CLI only)
 
 ### 28. Presets Import
+### 31. Batch Rename v2
+Enhance the existing batch rename with power features:
+
+**Scope:**
+- Global find/replace across proposed names (with regex option)
+- Conflict policy selection (suffix/skip/error) and live indicators
+- Dry-run preview with exportable report (CSV/MD)
+- Per-file overrides before apply
+- Rules: trim spaces, normalize dashes/underscores, case transform
+
+**FFmpeg:** None (filename planning only)
+**Models:** Extend RenamePattern (flags/options)
+**Services:** RenameService enhancements; persistence of last-used pattern
+**UI:** Batch Rename dialog (current) extended with advanced options and actions
+
 Parse HandBrake JSON/XML presets. Map HandBrake settings to FFmpeg parameters. Show compatibility warnings.
 
 **FFmpeg:** Parameter mapping  
@@ -263,7 +283,20 @@ Parse HandBrake JSON/XML presets. Map HandBrake settings to FFmpeg parameters. S
 - **Phase Summary:** `docs/PHASES_REPORT.md`
 - **Current Features:** `docs/FEATURES.md`
 
----
+### 32. Batch Rename UX Quick Wins
+Enhance the existing Batch Rename dialog with user-friendly improvements:
 
-**Last Updated:** 2025-10-22  
+**Scope:**
+- Pattern presets (TV, Movie, Anime, Indexed, With Date)
+- Live variable hints and validation feedback
+- Export preview table to CSV/Markdown for review/sharing
+- Persist last-used rename pattern and parameters
+
+**FFmpeg:** None (filename planning only)
+**Models:** May extend RenamePattern with preset metadata
+**Services:** RenameService: add export of preview to CSV/MD
+**UI:** Extend Batch Rename dialog with presets dropdown and export button
+
+
+**Last Updated:** 2025-10-23  
 **Total Estimated Effort:** 77-111 days (approximately 3-5 months for single developer)

@@ -1,5 +1,22 @@
 import 'package:path/path.dart' as path;
 
+/// Result for a single item in a batch rename operation
+class BatchRenameResult {
+  final String originalPath;
+  final String proposedName; // filename only (not a path)
+  final bool skipped;
+  final bool conflictResolved;
+  final String? reason; // set if skipped or error handled
+
+  BatchRenameResult({
+    required this.originalPath,
+    required this.proposedName,
+    this.skipped = false,
+    this.conflictResolved = false,
+    this.reason,
+  });
+}
+
 /// Utility class for applying rename patterns to filenames
 class RenameUtils {
   /// Apply a rename pattern to a file with variable substitution
@@ -170,6 +187,122 @@ class RenameUtils {
       );
     } catch (e) {
       return 'Error: $e';
+    }
+  }
+
+  /// Strategy to handle filename collisions during batch rename
+  /// - error: throw on conflict
+  /// - suffix: append -1, -2, ... before the extension to make unique (default)
+  /// - skip: mark result as skipped and continue
+  static const String conflictError = 'error';
+  static const String conflictSuffix = 'suffix';
+  static const String conflictSkip = 'skip';
+
+  /// Apply a rename pattern to many files at once.
+  ///
+  /// Inputs:
+  /// - pattern: rename pattern supporting the same variables as [applyPattern]
+  /// - originalPaths: absolute paths (used to extract base filename/ext)
+  /// - startIndex: starting value for {index} when present
+  /// - episodeStart: starting value for {episode} when present; auto-increments per file
+  /// - season: value for {season} when present (constant for the batch)
+  /// - existingNames: optional set of filenames already present in destination directory
+  /// - conflictStrategy: one of [conflictError, conflictSuffix, conflictSkip]
+  ///
+  /// Output:
+  /// - List of [BatchRenameResult] with unique, safe filenames (no path)
+  static List<BatchRenameResult> applyPatternBatch({
+    required String pattern,
+    required List<String> originalPaths,
+    int startIndex = 1,
+    int? episodeStart,
+    int? season,
+    int? year,
+    Set<String>? existingNames,
+    String conflictStrategy = conflictSuffix,
+  }) {
+    // Validate pattern early
+    final error = validatePattern(pattern);
+    if (error != null) {
+      throw ArgumentError('Invalid pattern: $error');
+    }
+
+    final results = <BatchRenameResult>[];
+    final usedNames = <String>{
+      ...?(existingNames)
+    }; // track collisions within batch
+
+    for (int i = 0; i < originalPaths.length; i++) {
+      final original = originalPaths[i];
+      final index = startIndex + i;
+      final episode = episodeStart != null ? (episodeStart + i) : null;
+
+      var candidate = applyPattern(
+        pattern,
+        original,
+        index: index,
+        episode: episode,
+        season: season,
+        year: year,
+      );
+
+      final baseName = path.basename(candidate);
+
+      if (!usedNames.contains(baseName)) {
+        usedNames.add(baseName);
+        results.add(BatchRenameResult(
+          originalPath: original,
+          proposedName: baseName,
+        ));
+        continue;
+      }
+
+      // Handle conflict
+      switch (conflictStrategy) {
+        case conflictError:
+          results.add(BatchRenameResult(
+            originalPath: original,
+            proposedName: baseName,
+            skipped: true,
+            reason: 'Conflict with existing filename: $baseName',
+          ));
+          break;
+        case conflictSkip:
+          results.add(BatchRenameResult(
+            originalPath: original,
+            proposedName: baseName,
+            skipped: true,
+            reason: 'Skipped due to conflict: $baseName',
+          ));
+          break;
+        case conflictSuffix:
+        default:
+          final unique = _dedupeWithSuffix(baseName, usedNames);
+          usedNames.add(unique);
+          results.add(BatchRenameResult(
+            originalPath: original,
+            proposedName: unique,
+            conflictResolved: true,
+          ));
+      }
+    }
+
+    return results;
+  }
+
+  /// Generate a unique filename by appending -1, -2, ... before the extension.
+  static String _dedupeWithSuffix(String fileName, Set<String> alreadyUsed) {
+    if (!alreadyUsed.contains(fileName)) return fileName;
+
+    final ext = path.extension(fileName);
+    final name = fileName.substring(0, fileName.length - ext.length);
+    int counter = 1;
+    while (true) {
+      final candidate = '$name-$counter$ext';
+      if (!alreadyUsed.contains(candidate)) {
+        return candidate;
+      }
+      counter++;
     }
   }
 }

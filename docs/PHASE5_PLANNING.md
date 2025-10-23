@@ -7,7 +7,7 @@ This document provides detailed planning guidance for Phase 5 features. It compl
 Phase 5 consolidates all remaining planned features from the roadmap into a single backlog for prioritization and future implementation. Unlike Phases 1–4 (which have been completed), Phase 5 features are documented but not yet scheduled.
 
 **Status:** Planning phase  
-**Total Features:** 17 across 5 categories  
+**Total Features:** 19 across 5 categories  
 **Dependencies:** None (Phases 1–4 complete)
 
 ## Feature Categories
@@ -60,7 +60,7 @@ Phase 5 consolidates all remaining planned features from the roadmap into a sing
     - Technical: FFmpeg scale filter, fps parameter, size estimation
     - Estimated effort: Medium (3-5 days)
 
-### Batch Operations (1 feature)
+### Batch Operations (2 features)
 
 **Priority:** Low to Medium  
 **Complexity:** Medium  
@@ -71,6 +71,11 @@ Phase 5 consolidates all remaining planned features from the roadmap into a sing
     - Queue management for multiple outputs per file
     - Technical: Queue service extension, filename suffixes, parallel tracking
     - Estimated effort: Medium (4-6 days)
+
+32. **Batch Rename UX Quick Wins** (Feature #32)
+    - Presets, variable hints, export preview to CSV/Markdown
+    - Technical: Extend Batch Rename dialog, preset list, preview export
+    - Estimated effort: Small (2-3 days)
 
 ### Advanced Features (4 features)
 
@@ -168,6 +173,7 @@ Features should be prioritized based on:
 - Sorting Options (Feature #5)
 - Recent Files List (Feature #1)
 - Subtitle Format Conversion (Feature #18)
+ - Batch Rename UX Quick Wins (Feature #32)
 
 **Tier 2: Export Power (Medium effort, High impact)**
 - Trim/Cut Functionality (Feature #9)
@@ -319,10 +325,10 @@ When creating sub-issues for specific features, use this template:
 
 Track overall Phase 5 progress:
 
-- **Total Features:** 17
+- **Total Features:** 19
 - **Completed:** 0
 - **In Progress:** 0
-- **Planned:** 17
+- **Planned:** 19
 
 Update the tracking issue checklist as features are completed.
 
@@ -345,5 +351,5 @@ For questions about Phase 5 planning:
 
 ---
 
-**Last Updated:** 2025-10-22  
+**Last Updated:** 2025-10-23  
 **Status:** Planning phase - features documented, not yet scheduled for implementation

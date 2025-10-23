@@ -23,6 +23,9 @@ import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
 import 'widgets/subtitle_batch_card.dart';
 import 'widgets/codec_settings_dialog.dart';
+import 'widgets/batch_rename_dialog.dart';
+import 'widgets/quick_rename_dialog.dart';
+import 'models/rename_pattern.dart';
 
 void main() {
   runApp(const MyApp());
@@ -484,6 +487,71 @@ class _MyHomePageState extends State<MyHomePage> {
       });
       _appendLog('Applied audio codec settings to ${_files.length} file(s)');
     }
+  }
+
+  Future<void> _showBatchRenameDialog() async {
+    if (_files.isEmpty) {
+      _appendLog('ERROR: No files loaded. Add files before batch renaming.');
+      return;
+    }
+
+    final result = await showBatchRenameDialog(
+      context: context,
+      paths: _files.map((f) => f.path).toList(),
+    );
+
+    if (result == null) return;
+
+    // Apply rename parameters to files
+    setState(() {
+      for (int i = 0; i < _files.length; i++) {
+        final file = _files[i];
+        final mappedName = result.plan.renameMapping[file.path];
+        file.renamePattern = RenamePattern(
+          name: 'Batch',
+          pattern: result.pattern,
+          isCustom: true,
+        );
+        file.renameIndex = result.startIndex + i;
+        file.renameEpisode =
+            result.episodeStart != null ? (result.episodeStart! + i) : null;
+        file.renameSeason = result.season;
+        file.renameYear = result.year;
+
+        if (mappedName != null) {
+          // Update UI field to reflect preview
+          file.outputName = mappedName;
+        }
+      }
+    });
+
+    _appendLog('Applied batch rename pattern to ${_files.length} file(s)');
+  }
+
+  Future<void> _showQuickRenameDialog() async {
+    if (_files.isEmpty) {
+      _appendLog('ERROR: No files loaded. Add files before quick renaming.');
+      return;
+    }
+
+    final currentNames =
+        _files.map((f) => f.outputName).toList(growable: false);
+    final newNames = await showQuickRenameDialog(
+      context: context,
+      names: currentNames,
+    );
+
+    if (newNames == null) return;
+
+    setState(() {
+      for (var i = 0; i < _files.length; i++) {
+        _files[i].outputName = newNames[i];
+        // Ensure export uses the quick-renamed name (not a stale pattern)
+        _files[i].renamePattern = null;
+      }
+    });
+
+    _appendLog('Applied quick rename to ${_files.length} file(s)');
   }
 
   void _appendLog(String message) {
@@ -1095,6 +1163,24 @@ class _MyHomePageState extends State<MyHomePage> {
                                                           Icons.audio_file),
                                                       label: const Text(
                                                           'Audio Codec'),
+                                                    ),
+                                                    OutlinedButton.icon(
+                                                      onPressed: _running
+                                                          ? null
+                                                          : _showBatchRenameDialog,
+                                                      icon: const Icon(Icons
+                                                          .drive_file_rename_outline),
+                                                      label: const Text(
+                                                          'Batch Rename'),
+                                                    ),
+                                                    OutlinedButton.icon(
+                                                      onPressed: _running
+                                                          ? null
+                                                          : _showQuickRenameDialog,
+                                                      icon: const Icon(
+                                                          Icons.text_fields),
+                                                      label: const Text(
+                                                          'Quick Rename'),
                                                     ),
                                                   ],
                                                 ),
