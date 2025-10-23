@@ -5,8 +5,10 @@ Labels: enhancement, backlog, phase-5, planning
 This tracking issue aggregates all remaining planned features into a single phase for prioritization and scheduling. Items below match the numbering used in `ENHANCEMENTS.md`.
 
 References:
-- Roadmap: `ENHANCEMENTS.md` (Phase 5 — Consolidated Backlog)
-- Consolidated phase summaries: `docs/PHASES_REPORT.md`
+- Roadmap: `docs/ENHANCEMENTS.md` (Phase 5 — Consolidated Backlog)
+- Phase summaries: `docs/PHASES_REPORT.md` (Phase 5 section)
+- Planning guide: `docs/PHASE5_PLANNING.md` (detailed implementation guidance)
+- Feature reference: `docs/PHASE5_FEATURES.md` (quick feature lookup)
 
 ## Checklist by category
 
