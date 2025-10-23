@@ -149,7 +149,7 @@ class _BatchRenameDialogState extends State<BatchRenameDialog> {
                 SizedBox(
                   width: 220,
                   child: DropdownButtonFormField<RenamePattern>(
-                    value: _presets.contains(_selectedPreset)
+                    initialValue: _presets.contains(_selectedPreset)
                         ? _selectedPreset
                         : null,
                     decoration: const InputDecoration(
@@ -235,7 +235,7 @@ class _BatchRenameDialogState extends State<BatchRenameDialog> {
                 SizedBox(
                   width: 180,
                   child: DropdownButtonFormField<String>(
-                    value: _conflictStrategy,
+                    initialValue: _conflictStrategy,
                     decoration: const InputDecoration(
                       labelText: 'On Conflict',
                       border: OutlineInputBorder(),
@@ -364,7 +364,7 @@ class _BatchRenameDialogState extends State<BatchRenameDialog> {
               ? () {
                   Navigator.pop(
                       context,
-                      _BatchRenameDialogResult(
+                      BatchRenameDialogResult(
                         pattern: _patternCtrl.text,
                         plan: _plan!,
                         startIndex:
@@ -436,7 +436,7 @@ class _BatchRenameDialogState extends State<BatchRenameDialog> {
   String _mdEscape(String v) => v.replaceAll('|', '\\|');
 }
 
-class _BatchRenameDialogResult {
+class BatchRenameDialogResult {
   final String pattern;
   final BatchRenamePlan plan;
   final int startIndex;
@@ -444,7 +444,7 @@ class _BatchRenameDialogResult {
   final int? season;
   final int? year;
 
-  _BatchRenameDialogResult({
+  BatchRenameDialogResult({
     required this.pattern,
     required this.plan,
     required this.startIndex,
@@ -455,11 +455,11 @@ class _BatchRenameDialogResult {
 }
 
 /// Helper to show dialog and get a strongly typed result in calling code.
-Future<_BatchRenameDialogResult?> showBatchRenameDialog({
+Future<BatchRenameDialogResult?> showBatchRenameDialog({
   required BuildContext context,
   required List<String> paths,
 }) {
-  return showDialog<_BatchRenameDialogResult?>(
+  return showDialog<BatchRenameDialogResult?>(
     context: context,
     builder: (_) => BatchRenameDialog(paths: paths),
   );
