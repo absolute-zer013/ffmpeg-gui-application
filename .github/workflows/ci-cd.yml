@@ -96,161 +96,9 @@ jobs:
           path: dist/windows-portable.zip
           retention-days: 7
 
-      - name: Create installer script (tagged builds)
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Force -Path installer | Out-Null
-          $content = @'
-          ; Inno Setup Script for FFmpeg Export Tool
-          ; Builds a Windows installer from the Flutter Windows release output
-
-          #define MyAppName "FFmpeg Export Tool"
-          #define MyAppPublisher "absolute-zer013"
-          #define MyAppURL "https://github.com/absolute-zer013/ffmpeg-gui-application"
-          #define MyAppExeName "export_file.exe"
-          ; Allow override from command line: /DMyAppVersion=1.2.3
-          #ifndef MyAppVersion
-          #define MyAppVersion "1.0.0"
-          #endif
-
-          ; Build output configuration
-          #define OutputDir "..\\dist"
-          #define OutputBase "FFmpegExportTool-v" + MyAppVersion + "-setup"
-
-          ; Flutter Windows release folder (relative to repo root)
-          #define BuildRoot "..\\build\\windows\\x64\\runner\\Release"
-
-          [Setup]
-          AppId={{B7C6F51A-6E1C-4B31-A29F-0CC1BCE9F3B1}}
-          AppName={#MyAppName}
-          AppVersion={#MyAppVersion}
-          AppPublisher={#MyAppPublisher}
-          AppPublisherURL={#MyAppURL}
-          AppSupportURL={#MyAppURL}
-          AppUpdatesURL={#MyAppURL}
-          DefaultDirName={autopf}\\{#MyAppName}
-          DefaultGroupName={#MyAppName}
-          DisableDirPage=no
-          DisableProgramGroupPage=yes
-          OutputDir={#OutputDir}
-          OutputBaseFilename={#OutputBase}
-          Compression=lzma
-          SolidCompression=yes
-          ArchitecturesInstallIn64BitMode=x64
-
-          [Languages]
-          Name: "english"; MessagesFile: "compiler:Default.isl"
-
-          [Tasks]
-          Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional icons:"; Flags: unchecked
-
-          [Files]
-          ; Application executable and runtime
-          Source: "{#BuildRoot}\\{#MyAppExeName}"; DestDir: "{app}\\bin"; Flags: ignoreversion
-          Source: "{#BuildRoot}\\*.dll"; DestDir: "{app}\\bin"; Flags: ignoreversion
-
-          ; Data directory
-          Source: "{#BuildRoot}\\data\\*"; DestDir: "{app}\\data"; Flags: ignoreversion recursesubdirs createallsubdirs
-
-          ; Optional docs (if present in packaging step)
-          Source: "..\\README.md"; DestDir: "{app}\\docs"; Flags: ignoreversion; Check: FileExists(ExpandConstant('..\\README.md'))
-          Source: "..\\FEATURES.md"; DestDir: "{app}\\docs"; Flags: ignoreversion; Check: FileExists(ExpandConstant('..\\FEATURES.md'))
-          Source: "..\\TESTING.md"; DestDir: "{app}\\docs"; Flags: ignoreversion; Check: FileExists(ExpandConstant('..\\TESTING.md'))
-
-          [Icons]
-          Name: "{group}\\{#MyAppName}"; Filename: "{app}\\bin\\{#MyAppExeName}"
-          Name: "{autodesktop}\\{#MyAppName}"; Filename: "{app}\\bin\\{#MyAppExeName}"; Tasks: desktopicon
-
-          [Run]
-          Filename: "{app}\\bin\\{#MyAppExeName}"; Description: "Launch {#MyAppName}"; Flags: nowait postinstall skipifsilent
-          '@
-          Set-Content -Path "installer/installer.iss" -Value $content -Encoding UTF8
-      
-      - name: Install Inno Setup (tagged builds)
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
-        run: |
-          # Try Chocolatey first (quiet, no progress)
-          try {
-            choco install innosetup -y --no-progress
-          } catch {
-            Write-Host "Chocolatey install failed or not available. Falling back to direct download." -ForegroundColor Yellow
-            $url = "https://files.jrsoftware.org/is/6/innosetup-6.2.2.exe"
-            $installer = Join-Path $env:TEMP "innosetup.exe"
-            Invoke-WebRequest -Uri $url -OutFile $installer
-            Start-Process $installer -ArgumentList "/VERYSILENT" -Wait
-          }
-
-          # Ensure ISCC is available (PATH + typical locations)
-          $env:Path += ";$env:ProgramFilesx86\Inno Setup 6;$env:ProgramFiles\Inno Setup 6"
-          $iscc = (Get-Command ISCC -ErrorAction SilentlyContinue)
-          if (-not $iscc) {
-            $candidatePaths = @(
-              "$env:ProgramFilesx86\Inno Setup 6\ISCC.exe",
-              "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
-            )
-            $isccPath = $candidatePaths | Where-Object { Test-Path $_ } | Select-Object -First 1
-            if (-not $isccPath) {
-              Write-Host "ISCC.exe not found in default locations. Searching Program Files recursively..." -ForegroundColor Yellow
-              $pfCandidates = @($env:ProgramFiles, $env:ProgramFilesx86) | Where-Object { $_ -and (Test-Path $_) }
-              foreach ($root in $pfCandidates) {
-                try {
-                  $hit = Get-ChildItem -Path $root -Recurse -Filter ISCC.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-                  if ($hit) { $isccPath = $hit.FullName; break }
-                } catch {}
-              }
-            }
-            if (-not $isccPath) { throw 'ISCC.exe not found after installation.' }
-          }
-
-      - name: Build Windows installer (tagged builds)
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
-        run: |
-          # Parse version from pubspec.yaml (fallback to 1.0.0)
-          $pub = Get-Content -Raw pubspec.yaml
-          $m = [regex]::Match($pub, 'version:\s*([0-9]+\.[0-9]+\.[0-9]+)')
-          $env:APP_VERSION = if ($m.Success) { $m.Groups[1].Value } else { '1.0.0' }
-          Write-Host "Using version $env:APP_VERSION"
-
-          # Ensure dist exists
-          if (-not (Test-Path 'dist')) { New-Item -ItemType Directory -Path dist | Out-Null }
-
-          # Build installer via ISCC with logging
-          $isccCmd = (Get-Command ISCC -ErrorAction SilentlyContinue)
-          if ($isccCmd) { $isccPath = $isccCmd.Path }
-          if (-not $isccPath) {
-            $pathsToCheck = @(
-              "$env:ProgramFilesx86\Inno Setup 6\ISCC.exe",
-              "$env:ProgramFiles\Inno Setup 6\ISCC.exe"
-            )
-            $isccPath = $pathsToCheck | Where-Object { Test-Path $_ } | Select-Object -First 1
-          }
-          if (-not $isccPath) { throw 'ISCC.exe not found after installation.' }
-
-          $logPath = "dist/iscc.log"
-          & "$isccPath" "/DMyAppVersion=$env:APP_VERSION" "installer\installer.iss" 2>&1 | Tee-Object -FilePath $logPath
-          $code = $LASTEXITCODE
-          if ($code -ne 0) {
-            Write-Host "Inno Setup compilation failed with exit code $code" -ForegroundColor Red
-            if (Test-Path $logPath) {
-              Write-Host "===== ISCC Output (tail) =====" -ForegroundColor Cyan
-              Get-Content $logPath -Tail 200 | Write-Host
-            }
-            throw 'Inno Setup compilation failed.'
-          }
-
-      - name: Upload Windows installer artifact (tagged builds)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-installer
-          path: dist/*.exe
-          retention-days: 14
-
       - name: Create release
         if: startsWith(github.ref, 'refs/tags/v')
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
@@ -259,3 +107,14 @@ jobs:
           release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
+
+      - name: Attach portable ZIP to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.UPLOAD_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: dist/windows-portable.zip
+          asset_name: windows-portable.zip
+          asset_content_type: application/zip
