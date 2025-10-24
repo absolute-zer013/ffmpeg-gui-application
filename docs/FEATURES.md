@@ -348,9 +348,77 @@
    - Apply settings to all loaded files or all audio tracks
    - Integrated with existing codec conversion features
 
+### Phase 5 - Tier 3 (Advanced Features)
+
+### 34. **✓ Undo/Redo (Feature #3)**
+   - Command pattern implementation for reversible operations
+   - Undo stack with configurable history size (default: 50 commands)
+   - Redo stack for reapplying undone commands
+   - History state notifications via stream
+   - Command descriptions for better UX
+   - Supports undo/redo for file selections, settings changes, etc.
+   - Full test coverage with CommandHistoryService
+
+### 35. **✓ Chapter Editing (Feature #15)**
+   - Parse chapter markers from video files using ffprobe
+   - Chapter model with time formatting utilities (HH:MM:SS)
+   - Chapter validation (no overlaps, valid time ranges)
+   - Add, edit, delete, and reorder chapters
+   - Sort chapters automatically by start time
+   - Write chapters back to video via FFmpeg metadata format
+   - Support for chapter titles and timestamps
+   - ChapterService with comprehensive test coverage
+
+### 36. **✓ MKV Optimization (Feature #19)**
+   - mkvpropedit integration for MKV file optimization
+   - Stream reordering policies:
+     - Keep original order
+     - Type-based with default tracks first
+     - Type-based maintaining original order
+   - Remove unnecessary metadata
+   - Optimize header compression
+   - Report size savings with formatted output
+   - OptimizationResult with detailed metrics
+   - Automatic file size comparison
+
+### 37. **✓ Multi-Profile Export (Feature #14)**
+   - Export single file with multiple profiles simultaneously
+   - Three filename suffix strategies:
+     - Profile name (e.g., "movie-HighQuality.mkv")
+     - Sequential number (e.g., "movie-01.mkv")
+     - Profile name + number (e.g., "movie-HighQuality_01.mkv")
+   - Queue management for multiple exports per file
+   - Priority-based queue sorting
+   - Parallel or sequential export modes
+   - MultiProfileExportDialog UI (already implemented)
+
+### 38. **✓ Watch Folder (Feature #26)**
+   - Monitor folder for new files automatically
+   - File pattern matching (*.mkv, *.mp4, etc.)
+   - Recursive subdirectory watching
+   - Auto-add new files to processing list
+   - Optional auto-export with default profile
+   - File completion detection (waits for file write to finish)
+   - Configurable watch settings
+   - WatchFolderService with stream-based notifications
+
+### 39. **✓ Batch Rename v2 (Feature #31)**
+   - Global find/replace with regex support
+   - Case-sensitive and case-insensitive search
+   - Advanced transformations:
+     - Trim spaces
+     - Normalize spaces (remove extra spaces)
+     - Dashes to underscores / underscores to dashes
+     - Uppercase / lowercase / title case
+   - Export dry-run preview to CSV format
+   - Export dry-run preview to Markdown format
+   - Per-file override support
+   - Conflict resolution strategies
+   - Full test coverage for all transformations
+
 ---
 
-**All 20 original features + 13 NEW enhancement features have been fully implemented!** 🎉
+**All 20 original features + 19 NEW enhancement features have been fully implemented!** 🎉
 
 ### Summary
 - ✅ 20 Original core features (progress, cancellation, drag-drop, profiles, etc.)
@@ -367,3 +435,9 @@
 - ✅ Export Queue Management (Feature #31)
 - ✅ Better Notifications (Feature #32)
 - ✅ Batch Codec/Quality Apply (Feature #33)
+- ✅ **Undo/Redo (Feature #34 / Phase 5 Tier 3)**
+- ✅ **Chapter Editing (Feature #35 / Phase 5 Tier 3)**
+- ✅ **MKV Optimization (Feature #36 / Phase 5 Tier 3)**
+- ✅ **Multi-Profile Export (Feature #37 / Phase 5 Tier 3)**
+- ✅ **Watch Folder (Feature #38 / Phase 5 Tier 3)**
+- ✅ **Batch Rename v2 (Feature #39 / Phase 5 Tier 3)**

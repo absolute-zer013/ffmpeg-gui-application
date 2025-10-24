@@ -156,18 +156,61 @@ Configuration includes:
 - Rename patterns
 - Output format and settings
 
+### Phase 5 Tier 3 - Advanced Features (NEW!)
+
+The following advanced features have been implemented:
+
+#### Undo/Redo (#3)
+- Command pattern implementation for reversible operations
+- Configurable history stack (default: 50 commands)
+- Full undo/redo support for file selections and settings changes
+- Command descriptions for better user feedback
+
+#### Chapter Editing (#15)
+- Parse chapter markers from video files using ffprobe
+- Add, edit, delete, and reorder chapters
+- Automatic chapter validation and sorting
+- Write chapters back to video via FFmpeg metadata format
+- Time formatting utilities (HH:MM:SS)
+
+#### MKV Optimization (#19)
+- mkvpropedit integration for MKV file optimization
+- Multiple stream reordering policies
+- Metadata removal options
+- Header compression optimization
+- Detailed size savings reports
+
+#### Multi-Profile Export (#14)
+- Export single file with multiple profiles simultaneously
+- Three filename suffix strategies (profile name, index, or both)
+- Priority-based queue management
+- Parallel or sequential export modes
+
+#### Watch Folder (#26)
+- Monitor folder for new files automatically
+- Configurable file pattern matching (*.mkv, *.mp4, etc.)
+- Recursive subdirectory watching
+- Auto-add and optional auto-export
+- File completion detection
+
+#### Batch Rename v2 (#31)
+- Global find/replace with regex support
+- Case-sensitive and case-insensitive search
+- Advanced transformations (trim, normalize, case changes)
+- Export dry-run preview to CSV or Markdown
+- Conflict resolution strategies
+
+See `docs/FEATURES.md` for complete details on all 39 implemented features.
+
 ## What's Next?
 
-### Phase 5 - Planned Features
+### Phase 5 - Remaining Planned Features
 
-The project roadmap includes 17 additional features planned for future releases, organized into 5 categories:
+Additional features planned for future releases:
 
-- **Quality of Life**: Recent files list, undo/redo, search/filter, sorting
 - **Export Enhancements**: Trim/cut functionality, resolution/framerate changes
-- **Batch Operations**: Multi-profile export
-- **Advanced Features**: Chapter editing, audio/subtitle sync, subtitle format conversion, MKV optimization
 - **UI/UX Enhancements**: Dual pane mode, waveform visualization, estimated export times
-- **Integration**: Watch folder, command-line interface, presets import
+- **Integration**: Command-line interface, presets import
 
 See `docs/PHASE5_FEATURES.md` for the complete list and `docs/PHASE5_PLANNING.md` for implementation guidance.
 
@@ -175,7 +218,7 @@ See `docs/PHASE5_FEATURES.md` for the complete list and `docs/PHASE5_PLANNING.md
 
 The project includes comprehensive automated testing:
 
-- **Unit Tests**: 23+ tests covering all models and utilities
+- **Unit Tests**: 30+ tests covering all models and services
 - **Code Quality**: Automatic format checking and linting
 - **CI/CD Pipeline**: GitHub Actions for continuous integration and deployment
 
