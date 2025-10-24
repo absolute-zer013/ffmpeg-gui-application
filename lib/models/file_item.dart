@@ -7,6 +7,7 @@ import 'rename_pattern.dart';
 import 'trim_settings.dart';
 import 'resolution_settings.dart';
 import 'sync_offset.dart';
+import 'multi_profile_export_config.dart';
 
 /// Data model representing a file with its streams and selections.
 class FileItem {
@@ -57,6 +58,8 @@ class FileItem {
   // ETA tracking (Feature #25)
   DateTime? exportStartTime;
   Duration? estimatedTimeRemaining;
+  // Multi-profile export (Feature #14)
+  MultiProfileExportConfig? multiProfileConfig;
 
   FileItem({
     required this.path,
@@ -93,6 +96,7 @@ class FileItem {
     this.syncOffsets,
     this.exportStartTime,
     this.estimatedTimeRemaining,
+    this.multiProfileConfig,
   })  : name = name ?? File(path).uri.pathSegments.last,
         outputName = outputName ?? File(path).uri.pathSegments.last,
         videoTracks = videoTracks ?? [],
