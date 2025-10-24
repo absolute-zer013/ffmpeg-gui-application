@@ -11,12 +11,14 @@ import 'models/export_profile.dart';
 import 'models/file_item.dart';
 import 'models/auto_detect_rule.dart';
 import 'models/codec_options.dart';
+import 'models/recent_file.dart';
 import 'services/profile_service.dart';
 import 'services/ffprobe_service.dart';
 import 'services/ffmpeg_export_service.dart';
 import 'services/verification_service.dart';
 import 'services/rule_service.dart';
 import 'services/notification_service.dart';
+import 'services/recent_files_service.dart';
 // import 'models/quality_preset.dart'; // Not used in the codec dialogs anymore
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
@@ -83,6 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final bool _autoApplyRules = true;
   bool _enableDesktopNotifications = true;
   bool _autoFixCompatibility = true;
+  List<RecentFile> _recentFiles = [];
 
   @override
   void initState() {
@@ -90,6 +93,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _loadPreferences();
     _loadProfiles();
     _loadRules();
+    _loadRecentFiles();
     // Check FFmpeg and show dialog after check completes, but skip during tests
     final isRunningTests = Platform.environment.containsKey('FLUTTER_TEST');
     if (!isRunningTests) {
@@ -206,6 +210,101 @@ class _MyHomePageState extends State<MyHomePage> {
     final rules = await RuleService.loadRules();
     setState(() {
       _rules = rules;
+    });
+  }
+
+  Future<void> _loadRecentFiles() async {
+    final recentFiles = await RecentFilesService.getExistingRecentFiles();
+    setState(() {
+      _recentFiles = recentFiles;
+    });
+  }
+
+  Future<void> _addFileToRecents(String filePath) async {
+    await RecentFilesService.addRecentFile(filePath);
+    await _loadRecentFiles();
+  }
+
+  Future<void> _loadRecentFile(String filePath) async {
+    if (!await File(filePath).exists()) {
+      _appendLog('ERROR: File not found: $filePath');
+      await RecentFilesService.removeRecentFile(filePath);
+      await _loadRecentFiles();
+      return;
+    }
+
+    // Add to files list and probe
+    await _handleFilePaths([filePath]);
+  }
+
+  void _showRecentFilesMenu(BuildContext context, Offset position) {
+    if (_recentFiles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No recent files'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    showMenu(
+      context: context,
+      position: RelativeRect.fromLTRB(
+        position.dx,
+        position.dy,
+        position.dx,
+        position.dy,
+      ),
+      items: [
+        ..._recentFiles.take(10).map((recentFile) {
+          final fileName = path.basename(recentFile.path);
+          return PopupMenuItem<String>(
+            value: recentFile.path,
+            child: SizedBox(
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    fileName,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                  ),
+                  Text(
+                    recentFile.path,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }),
+        const PopupMenuDivider(),
+        const PopupMenuItem<String>(
+          value: 'clear',
+          child: Row(
+            children: [
+              Icon(Icons.clear_all, size: 20),
+              SizedBox(width: 8),
+              Text('Clear Recent Files'),
+            ],
+          ),
+        ),
+      ],
+    ).then((value) async {
+      if (value == 'clear') {
+        await RecentFilesService.clearRecentFiles();
+        await _loadRecentFiles();
+        _appendLog('Recent files cleared');
+      } else if (value != null) {
+        await _loadRecentFile(value);
+      }
     });
   }
 
@@ -861,6 +960,9 @@ class _MyHomePageState extends State<MyHomePage> {
         });
         _appendLog('✓ Completed: ${item.name}');
 
+        // Add to recent files
+        await _addFileToRecents(item.path);
+
         // Run verification if enabled
         if (_enableVerification) {
           _appendLog('Verifying: ${item.name}');
@@ -1060,6 +1162,34 @@ class _MyHomePageState extends State<MyHomePage> {
                   label: Text('FFmpeg Not Found'),
                   backgroundColor: Colors.red,
                 ),
+              ),
+            if (_recentFiles.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.history),
+                tooltip: 'Recent Files',
+                onPressed: _running
+                    ? null
+                    : () {
+                        final RenderBox button =
+                            context.findRenderObject() as RenderBox;
+                        final RenderBox overlay = Navigator.of(context)
+                            .overlay!
+                            .context
+                            .findRenderObject() as RenderBox;
+                        final RelativeRect position = RelativeRect.fromRect(
+                          Rect.fromPoints(
+                            button.localToGlobal(button.size.bottomRight(Offset.zero),
+                                ancestor: overlay),
+                            button.localToGlobal(button.size.bottomRight(Offset.zero),
+                                ancestor: overlay),
+                          ),
+                          Offset.zero & overlay.size,
+                        );
+                        _showRecentFilesMenu(
+                          context,
+                          Offset(position.left, position.top),
+                        );
+                      },
               ),
             IconButton(
               icon: const Icon(Icons.settings),
