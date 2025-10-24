@@ -241,6 +241,53 @@
    - Configuration validation on import
    - Quick configuration info preview
 
+## 🆕 Phase 5 - Tier 4 (Complex Features)
+
+### 30. **✓ Dual Pane Mode**
+   - Split screen layout for comparing files
+   - Horizontal or vertical orientation
+   - Resizable divider with drag support
+   - Shows detailed file information in each pane
+   - Compare source vs destination metadata
+   - Highlight differences in tracks and metadata
+   - Responsive layout adjusts to screen size
+   - Preview files before and after export
+
+### 31. **✓ Waveform Visualization**
+   - Visual representation of audio tracks
+   - Canvas-based rendering for smooth performance
+   - Zoom in/out controls (1x to 10x)
+   - Pan/scroll through waveform
+   - Click to seek to position in audio
+   - Silence detection with highlighting
+   - Real-time peak and RMS amplitude calculation
+   - Support for mono and stereo audio
+   - Audio extraction and downsampling via FFmpeg
+
+### 32. **✓ Command-Line Interface**
+   - Headless execution without GUI
+   - Full argument parsing with `args` package
+   - JSON output mode for scripting
+   - File information display (--info flag)
+   - Dry-run mode to preview operations
+   - Track selection via command-line arguments
+   - Codec configuration from CLI
+   - Audio/video bitrate control
+   - Verification support
+   - Cross-platform compatible
+
+### 33. **✓ Presets Import**
+   - Import HandBrake JSON presets
+   - Parse HandBrake preset format
+   - Map HandBrake parameters to FFmpeg
+   - Automatic codec translation
+   - Quality settings conversion (CRF, bitrate)
+   - Resolution and framerate mapping
+   - Audio configuration mapping
+   - Compatibility warnings for unsupported features
+   - Preview preset details before applying
+   - Support for preset categories
+
 ## Additional Bonus Features
 - **Real-time FFmpeg Progress Parsing**: Reads FFmpeg stdout to calculate accurate progress percentages
 - **Multiple File Format Support**: Accepts MKV, MP4, AVI, MOV input files
