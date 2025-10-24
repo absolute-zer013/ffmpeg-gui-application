@@ -49,6 +49,7 @@ app.*.map.json
 *.cache.dill
 
 # Project-specific
+logs/
 Filtered/
 *.old.md
 devtools_options.yaml
