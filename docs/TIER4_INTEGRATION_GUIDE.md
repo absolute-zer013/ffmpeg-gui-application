@@ -122,8 +122,8 @@ void _showWaveformDialog(FileItem file, int trackIndex) {
             return WaveformWidget(
               waveformData: snapshot.data!,
               onSeek: (position) {
-                // Handle seek if needed
-                print('Seek to: $position seconds');
+                // Handle seek - log or update player position
+                _appendLog('Seek to: ${position.toStringAsFixed(2)} seconds');
               },
             );
           },
@@ -175,7 +175,6 @@ dart run bin/ffmpeg_cli.dart \
   -a 0,1 \
   -s 0 \
   -o output.mkv \
-  --format mkv \
   --video-codec h264 \
   --audio-codec aac \
   --audio-bitrate 192k \
@@ -188,13 +187,21 @@ dart run bin/ffmpeg_cli.dart \
 For distribution, compile to native executable:
 
 ```bash
+# Windows
 dart compile exe bin/ffmpeg_cli.dart -o ffmpeg_cli.exe
+
+# Linux/Mac
+dart compile exe bin/ffmpeg_cli.dart -o ffmpeg_cli
 ```
 
 Then use directly:
 
 ```bash
+# Windows
 ffmpeg_cli.exe -i input.mkv --info
+
+# Linux/Mac
+./ffmpeg_cli -i input.mkv --info
 ```
 
 ## Feature #28: Presets Import

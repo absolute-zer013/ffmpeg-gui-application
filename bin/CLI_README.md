@@ -353,8 +353,10 @@ ENTRYPOINT ["dart", "run", "bin/ffmpeg_cli.dart"]
 
 Usage:
 ```bash
-docker run -v $(pwd):/data myimage -i /data/input.mkv -o /data/output.mkv
+docker run -v $(pwd):/data ffmpeg-cli-app -i /data/input.mkv -o /data/output.mkv
 ```
+
+Replace `ffmpeg-cli-app` with your actual Docker image name.
 
 ## Performance
 
