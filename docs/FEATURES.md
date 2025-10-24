@@ -57,18 +57,50 @@
     - Success/failure statistics
     - Persistent notification with action button
 
+### Phase 5 - Tier 1 (Quick Wins)
+11. **✓ Recent Files List**
+    - Stores up to 20 recently processed files
+    - Quick access via history icon in app bar
+    - Automatically removes missing files
+    - Persisted across sessions with SharedPreferences
+
+12. **✓ Search & Filter**
+    - Real-time search by filename or path
+    - Filter by status (pending/completed/failed)
+    - Filtered count display
+    - Clear all filters button
+
+13. **✓ Sorting Options**
+    - Sort files by name, size, duration, or status
+    - Ascending/descending toggle
+    - Preferences persisted across sessions
+    - Visual sort indicators
+
+14. **✓ Subtitle Format Conversion**
+    - Convert between 7 subtitle formats (SRT, ASS, SSA, WebVTT, MOV Text, SubRip)
+    - Per-track format selection dropdown
+    - FFmpeg codec mapping with -c:s parameter
+    - Format descriptions and compatibility info
+
+35. **✓ Batch Rename UX Quick Wins**
+    - 7 predefined patterns (TV Show, Movie, Anime, Indexed, With Date, etc.)
+    - Live variable hints showing used variables
+    - Validation messages for missing parameters
+    - Export preview to CSV/Markdown
+    - Last-used pattern persistence
+
 ### Advanced Features
-11. **✓ Parallel Processing Control**
+31. **✓ Parallel Processing Control**
     - Settings slider to control concurrent exports (1-8 files)
     - Batch processing for efficiency
     - Configurable via Settings dialog
 
-12. **✓ File Size Estimation**
+32. **✓ File Size Estimation**
     - Shows original file size per file
     - Total size of all selected files
     - Human-readable format (KB, MB, GB)
 
-13. **✓ Preview Mode**
+33. **✓ Preview Mode**
     - FFprobe integration showing:
       - File duration (HH:MM:SS)
       - File size
@@ -76,42 +108,42 @@
       - Subtitle track count and languages
     - Displayed in file cards
 
-14. **✓ Batch Rename**
+34. **✓ Batch Rename**
     - Editable output filenames per file
     - Automatic extension handling based on output format
     - Pattern preservation with format change
 
-15. **✓ Auto Language Detection**
+35. **✓ Auto Language Detection**
     - Automatically probes all audio/subtitle languages
     - Pre-selects all audio tracks by default
     - Selects first subtitle track as default
     - Language-based batch operations
 
 ### Polish Features
-16. **✓ Keyboard Shortcuts**
+31. **✓ Keyboard Shortcuts**
     - Built-in Flutter focus/navigation support
     - Tab navigation through controls
     - Enter to confirm dialogs
 
-17. **✓ Dark Mode**
+32. **✓ Dark Mode**
     - System-adaptive theme
     - Light and dark theme variants
     - Material 3 design system
     - Automatic switching based on OS preference
 
-18. **✓ Collapsible Sections**
+33. **✓ Collapsible Sections**
     - Expandable file cards (click to expand/collapse)
     - Collapsible batch mode section with toggle
     - Saves screen space
     - Per-file expansion state
 
-19. **✓ Export to Different Container**
+34. **✓ Export to Different Container**
     - Settings option to choose output format
     - Supports MKV (default) and MP4
     - Preserved in preferences
     - Auto-updates file extensions
 
-20. **✓ Log Export**
+35. **✓ Log Export**
     - "Save" button in log panel
     - Exports timestamped log to text file
     - Timestamped filenames

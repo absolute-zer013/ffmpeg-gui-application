@@ -310,51 +310,91 @@ class FileCard extends StatelessWidget {
                       if (item.subtitleTracks.isEmpty)
                         const Text('No subtitles'),
                       for (final track in item.subtitleTracks)
-                        Row(
+                        Column(
                           children: [
-                            Expanded(
-                              child: CheckboxListTile(
-                                dense: true,
-                                contentPadding: EdgeInsets.zero,
-                                title: Text(track.description,
-                                    style: const TextStyle(fontSize: 12)),
-                                value: item.selectedSubtitles
-                                    .contains(track.position),
-                                onChanged: (value) {
-                                  if (value == true) {
-                                    item.selectedSubtitles.add(track.position);
-                                    item.defaultSubtitle ??= track.position;
-                                  } else {
-                                    item.selectedSubtitles
-                                        .remove(track.position);
-                                    if (item.defaultSubtitle ==
-                                        track.position) {
-                                      item.defaultSubtitle =
-                                          item.selectedSubtitles.isNotEmpty
-                                              ? item.selectedSubtitles.first
-                                              : null;
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: CheckboxListTile(
+                                    dense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    title: Text(track.description,
+                                        style: const TextStyle(fontSize: 12)),
+                                    value: item.selectedSubtitles
+                                        .contains(track.position),
+                                    onChanged: (value) {
+                                      if (value == true) {
+                                        item.selectedSubtitles.add(track.position);
+                                        item.defaultSubtitle ??= track.position;
+                                      } else {
+                                        item.selectedSubtitles
+                                            .remove(track.position);
+                                        if (item.defaultSubtitle ==
+                                            track.position) {
+                                          item.defaultSubtitle =
+                                              item.selectedSubtitles.isNotEmpty
+                                                  ? item.selectedSubtitles.first
+                                                  : null;
+                                        }
+                                      }
+                                      onChanged();
+                                    },
+                                  ),
+                                ),
+                                Checkbox(
+                                  value: item.defaultSubtitle == track.position,
+                                  onChanged: (value) {
+                                    if (value == true) {
+                                      item.selectedSubtitles.add(track.position);
+                                      item.defaultSubtitle = track.position;
+                                    } else {
+                                      if (item.defaultSubtitle == track.position) {
+                                        item.defaultSubtitle = null;
+                                      }
                                     }
-                                  }
-                                  onChanged();
-                                },
+                                    onChanged();
+                                  },
+                                ),
+                                const Text('Default',
+                                    style: TextStyle(fontSize: 10)),
+                              ],
+                            ),
+                            if (item.selectedSubtitles.contains(track.position))
+                              Padding(
+                                padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+                                child: Row(
+                                  children: [
+                                    const Text('Format: ', style: TextStyle(fontSize: 11)),
+                                    DropdownButton<SubtitleFormat>(
+                                      value: item.codecSettings[track.streamIndex]
+                                              ?.subtitleFormat ??
+                                          SubtitleFormat.copy,
+                                      isDense: true,
+                                      style: const TextStyle(fontSize: 11),
+                                      onChanged: (newFormat) {
+                                        if (newFormat != null) {
+                                          final currentSettings =
+                                              item.codecSettings[track.streamIndex] ??
+                                                  CodecConversionSettings();
+                                          item.codecSettings[track.streamIndex] =
+                                              currentSettings.copyWith(
+                                                  subtitleFormat: newFormat);
+                                          onChanged();
+                                        }
+                                      },
+                                      items: SubtitleFormat.values
+                                          .map((format) => DropdownMenuItem(
+                                                value: format,
+                                                child: Tooltip(
+                                                  message: format.description,
+                                                  child: Text(format.displayName),
+                                                ),
+                                              ))
+                                          .toList(),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            Checkbox(
-                              value: item.defaultSubtitle == track.position,
-                              onChanged: (value) {
-                                if (value == true) {
-                                  item.selectedSubtitles.add(track.position);
-                                  item.defaultSubtitle = track.position;
-                                } else {
-                                  if (item.defaultSubtitle == track.position) {
-                                    item.defaultSubtitle = null;
-                                  }
-                                }
-                                onChanged();
-                              },
-                            ),
-                            const Text('Default',
-                                style: TextStyle(fontSize: 10)),
                           ],
                         ),
                     ],
