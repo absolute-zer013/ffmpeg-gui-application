@@ -347,16 +347,105 @@ Desktop notifications when exports complete.
 
 ---
 
-### 30. Batch Codec/Quality Apply ✅ **IMPLEMENTED**
-Apply selected video/audio codec and audio quality presets to multiple files at once.
+### 30. Batch Codecs Apply ✅ **IMPLEMENTED**
+Apply selected video/audio codec settings to multiple files at once.
 
 **Implementation:**
 - ✅ Extended `CodecSettingsDialog` with batch mode support and "Apply to All" option
-- ✅ Added batch toolbar actions in batch                                       mode section: Video Quality and Audio Codec buttons
+- ✅ Added batch toolbar actions in the batch panel: Video Codec and Audio Codec Settings buttons
 - ✅ Created `_showBatchVideoCodecDialog` and `_showBatchAudioCodecDialog` methods in main.dart
 - ✅ Batch apply respects the dialog settings and applies to all loaded files
 - ✅ Added comprehensive widget tests for batch codec dialog functionality
 - ✅ Visual feedback with file count display in batch mode dialog title
+
+### 31. Two-Stage Export Pipeline ✅ **IMPLEMENTED** (Phase 5)
+Stage 1: Fast muxer/remux (copies streams). Stage 2: Optional re-encoding for quality/codec changes.
+
+**Implementation:**
+- ✅ Split export into two distinct stages in `FFmpegExportService`
+- ✅ Stage 1: Remux with muxer auto-detection based on output format (libx264 → mp4box, libx265 → hevc_mp42cf, etc.)
+- ✅ Stage 2: Re-encode triggered only when codec conversion or quality preset specified
+- ✅ Independent stdout/stderr capture for each stage
+- ✅ Progress tracking for both stages (Stage 1 remux, Stage 2 encode)
+- ✅ Per-file logging with both stage commands and output
+- ✅ Timing breakdown: Stage 1 duration, Stage 2 duration, total duration
+
+### 32. Auto-Fix Codec Compatibility ✅ **IMPLEMENTED** (Phase 5)
+Automatically transcode incompatible codecs when output format is MP4 or WebM.
+
+**Implementation:**
+- ✅ Created `_getCompatibilityIssues()` method in `FFmpegExportService`
+- ✅ Automatic codec detection: MP4 (H.264/HEVC/MPEG-4/AV1 video; AAC/AC3/ALAC/MP3 audio), WebM (VP9/AV1 video; Opus/Vorbis audio), MKV (all)
+- ✅ Auto-transcode to compatible codec when incompatible codec + incompatible container selected
+- ✅ Auto-drop subtitle tracks if unsupported by container
+- ✅ Preflight compatibility check before export with user-visible warnings
+- ✅ When auto-fix enabled, incompatible codecs hidden from UI dropdown
+- ✅ Logged in export summary for transparency
+
+### 33. Dynamic Codec Filtering ✅ **IMPLEMENTED** (Phase 5)
+When auto-fix enabled and MP4/WebM format selected, hide incompatible codecs from codec settings UI.
+
+**Implementation:**
+- ✅ Added `_isVideoCodecCompatible()` and `_isAudioCodecCompatible()` methods in `CodecSettingsDialog`
+- ✅ Filter video codec list: `VideoCodec.values.where((codec) => _isVideoCodecCompatible(codec))`
+- ✅ Filter audio codec list: `AudioCodec.values.where((codec) => _isAudioCodecCompatible(codec))`
+- ✅ Display rules: MP4 (H.264, HEVC, MPEG-4, AV1), WebM (VP9, AV1), MKV (all)
+- ✅ Parameters passed from main.dart: `outputFormat` and `autoFixEnabled`
+- ✅ Only filters when auto-fix is ON; shows all codecs when auto-fix OFF or MKV format
+- ✅ Prevents user confusion by hiding unusable codec options
+
+### 34. Codec Preset System for All Codecs ✅ **IMPLEMENTED** (Phase 5)
+Quick preset chips (Speed/Balanced/Quality) for H.264, H.265, VP9, and AV1 encoders.
+
+**Implementation:**
+- ✅ Added "Encoding Presets" section in codec settings dialog for H.264/H.265/VP9
+- ✅ Speed preset: preset=fast, CRF=28 (~4x realtime)
+- ✅ Balanced preset: preset=medium, CRF=23 (~2x realtime) - Recommended
+- ✅ Quality preset: preset=slow, CRF=20 (~1x realtime)
+- ✅ Quick chip selection with automatic CRF value population
+- ✅ Manual preset dropdown for advanced users (ultrafast, fast, medium, slow, veryslow)
+- ✅ CRF adjustment field (0-51 range, lower = better quality)
+- ✅ Applied settings summary showing codec, CRF, and preset at bottom
+- ✅ AV1: Encoder choice (libsvtav1 vs libaom-av1) + profile presets with `-cpu-used` mapping
+- ✅ Smooth codec switching resets presets to avoid conflicts
+
+### 35. Comprehensive Export Logging ✅ **IMPLEMENTED** (Phase 5)
+Per-file detailed logs with commands, stdout/stderr, timing, and progress for debugging and verification.
+
+**Implementation:**
+- ✅ Per-file logs created in `logs/` directory next to output file (e.g., `output.mkv.log`)
+- ✅ Log contains: Stage 1 FFmpeg command, Stage 1 stdout/stderr, Stage 2 FFmpeg command (if applicable), Stage 2 stdout/stderr
+- ✅ Progress lines logged as they arrive (both `-progress` stdout and stderr `time=` fallback)
+- ✅ Timing info: Stage 1 duration, Stage 2 duration, total duration
+- ✅ Status: Success, Failure (error message), or Cancelled by user
+- ✅ Compatibility issues logged in summary if auto-fix applied
+- ✅ File size before/after for compression ratio reference
+- ✅ All logs preserve for diagnostics even on failure
+
+### 36. Cancellation Handling ✅ **IMPLEMENTED** (Phase 5)
+Proper exit code mapping for cancellation; displays user-friendly message instead of error.
+
+**Implementation:**
+- ✅ Map exit codes to cancellation: -1, 130 (SIGINT), 255, 3221225786 (Windows CTRL+C), -1073741510 (Windows termination)
+- ✅ Display message: "Cancelled by user" instead of "Export failed"
+- ✅ Log status shows "Cancelled" in export summary
+- ✅ Distinguish user cancellation from actual errors
+- ✅ UI shows cancellation status clearly in file card and export summary
+
+### 37. Export Summary with Encoding Details ✅ **IMPLEMENTED** (Phase 5)
+Export summary dialog displays video/audio codec selections, CRF, presets, and bitrate details for verification before export.
+
+**Implementation:**
+- ✅ Enhanced `generateExportSummary()` in FFmpegExportService
+- ✅ Per-file section with: input file, output file, estimated output size
+- ✅ Video codec section (if re-encoding): codec name, CRF value, preset, bitrate
+- ✅ Audio codec section per track: codec name, bitrate (kbps), channels, sample rate
+- ✅ Quality preset summary: Fast (CRF 28), Balanced (CRF 23), Quality (CRF 20)
+- ✅ Container format info: MP4, MKV, WebM (shows what will be used)
+- ✅ Auto-fix compatibility warnings: lists codecs that will be auto-transcoded
+- ✅ Total file count and cumulative statistics (total removed audio/subs, etc.)
+- ✅ Clear, formatted output for user review before proceeding
+
 
 
 ## Implementation Priority Suggestions
@@ -382,9 +471,18 @@ Apply selected video/audio codec and audio quality presets to multiple files at 
 12. ✅ Better Notifications (Feature #29) - **COMPLETED**
 13. ✅ Batch Codec/Quality Apply (Feature #30) - **COMPLETED**
 
+### **Phase 5a - Export Stability & Codec Enhancements** (Post-Phase 4) ✅ **COMPLETED**
+14. ✅ Two-Stage Export Pipeline (Feature #31) - **COMPLETED**
+15. ✅ Auto-Fix Codec Compatibility (Feature #32) - **COMPLETED**
+16. ✅ Dynamic Codec Filtering (Feature #33) - **COMPLETED**
+17. ✅ Codec Preset System for All Codecs (Feature #34) - **COMPLETED**
+18. ✅ Comprehensive Export Logging (Feature #35) - **COMPLETED**
+19. ✅ Cancellation Handling (Feature #36) - **COMPLETED**
+20. ✅ Export Summary with Encoding Details (Feature #37) - **COMPLETED**
+
 ---
 
-### **Phase 5 - Consolidated Backlog** (All Remaining Planned Features)
+### **Phase 5b - Consolidated Backlog** (All Remaining Planned Features)
 
 **Status:** Planning phase - features documented but not yet scheduled for implementation  
 **Total Features:** 17 across 5 categories  

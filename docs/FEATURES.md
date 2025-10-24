@@ -304,14 +304,14 @@
    - Automatic duration formatting (hours, minutes, seconds)
    - Graceful fallback for non-Windows platforms
 
-### 33. **✓ Batch Codec/Quality Apply**
-   - Apply codec and quality settings to multiple files at once
-   - Batch video quality preset application
+### 33. **✓ Batch Codecs Apply**
+   - Apply codec settings to multiple files at once
+   - Batch video codec application
    - Batch audio codec settings application
    - "Apply to All" mode in CodecSettingsDialog
    - Batch toolbar actions in batch mode panel:
-     - "Video Quality" button for quality presets
-     - "Audio Codec" button for audio codec settings
+   - "Video Codec" button for video codec selection
+   - "Audio Codec Settings" button for audio codec settings
    - File count display in batch mode dialog
    - Apply settings to all loaded files or all audio tracks
    - Integrated with existing codec conversion features

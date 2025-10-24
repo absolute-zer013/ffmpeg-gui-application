@@ -34,31 +34,53 @@ enum AudioCodec {
 class CodecConversionSettings {
   final VideoCodec? videoCodec;
   final AudioCodec? audioCodec;
+  // Video params
+  final int? videoCrf; // for constant quality
+  final String? videoPreset; // encoder preset string
+  final int? videoBitrateKbps; // set to 0 for CQ in AV1 (-b:v 0)
   final int? audioBitrate; // in kbps
   final int? audioChannels; // e.g., 2 for stereo, 6 for 5.1
   final int? audioSampleRate; // in Hz, e.g., 48000
+  // Advanced: allow using any ffmpeg codec name directly
+  final String? customVideoCodec; // e.g., 'libsvtav1', 'mpeg4'
+  final String? customAudioCodec; // e.g., 'libfdk_aac', 'pcm_s16le'
 
   CodecConversionSettings({
     this.videoCodec,
     this.audioCodec,
+    this.videoCrf,
+    this.videoPreset,
+    this.videoBitrateKbps,
     this.audioBitrate,
     this.audioChannels,
     this.audioSampleRate,
+    this.customVideoCodec,
+    this.customAudioCodec,
   });
 
   CodecConversionSettings copyWith({
     VideoCodec? videoCodec,
     AudioCodec? audioCodec,
+    int? videoCrf,
+    String? videoPreset,
+    int? videoBitrateKbps,
     int? audioBitrate,
     int? audioChannels,
     int? audioSampleRate,
+    String? customVideoCodec,
+    String? customAudioCodec,
   }) {
     return CodecConversionSettings(
       videoCodec: videoCodec ?? this.videoCodec,
       audioCodec: audioCodec ?? this.audioCodec,
+      videoCrf: videoCrf ?? this.videoCrf,
+      videoPreset: videoPreset ?? this.videoPreset,
+      videoBitrateKbps: videoBitrateKbps ?? this.videoBitrateKbps,
       audioBitrate: audioBitrate ?? this.audioBitrate,
       audioChannels: audioChannels ?? this.audioChannels,
       audioSampleRate: audioSampleRate ?? this.audioSampleRate,
+      customVideoCodec: customVideoCodec ?? this.customVideoCodec,
+      customAudioCodec: customAudioCodec ?? this.customAudioCodec,
     );
   }
 
@@ -66,9 +88,14 @@ class CodecConversionSettings {
     return {
       'videoCodec': videoCodec?.name,
       'audioCodec': audioCodec?.name,
+      'videoCrf': videoCrf,
+      'videoPreset': videoPreset,
+      'videoBitrateKbps': videoBitrateKbps,
       'audioBitrate': audioBitrate,
       'audioChannels': audioChannels,
       'audioSampleRate': audioSampleRate,
+      'customVideoCodec': customVideoCodec,
+      'customAudioCodec': customAudioCodec,
     };
   }
 
@@ -80,9 +107,14 @@ class CodecConversionSettings {
       audioCodec: json['audioCodec'] != null
           ? AudioCodec.values.firstWhere((e) => e.name == json['audioCodec'])
           : null,
+      videoCrf: json['videoCrf'] as int?,
+      videoPreset: json['videoPreset'] as String?,
+      videoBitrateKbps: json['videoBitrateKbps'] as int?,
       audioBitrate: json['audioBitrate'] as int?,
       audioChannels: json['audioChannels'] as int?,
       audioSampleRate: json['audioSampleRate'] as int?,
+      customVideoCodec: json['customVideoCodec'] as String?,
+      customAudioCodec: json['customAudioCodec'] as String?,
     );
   }
 }

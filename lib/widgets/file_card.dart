@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/file_item.dart';
-import '../models/quality_preset.dart';
+// Quality presets no longer edited via the video dialog here.
+import '../models/codec_options.dart';
 import '../utils/file_utils.dart';
 import 'metadata_editor_dialog.dart';
 import 'codec_settings_dialog.dart';
@@ -10,11 +11,15 @@ import 'file_preview_dialog.dart';
 class FileCard extends StatelessWidget {
   final FileItem item;
   final VoidCallback onChanged;
+  final String? outputFormat; // Container format for codec filtering
+  final bool autoFixEnabled; // If true, filter incompatible codecs
 
   const FileCard({
     super.key,
     required this.item,
     required this.onChanged,
+    this.outputFormat,
+    this.autoFixEnabled = false,
   });
 
   void _showMetadataEditor(BuildContext context) async {
@@ -28,19 +33,85 @@ class FileCard extends StatelessWidget {
     }
   }
 
-  void _showQualitySettings(BuildContext context) async {
+  void _showVideoCodecSettings(BuildContext context) async {
+    // Fetch the current video codec settings for the first video track (if any)
+    VideoCodec? savedCodec;
+    if (item.videoTracks.isNotEmpty) {
+      final firstTrackIdx = item.videoTracks.first.streamIndex;
+      final saved = item.codecSettings[firstTrackIdx];
+      if (saved != null) {
+        savedCodec = saved.videoCodec;
+      }
+    }
+
     final result = await showDialog<Map<String, dynamic>?>(
       context: context,
       builder: (context) => CodecSettingsDialog(
-        initialVideoCodec: null,
-        initialQualityPreset: item.qualityPreset,
+        initialVideoCodec: savedCodec,
         isVideoTrack: true,
+        outputFormat: outputFormat,
+        autoFixEnabled: autoFixEnabled,
       ),
     );
 
     if (result != null) {
-      item.qualityPreset = result['qualityPreset'] as QualityPreset?;
-      onChanged();
+      final settings = result['codecSettings'] as CodecConversionSettings?;
+      if (settings?.videoCodec != null) {
+        for (final track in item.videoTracks) {
+          item.codecSettings[track.streamIndex] = CodecConversionSettings(
+            videoCodec: settings!.videoCodec,
+          );
+        }
+        onChanged();
+      }
+    }
+  }
+
+  void _showAudioCodecSettings(BuildContext context) async {
+    // Fetch the current audio codec settings for the first audio track (if any)
+    AudioCodec? savedCodec;
+    int? savedBitrate;
+    int? savedChannels;
+    int? savedSampleRate;
+    if (item.audioTracks.isNotEmpty) {
+      final firstTrackIdx = item.audioTracks.first.streamIndex;
+      final saved = item.codecSettings[firstTrackIdx];
+      if (saved != null) {
+        savedCodec = saved.audioCodec;
+        savedBitrate = saved.audioBitrate;
+        savedChannels = saved.audioChannels;
+        savedSampleRate = saved.audioSampleRate;
+      }
+    }
+
+    final result = await showDialog<Map<String, dynamic>?>(
+      context: context,
+      builder: (context) => CodecSettingsDialog(
+        initialAudioCodec: savedCodec,
+        initialAudioBitrate: savedBitrate,
+        initialAudioChannels: savedChannels,
+        initialAudioSampleRate: savedSampleRate,
+        isVideoTrack: false,
+        showBatchOptions: false,
+        outputFormat: outputFormat,
+        autoFixEnabled: autoFixEnabled,
+      ),
+    );
+
+    if (result != null) {
+      final settings = result['codecSettings'] as CodecConversionSettings?;
+      if (settings != null) {
+        // Apply to all audio tracks in this file
+        for (final track in item.audioTracks) {
+          item.codecSettings[track.streamIndex] = CodecConversionSettings(
+            audioCodec: settings.audioCodec,
+            audioBitrate: settings.audioBitrate,
+            audioChannels: settings.audioChannels,
+            audioSampleRate: settings.audioSampleRate,
+          );
+        }
+        onChanged();
+      }
     }
   }
 
@@ -90,9 +161,14 @@ class FileCard extends StatelessWidget {
               tooltip: 'Preview',
             ),
             IconButton(
-              icon: const Icon(Icons.tune),
-              onPressed: () => _showQualitySettings(context),
-              tooltip: 'Quality Settings',
+              icon: const Icon(Icons.video_settings),
+              onPressed: () => _showVideoCodecSettings(context),
+              tooltip: 'Video Codec',
+            ),
+            IconButton(
+              icon: const Icon(Icons.audio_file),
+              onPressed: () => _showAudioCodecSettings(context),
+              tooltip: 'Audio Codec',
             ),
             IconButton(
               icon: const Icon(Icons.edit),

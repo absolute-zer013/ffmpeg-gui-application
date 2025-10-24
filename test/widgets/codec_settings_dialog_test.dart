@@ -208,7 +208,8 @@ void main() {
       expect(result!['codecSettings'], isNotNull);
     });
 
-    testWidgets('Dialog includes video codec options for video track',
+    testWidgets(
+        'Dialog includes video codec options for video track (no audio quality section)',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -231,9 +232,9 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      // Check that video codec section is visible
+      // Check that video codec section is visible and Audio Quality section is removed
       expect(find.text('Video Codec'), findsOneWidget);
-      expect(find.text('Audio Quality'), findsOneWidget);
+      expect(find.text('Audio Quality'), findsNothing);
     });
 
     testWidgets('Dialog includes audio codec options for audio track',

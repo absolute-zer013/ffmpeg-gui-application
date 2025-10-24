@@ -17,7 +17,7 @@ import 'services/ffmpeg_export_service.dart';
 import 'services/verification_service.dart';
 import 'services/rule_service.dart';
 import 'services/notification_service.dart';
-import 'models/quality_preset.dart';
+// import 'models/quality_preset.dart'; // Not used in the codec dialogs anymore
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
 import 'widgets/audio_batch_card.dart';
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final List<FileItem> _files = [];
   String _log = '';
   bool _running = false;
-  bool _batchMode = true;
+  bool _batchMode = false;
   bool _dragging = false;
   bool _ffmpegAvailable = false;
   String? _lastOutputDir;
@@ -82,6 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<AutoDetectRule> _rules = [];
   final bool _autoApplyRules = true;
   bool _enableDesktopNotifications = true;
+  bool _autoFixCompatibility = true;
 
   @override
   void initState() {
@@ -177,6 +178,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _enableVerification = prefs.getBool('enableVerification') ?? true;
       _enableDesktopNotifications =
           prefs.getBool('enableDesktopNotifications') ?? true;
+      _autoFixCompatibility = prefs.getBool('autoFixCompatibility') ?? true;
     });
   }
 
@@ -190,6 +192,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await prefs.setBool('enableVerification', _enableVerification);
     await prefs.setBool(
         'enableDesktopNotifications', _enableDesktopNotifications);
+    await prefs.setBool('autoFixCompatibility', _autoFixCompatibility);
   }
 
   Future<void> _loadProfiles() async {
@@ -429,7 +432,6 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (context) => CodecSettingsDialog(
         initialVideoCodec: null,
-        initialQualityPreset: null,
         isVideoTrack: true,
         showBatchOptions: true,
         fileCount: _files.length,
@@ -438,12 +440,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (result != null && result['applyToAll'] == true) {
       setState(() {
-        final qualityPreset = result['qualityPreset'] as QualityPreset?;
-        for (final file in _files) {
-          file.qualityPreset = qualityPreset;
+        // Apply selected video codec (if any) to all video tracks in each file
+        final codecSettings =
+            result['codecSettings'] as CodecConversionSettings?;
+        if (codecSettings?.videoCodec != null) {
+          for (final file in _files) {
+            for (final track in file.videoTracks) {
+              file.codecSettings[track.streamIndex] = CodecConversionSettings(
+                videoCodec: codecSettings!.videoCodec,
+              );
+            }
+          }
+          _appendLog(
+              'Applied video codec (${codecSettings!.videoCodec!.displayName}) to ${_files.length} file(s)');
         }
       });
-      _appendLog('Applied video quality preset to ${_files.length} file(s)');
     }
   }
 
@@ -584,6 +595,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _clearFiles() {
     setState(() {
       _files.clear();
+      _batchMode = false;
       _appendLog('Cleared all files');
     });
   }
@@ -613,6 +625,32 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
     });
+    // Create per-file log stubs for cancelled items so a .log is always produced
+    try {
+      if (_lastOutputDir != null) {
+        final dir = _lastOutputDir!;
+        final ext = _outputFormat;
+        final now = DateTime.now();
+        for (final file in _files) {
+          if (file.exportStatus == 'cancelled') {
+            final outputFileName =
+                '${path.basenameWithoutExtension(file.outputName)}.$ext';
+            final outPath = path.join(dir, outputFileName);
+            final logPath = path.setExtension(outPath, '.log');
+            final buf = StringBuffer()
+              ..writeln('FFmpeg Export Log')
+              ..writeln('Source: ${file.path}')
+              ..writeln('Destination dir: $dir')
+              ..writeln('Planned output: $outputFileName')
+              ..writeln('Started: $now')
+              ..writeln('Status: Cancelled by user at $now');
+            File(logPath).writeAsStringSync(buf.toString());
+          }
+        }
+      }
+    } catch (_) {
+      // Best-effort: ignore log write errors on cancel
+    }
     _appendLog('Export cancelled by user');
   }
 
@@ -650,6 +688,10 @@ class _MyHomePageState extends State<MyHomePage> {
         _appendLog('ERROR: Failed to probe $filePath: $e');
       }
     }
+    // Update batch mode automatically based on file count
+    setState(() {
+      _batchMode = _files.length > 1;
+    });
   }
 
   Future<void> _handleDrop(List<String> paths) async {
@@ -789,18 +831,28 @@ class _MyHomePageState extends State<MyHomePage> {
             item.exportProgress = progress;
           });
         },
+        onLog: (msg) => _appendLog(msg),
+        onProcessStarted: (process, stage) {
+          // Register live process immediately for cancellation
+          setState(() {
+            item.currentProcess = process;
+            _activeProcesses.add(process);
+          });
+          // Ensure cleanup after process finishes
+          process.exitCode.then((_) {
+            if (!mounted) return;
+            setState(() {
+              _activeProcesses.remove(process);
+              if (identical(item.currentProcess, process)) {
+                item.currentProcess = null;
+              }
+            });
+          });
+        },
+        autoFixIncompat: _autoFixCompatibility,
       );
 
-      if (result.process != null) {
-        item.currentProcess = result.process;
-        _activeProcesses.add(result.process!);
-      }
-
-      if (result.process != null) {
-        await result.process!.exitCode;
-        _activeProcesses.remove(result.process);
-        item.currentProcess = null;
-      }
+      // Process lifecycle is handled by onProcessStarted callback above.
 
       if (result.success) {
         setState(() {
@@ -983,9 +1035,17 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return DropTarget(
-      onDragEntered: (details) => setState(() => _dragging = true),
+      onDragEntered: (details) {
+        if (_running) return; // ignore drag UI while running
+        setState(() => _dragging = true);
+      },
       onDragExited: (details) => setState(() => _dragging = false),
       onDragDone: (details) {
+        // Ignore new drops while an export is running to avoid disturbing encoding
+        if (_running) {
+          setState(() => _dragging = false);
+          return;
+        }
         setState(() => _dragging = false);
         _handleDrop(details.files.map((f) => f.path).toList());
       },
@@ -1004,7 +1064,7 @@ class _MyHomePageState extends State<MyHomePage> {
             IconButton(
               icon: const Icon(Icons.settings),
               tooltip: 'Settings',
-              onPressed: () => _showSettingsDialog(),
+              onPressed: _running ? null : () => _showSettingsDialog(),
             ),
           ],
         ),
@@ -1122,8 +1182,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                             ListTileControlAffinity.leading,
                                         title: const Text('Batch mode'),
                                         value: _batchMode,
-                                        onChanged: (v) => setState(
-                                            () => _batchMode = v ?? false),
+                                        onChanged: _running
+                                            ? null
+                                            : (v) => setState(
+                                                () => _batchMode = v ?? false),
                                       ),
                                       if (_batchMode) ...[
                                         const SizedBox(height: 8),
@@ -1136,7 +1198,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 const Text(
-                                                  'Batch Codec/Quality',
+                                                  'Batch Codecs',
                                                   style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
@@ -1153,7 +1215,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       icon: const Icon(
                                                           Icons.video_settings),
                                                       label: const Text(
-                                                          'Video Quality'),
+                                                          'Video Codec'),
                                                     ),
                                                     OutlinedButton.icon(
                                                       onPressed: _running
@@ -1162,7 +1224,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       icon: const Icon(
                                                           Icons.audio_file),
                                                       label: const Text(
-                                                          'Audio Codec'),
+                                                          'Audio Codec Settings'),
                                                     ),
                                                     OutlinedButton.icon(
                                                       onPressed: _running
@@ -1209,8 +1271,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                       ListTileControlAffinity.leading,
                                   title: const Text('Batch mode'),
                                   value: _batchMode,
-                                  onChanged: (v) =>
-                                      setState(() => _batchMode = v ?? false),
+                                  onChanged: _running
+                                      ? null
+                                      : (v) => setState(
+                                          () => _batchMode = v ?? false),
                                 ),
                                 if (_batchMode) ...[
                                   const SizedBox(height: 8),
@@ -1223,7 +1287,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             CrossAxisAlignment.start,
                                         children: [
                                           const Text(
-                                            'Batch Codec/Quality',
+                                            'Batch Codecs',
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold),
                                           ),
@@ -1239,7 +1303,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                 icon: const Icon(
                                                     Icons.video_settings),
                                                 label:
-                                                    const Text('Video Quality'),
+                                                    const Text('Video Codec'),
                                               ),
                                               OutlinedButton.icon(
                                                 onPressed: _running
@@ -1247,8 +1311,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     : _showBatchAudioCodecDialog,
                                                 icon: const Icon(
                                                     Icons.audio_file),
-                                                label:
-                                                    const Text('Audio Codec'),
+                                                label: const Text(
+                                                    'Audio Codec Settings'),
                                               ),
                                             ],
                                           ),
@@ -1306,13 +1370,15 @@ class _MyHomePageState extends State<MyHomePage> {
                                               fontWeight: FontWeight.bold)),
                                       const Spacer(),
                                       TextButton.icon(
-                                        onPressed: () =>
-                                            setState(() => _log = ''),
+                                        onPressed: _running
+                                            ? null
+                                            : () => setState(() => _log = ''),
                                         icon: const Icon(Icons.clear, size: 16),
                                         label: const Text('Clear'),
                                       ),
                                       TextButton.icon(
-                                        onPressed: _saveLogToFile,
+                                        onPressed:
+                                            _running ? null : _saveLogToFile,
                                         icon: const Icon(Icons.save, size: 16),
                                         label: const Text('Save'),
                                       ),
@@ -1438,6 +1504,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
               const SizedBox(height: 16),
+              const Text('Compatibility:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              SwitchListTile(
+                title: const Text('Auto-fix container incompatibilities'),
+                subtitle: const Text(
+                    'Transcode incompatible audio (e.g., to AAC/Opus) and drop unsupported subtitles when needed'),
+                value: _autoFixCompatibility,
+                onChanged: (value) {
+                  setState(() {
+                    _autoFixCompatibility = value;
+                  });
+                  this.setState(() {});
+                },
+              ),
+              const SizedBox(height: 16),
               const Text('Notifications:',
                   style: TextStyle(fontWeight: FontWeight.bold)),
               SwitchListTile(
@@ -1472,6 +1553,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return FileCard(
       item: item,
       onChanged: () => setState(() {}),
+      outputFormat: _outputFormat,
+      autoFixEnabled: _autoFixCompatibility,
     );
   }
 

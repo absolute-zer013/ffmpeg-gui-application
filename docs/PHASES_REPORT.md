@@ -60,7 +60,7 @@ Notes
 ## Phase 4 — UI Polish
 
 What shipped
-- Batch Codec/Quality Apply (Feature #30): Batch mode in `CodecSettingsDialog` and helpers to apply video quality and audio codec settings across files.
+- Batch Codecs Apply (Feature #30): Batch mode in `CodecSettingsDialog` and helpers to apply video and audio codec settings across files.
 - Better Notifications (Feature #29): Desktop notifications on Windows with rich export stats, plus enhanced in‑app SnackBars and a settings toggle.
 - Export Queue Management (Feature #24): Queue item model, service, and panel for reorder/pause/resume/cancel with stream‑based updates.
 - File Preview (Feature #22): Detailed preview dialog with tracks, metadata, indicators, and "Open Location" integration.

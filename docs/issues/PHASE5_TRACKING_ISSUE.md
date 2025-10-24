@@ -41,6 +41,20 @@ References:
 - [ ] 27. Command-Line Interface
 - [ ] 28. Presets Import
 
+## Recently Implemented (Post-Phase 4) 🆕
+
+These features were implemented during Phase 5 planning but are not yet reflected in the main ENHANCEMENTS.md:
+
+- ✅ **Export Stage Progress Tracking** - Two-stage export (remux + encode) with progress display for both stages
+- ✅ **Comprehensive Export Logging** - Per-file logs with stdout/stderr, timing, and detailed encoding info
+- ✅ **Auto-Fix Codec Compatibility** - Automatic transcoding of incompatible codecs when container format selected; auto-drop unsupported subtitles
+- ✅ **Dynamic Codec Filtering** - When auto-fix enabled and MP4/WebM format selected, hide incompatible codecs from UI
+- ✅ **Codec Preset System for All Codecs** - Quick preset chips (Speed/Balanced/Quality) for H.264, H.265, VP9 (in addition to AV1)
+- ✅ **CRF Adjustment** - Manual CRF field for all video codecs
+- ✅ **Preset Switching** - Smooth codec switching with automatic reset of preset values to avoid conflicts
+- ✅ **Export Summary with Encoding Details** - Display video/audio codec selections, CRF, presets, bitrates in export summary dialog
+- ✅ **Cancellation Handling** - Proper exit code mapping for cancellation (shows user-friendly message instead of error)
+
 ## Acceptance criteria (general)
 For each item above:
 - Clear UX behavior defined (mock or description)
