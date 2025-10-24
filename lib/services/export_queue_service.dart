@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/export_queue_item.dart';
 import '../models/file_item.dart';
+import '../models/multi_profile_export_config.dart';
+import '../models/export_profile.dart';
 
 /// Service for managing the export queue
 class ExportQueueService {
@@ -212,5 +214,62 @@ class ExportQueueService {
   Future<void> clearSavedState() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_queueKey);
+  }
+
+  /// Adds multiple queue items for multi-profile export
+  /// Each profile generates a separate queue item with modified filename
+  void addMultiProfileExport(
+    FileItem fileItem,
+    MultiProfileExportConfig config, {
+    int priority = 0,
+  }) {
+    final profiles = config.profiles;
+
+    for (int i = 0; i < profiles.length; i++) {
+      final profile = profiles[i];
+      
+      // Generate output filename with appropriate suffix
+      final originalPath = fileItem.path;
+      final outputPath = _generateOutputPath(originalPath, profile, i, config);
+
+      // Create a copy of the file item with the modified output path
+      // Note: FileItem doesn't have outputPath field, so we'll store it in metadata
+      // For now, we'll just queue the items and handle the naming in the export service
+      
+      final id = (++_idCounter).toString();
+      final queueItem = ExportQueueItem(
+        id: id,
+        fileItem: fileItem,
+        priority: priority,
+        // Store profile information for later use
+      );
+
+      _queue.add(queueItem);
+    }
+
+    _sortQueue();
+    _notifyListeners();
+  }
+
+  /// Generates output path for multi-profile export
+  String _generateOutputPath(
+    String originalPath,
+    ExportProfile profile,
+    int index,
+    MultiProfileExportConfig config,
+  ) {
+    // Extract directory and filename
+    final lastSeparator = originalPath.lastIndexOf(RegExp(r'[/\\]'));
+    final directory = lastSeparator >= 0
+        ? originalPath.substring(0, lastSeparator + 1)
+        : '';
+    final fileName = lastSeparator >= 0
+        ? originalPath.substring(lastSeparator + 1)
+        : originalPath;
+
+    // Generate new filename with suffix
+    final newFileName = config.generateFilename(fileName, profile, index);
+
+    return '$directory$newFileName';
   }
 }

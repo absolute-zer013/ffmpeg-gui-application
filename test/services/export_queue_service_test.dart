@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:ffmpeg_filter_app/services/export_queue_service.dart';
 import 'package:ffmpeg_filter_app/models/export_queue_item.dart';
 import 'package:ffmpeg_filter_app/models/file_item.dart';
+import 'package:ffmpeg_filter_app/models/multi_profile_export_config.dart';
+import 'package:ffmpeg_filter_app/models/export_profile.dart';
 
 void main() {
   group('ExportQueueService', () {
@@ -244,6 +246,54 @@ void main() {
 
       final emittedQueue = await streamFuture;
       expect(emittedQueue.length, equals(1));
+    });
+
+    test('addMultiProfileExport adds multiple items for each profile', () {
+      final profile1 = ExportProfile(name: 'HD', removeEnglishAudio: true);
+      final profile2 = ExportProfile(name: 'SD', removeEnglishAudio: false);
+      
+      final config = MultiProfileExportConfig(
+        profiles: [profile1, profile2],
+        suffixStrategy: FilenameSuffixStrategy.profileName,
+      );
+
+      service.addMultiProfileExport(fileItem1, config);
+
+      expect(service.queue.length, equals(2));
+      expect(service.queue[0].fileItem, equals(fileItem1));
+      expect(service.queue[1].fileItem, equals(fileItem1));
+    });
+
+    test('addMultiProfileExport respects priority', () {
+      final profile1 = ExportProfile(name: 'HD', removeEnglishAudio: true);
+      final profile2 = ExportProfile(name: 'SD', removeEnglishAudio: false);
+      
+      final config = MultiProfileExportConfig(
+        profiles: [profile1, profile2],
+      );
+
+      service.addToQueue(fileItem2, priority: 1);
+      service.addMultiProfileExport(fileItem1, config, priority: 10);
+
+      expect(service.queue.length, equals(3));
+      // High priority items should be first
+      expect(service.queue[0].priority, equals(10));
+      expect(service.queue[1].priority, equals(10));
+      expect(service.queue[2].priority, equals(1));
+    });
+
+    test('addMultiProfileExport with three profiles creates three items', () {
+      final profile1 = ExportProfile(name: 'HD', removeEnglishAudio: true);
+      final profile2 = ExportProfile(name: 'SD', removeEnglishAudio: false);
+      final profile3 = ExportProfile(name: 'Mobile', removeEnglishAudio: true);
+      
+      final config = MultiProfileExportConfig(
+        profiles: [profile1, profile2, profile3],
+      );
+
+      service.addMultiProfileExport(fileItem1, config);
+
+      expect(service.queue.length, equals(3));
     });
   });
 }
