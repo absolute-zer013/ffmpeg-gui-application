@@ -19,6 +19,9 @@ class MultiProfileExportDialog extends StatefulWidget {
 }
 
 class _MultiProfileExportDialogState extends State<MultiProfileExportDialog> {
+  static const int _minimumProfileCount = 2;
+  static const String _previewFilename = 'example.mkv';
+
   late Set<String> _selectedProfileNames;
   late FilenameSuffixStrategy _suffixStrategy;
   late bool _parallel;
@@ -43,7 +46,7 @@ class _MultiProfileExportDialogState extends State<MultiProfileExportDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final canApply = _selectedProfileNames.length >= 2;
+    final canApply = _selectedProfileNames.length >= _minimumProfileCount;
 
     return AlertDialog(
       title: const Text('Multi-Profile Export'),
@@ -118,7 +121,7 @@ class _MultiProfileExportDialogState extends State<MultiProfileExportDialog> {
                 if (!canApply) ...[
                   const SizedBox(height: 8),
                   const Text(
-                    'Select at least 2 profiles',
+                    'Select at least $_minimumProfileCount profiles',
                     style: TextStyle(fontSize: 12, color: Colors.orange),
                   ),
                 ],
@@ -189,7 +192,7 @@ class _MultiProfileExportDialogState extends State<MultiProfileExportDialog> {
                             suffixStrategy: _suffixStrategy,
                           );
                           final filename = config.generateFilename(
-                            'example.mkv',
+                            _previewFilename,
                             entry.value,
                             entry.key,
                           );

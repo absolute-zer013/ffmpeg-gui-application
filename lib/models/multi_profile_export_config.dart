@@ -19,21 +19,27 @@ class MultiProfileExportConfig {
 
   /// Generate output filename with appropriate suffix
   String generateFilename(String originalName, ExportProfile profile, int index) {
-    final baseName = originalName.replaceAll(RegExp(r'\.[^.]+$'), '');
-    final extension = originalName.contains('.') 
-        ? originalName.split('.').last 
+    // Use path package for proper extension handling
+    final baseName = originalName.substring(
+      0, 
+      originalName.lastIndexOf('.') > 0 
+        ? originalName.lastIndexOf('.') 
+        : originalName.length
+    );
+    final extension = originalName.lastIndexOf('.') > 0
+        ? originalName.substring(originalName.lastIndexOf('.') + 1)
         : 'mkv';
 
     String suffix;
     switch (suffixStrategy) {
       case FilenameSuffixStrategy.profileName:
-        suffix = profile.name.replaceAll(RegExp(r'[^\w\-]'), '_');
+        suffix = profile.name.replaceAll(RegExp(r'[^\w_-]'), '_');
         break;
       case FilenameSuffixStrategy.index:
         suffix = (index + 1).toString().padLeft(2, '0');
         break;
       case FilenameSuffixStrategy.profileNameAndIndex:
-        suffix = '${profile.name.replaceAll(RegExp(r'[^\w\-]'), '_')}_${(index + 1).toString().padLeft(2, '0')}';
+        suffix = '${profile.name.replaceAll(RegExp(r'[^\w_-]'), '_')}_${(index + 1).toString().padLeft(2, '0')}';
         break;
     }
 
