@@ -31,11 +31,37 @@ class FFmpegExportService {
     required String outputFormat,
     bool autoFix = false,
   }) {
-    final args = <String>[
+    final args = <String>[];
+    
+    // Add trim/cut settings (Feature #9) - must come before -i
+    if (item.trimSettings != null && item.trimSettings!.enabled) {
+      if (item.trimSettings!.startTime != null) {
+        args.addAll(['-ss', item.trimSettings!.startTime.toString()]);
+      }
+    }
+    
+    // Add audio/subtitle sync offsets (Feature #17) - must come before -i
+    if (item.syncOffsets != null && item.syncOffsets!.isNotEmpty) {
+      for (final offset in item.syncOffsets!) {
+        args.addAll(['-itsoffset', offset.offsetSeconds.toString()]);
+      }
+    }
+    
+    args.addAll([
       '-i', inputPath,
+    ]);
+    
+    // Add end time for trim/cut (Feature #9) - comes after -i
+    if (item.trimSettings != null && item.trimSettings!.enabled) {
+      if (item.trimSettings!.endTime != null) {
+        args.addAll(['-to', item.trimSettings!.endTime.toString()]);
+      }
+    }
+    
+    args.addAll([
       '-map', '0',
       '-y', // Overwrite output files
-    ];
+    ]);
 
     // Remove unselected video streams
     for (final track in item.videoTracks) {
@@ -308,6 +334,22 @@ class FFmpegExportService {
         // Copy subtitle
         args.addAll(['-c:s:$i', 'copy']);
       }
+    }
+    
+    // Apply resolution/framerate changes (Feature #10)
+    final filters = <String>[];
+    if (item.resolutionSettings != null && item.resolutionSettings!.enabled) {
+      final scaleFilter = item.resolutionSettings!.scaleFilter;
+      if (scaleFilter != null) {
+        filters.add(scaleFilter);
+      }
+      if (item.resolutionSettings!.framerate != null) {
+        args.addAll(['-r', item.resolutionSettings!.framerate.toString()]);
+      }
+    }
+    
+    if (filters.isNotEmpty) {
+      args.addAll(['-vf', filters.join(',')]);
     }
     
     args.addAll([
