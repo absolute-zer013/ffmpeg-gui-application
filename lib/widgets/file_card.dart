@@ -6,6 +6,9 @@ import '../utils/file_utils.dart';
 import 'metadata_editor_dialog.dart';
 import 'codec_settings_dialog.dart';
 import 'file_preview_dialog.dart';
+import 'trim_settings_dialog.dart';
+import 'resolution_settings_dialog.dart';
+import 'sync_offset_dialog.dart';
 
 /// Widget for displaying a file card with track selections
 class FileCard extends StatelessWidget {
@@ -122,6 +125,81 @@ class FileCard extends StatelessWidget {
     );
   }
 
+  void _showTrimSettings(BuildContext context) async {
+    final result = await showDialog<TrimSettings>(
+      context: context,
+      builder: (context) => TrimSettingsDialog(
+        initialSettings: item.trimSettings,
+        fileDuration: item.duration,
+      ),
+    );
+
+    if (result != null) {
+      item.trimSettings = result;
+      onChanged();
+    }
+  }
+
+  void _showResolutionSettings(BuildContext context) async {
+    // Extract original width/height from video tracks
+    int? width;
+    int? height;
+    if (item.videoTracks.isNotEmpty) {
+      final firstVideo = item.videoTracks.first;
+      // Parse resolution from codec info if available (e.g., "1920x1080")
+      final codec = firstVideo.codec ?? '';
+      final resMatch = RegExp(r'(\d+)x(\d+)').firstMatch(codec);
+      if (resMatch != null) {
+        width = int.tryParse(resMatch.group(1)!);
+        height = int.tryParse(resMatch.group(2)!);
+      }
+    }
+
+    final result = await showDialog<ResolutionSettings>(
+      context: context,
+      builder: (context) => ResolutionSettingsDialog(
+        initialSettings: item.resolutionSettings,
+        originalWidth: width,
+        originalHeight: height,
+      ),
+    );
+
+    if (result != null) {
+      item.resolutionSettings = result;
+      onChanged();
+    }
+  }
+
+  void _showSyncOffsets(BuildContext context) async {
+    final result = await showDialog<List<SyncOffset>>(
+      context: context,
+      builder: (context) => SyncOffsetDialog(
+        audioTracks: item.audioTracks,
+        subtitleTracks: item.subtitleTracks,
+        initialOffsets: item.syncOffsets,
+      ),
+    );
+
+    if (result != null) {
+      item.syncOffsets = result;
+      onChanged();
+    }
+  }
+
+  String _formatDuration(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    final seconds = duration.inSeconds.remainder(60);
+
+    if (hours > 0) {
+      return '${hours}h ${minutes}m';
+    } else if (minutes > 0) {
+      return '${minutes}m ${seconds}s';
+    } else {
+      return '${seconds}s';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final statusIcon = item.exportStatus == 'completed'
@@ -155,25 +233,121 @@ class FileCard extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
-            IconButton(
-              icon: const Icon(Icons.info_outline),
-              onPressed: () => _showPreview(context),
-              tooltip: 'Preview',
-            ),
-            IconButton(
-              icon: const Icon(Icons.video_settings),
-              onPressed: () => _showVideoCodecSettings(context),
-              tooltip: 'Video Codec',
-            ),
-            IconButton(
-              icon: const Icon(Icons.audio_file),
-              onPressed: () => _showAudioCodecSettings(context),
-              tooltip: 'Audio Codec',
-            ),
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => _showMetadataEditor(context),
-              tooltip: 'Edit Metadata',
+            // New Tier 2 feature indicators
+            if (item.trimSettings?.enabled == true)
+              Tooltip(
+                message: item.trimSettings.toString(),
+                child: const Chip(
+                  label: Icon(Icons.content_cut, size: 14),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            if (item.resolutionSettings?.enabled == true)
+              Tooltip(
+                message: item.resolutionSettings.toString(),
+                child: const Chip(
+                  label: Icon(Icons.aspect_ratio, size: 14),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            if (item.syncOffsets != null && item.syncOffsets!.isNotEmpty)
+              Tooltip(
+                message: '${item.syncOffsets!.length} sync offset(s)',
+                child: const Chip(
+                  label: Icon(Icons.sync, size: 14),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert),
+              tooltip: 'More options',
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'preview',
+                  child: ListTile(
+                    leading: Icon(Icons.info_outline),
+                    title: Text('Preview'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'trim',
+                  child: ListTile(
+                    leading: Icon(Icons.content_cut),
+                    title: Text('Trim/Cut'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'resolution',
+                  child: ListTile(
+                    leading: Icon(Icons.aspect_ratio),
+                    title: Text('Resolution/Framerate'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'sync',
+                  child: ListTile(
+                    leading: Icon(Icons.sync),
+                    title: Text('Audio/Subtitle Sync'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'video',
+                  child: ListTile(
+                    leading: Icon(Icons.video_settings),
+                    title: Text('Video Codec'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'audio',
+                  child: ListTile(
+                    leading: Icon(Icons.audio_file),
+                    title: Text('Audio Codec'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'metadata',
+                  child: ListTile(
+                    leading: Icon(Icons.edit),
+                    title: Text('Edit Metadata'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
+              onSelected: (value) {
+                switch (value) {
+                  case 'preview':
+                    _showPreview(context);
+                    break;
+                  case 'trim':
+                    _showTrimSettings(context);
+                    break;
+                  case 'resolution':
+                    _showResolutionSettings(context);
+                    break;
+                  case 'sync':
+                    _showSyncOffsets(context);
+                    break;
+                  case 'video':
+                    _showVideoCodecSettings(context);
+                    break;
+                  case 'audio':
+                    _showAudioCodecSettings(context);
+                    break;
+                  case 'metadata':
+                    _showMetadataEditor(context);
+                    break;
+                }
+              },
             ),
             const Icon(Icons.expand_more),
           ],
@@ -202,6 +376,13 @@ class FileCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text('${(item.exportProgress * 100).toInt()}%'),
+              if (item.estimatedTimeRemaining != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  'ETA: ${_formatDuration(item.estimatedTimeRemaining!)}',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ],
           ],
         ),

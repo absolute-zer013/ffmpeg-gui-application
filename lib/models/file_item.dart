@@ -4,6 +4,10 @@ import 'metadata.dart';
 import 'codec_options.dart';
 import 'quality_preset.dart';
 import 'rename_pattern.dart';
+import 'trim_settings.dart';
+import 'resolution_settings.dart';
+import 'sync_offset.dart';
+import 'multi_profile_export_config.dart';
 
 /// Data model representing a file with its streams and selections.
 class FileItem {
@@ -45,6 +49,17 @@ class FileItem {
   int? renameEpisode;
   int? renameSeason;
   int? renameYear;
+  // Trim/Cut settings (Feature #9)
+  TrimSettings? trimSettings;
+  // Resolution/Framerate settings (Feature #10)
+  ResolutionSettings? resolutionSettings;
+  // Audio/Subtitle sync offsets (Feature #17)
+  List<SyncOffset>? syncOffsets;
+  // ETA tracking (Feature #25)
+  DateTime? exportStartTime;
+  Duration? estimatedTimeRemaining;
+  // Multi-profile export (Feature #14)
+  MultiProfileExportConfig? multiProfileConfig;
 
   FileItem({
     required this.path,
@@ -76,6 +91,12 @@ class FileItem {
     this.renameEpisode,
     this.renameSeason,
     this.renameYear,
+    this.trimSettings,
+    this.resolutionSettings,
+    this.syncOffsets,
+    this.exportStartTime,
+    this.estimatedTimeRemaining,
+    this.multiProfileConfig,
   })  : name = name ?? File(path).uri.pathSegments.last,
         outputName = outputName ?? File(path).uri.pathSegments.last,
         videoTracks = videoTracks ?? [],

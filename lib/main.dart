@@ -19,6 +19,7 @@ import 'services/verification_service.dart';
 import 'services/rule_service.dart';
 import 'services/notification_service.dart';
 import 'services/recent_files_service.dart';
+import 'services/performance_tracking_service.dart';
 // import 'models/quality_preset.dart'; // Not used in the codec dialogs anymore
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
@@ -996,9 +997,21 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       item.exportStatus = 'processing';
       item.exportProgress = 0.0;
+      item.exportStartTime = DateTime.now(); // Track start time for ETA
+      item.estimatedTimeRemaining = null;
     });
 
     _appendLog('Processing: ${item.name}');
+    
+    // Calculate initial ETA based on historical data
+    if (item.fileSize != null) {
+      final eta = await PerformanceTrackingService.estimateExportTime(item.fileSize!);
+      if (eta != null) {
+        setState(() {
+          item.estimatedTimeRemaining = eta;
+        });
+      }
+    }
 
     try {
       final result = await FFmpegExportService.exportFile(
@@ -1008,6 +1021,16 @@ class _MyHomePageState extends State<MyHomePage> {
         onProgress: (progress) {
           setState(() {
             item.exportProgress = progress;
+            // Update ETA based on actual progress
+            if (item.exportStartTime != null && item.fileSize != null && progress > 0.01) {
+              final elapsed = DateTime.now().difference(item.exportStartTime!);
+              final remaining = PerformanceTrackingService.calculateRemainingTime(
+                fileSizeBytes: item.fileSize!,
+                progressPercent: progress * 100,
+                elapsedTime: elapsed,
+              );
+              item.estimatedTimeRemaining = remaining;
+            }
           });
         },
         onLog: (msg) => _appendLog(msg),
@@ -1037,8 +1060,18 @@ class _MyHomePageState extends State<MyHomePage> {
         setState(() {
           item.exportStatus = 'completed';
           item.exportProgress = 1.0;
+          item.estimatedTimeRemaining = null;
         });
         _appendLog('✓ Completed: ${item.name}');
+        
+        // Record performance metrics for future ETA calculations (Feature #25)
+        if (item.exportStartTime != null && item.fileSize != null) {
+          final duration = DateTime.now().difference(item.exportStartTime!);
+          await PerformanceTrackingService.recordExport(
+            fileSizeBytes: item.fileSize!,
+            durationSeconds: duration.inSeconds.toDouble(),
+          );
+        }
 
         // Add to recent files
         await _addFileToRecents(item.path);
