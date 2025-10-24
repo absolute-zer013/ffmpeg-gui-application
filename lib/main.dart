@@ -91,6 +91,10 @@ class _MyHomePageState extends State<MyHomePage> {
   String _searchQuery = '';
   Set<String> _statusFilters = {}; // 'pending', 'completed', 'failed'
   final TextEditingController _searchController = TextEditingController();
+  
+  // Sort state
+  String _sortBy = 'name'; // 'name', 'size', 'duration', 'status'
+  bool _sortAscending = true;
 
   @override
   void initState() {
@@ -188,6 +192,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _enableDesktopNotifications =
           prefs.getBool('enableDesktopNotifications') ?? true;
       _autoFixCompatibility = prefs.getBool('autoFixCompatibility') ?? true;
+      _sortBy = prefs.getString('sortBy') ?? 'name';
+      _sortAscending = prefs.getBool('sortAscending') ?? true;
     });
   }
 
@@ -202,6 +208,8 @@ class _MyHomePageState extends State<MyHomePage> {
     await prefs.setBool(
         'enableDesktopNotifications', _enableDesktopNotifications);
     await prefs.setBool('autoFixCompatibility', _autoFixCompatibility);
+    await prefs.setString('sortBy', _sortBy);
+    await prefs.setBool('sortAscending', _sortAscending);
   }
 
   Future<void> _loadProfiles() async {
@@ -243,31 +251,70 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   List<FileItem> _getFilteredFiles() {
-    if (_searchQuery.isEmpty && _statusFilters.isEmpty) {
-      return _files;
-    }
+    var filteredFiles = _files;
 
-    return _files.where((file) {
-      // Search filter
-      if (_searchQuery.isNotEmpty) {
+    // Apply search filter
+    if (_searchQuery.isNotEmpty) {
+      filteredFiles = filteredFiles.where((file) {
         final query = _searchQuery.toLowerCase();
         final matchesName = file.name.toLowerCase().contains(query);
         final matchesPath = file.path.toLowerCase().contains(query);
-        if (!matchesName && !matchesPath) {
-          return false;
-        }
-      }
+        return matchesName || matchesPath;
+      }).toList();
+    }
 
-      // Status filter
-      if (_statusFilters.isNotEmpty) {
+    // Apply status filter
+    if (_statusFilters.isNotEmpty) {
+      filteredFiles = filteredFiles.where((file) {
         final status = file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
-        if (!_statusFilters.contains(status)) {
-          return false;
-        }
-      }
+        return _statusFilters.contains(status);
+      }).toList();
+    }
 
-      return true;
-    }).toList();
+    // Apply sorting
+    filteredFiles.sort((a, b) {
+      int comparison = 0;
+      
+      switch (_sortBy) {
+        case 'name':
+          comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
+          break;
+        case 'size':
+          final sizeA = a.fileSize ?? 0;
+          final sizeB = b.fileSize ?? 0;
+          comparison = sizeA.compareTo(sizeB);
+          break;
+        case 'duration':
+          final durationA = _parseDuration(a.duration ?? '0:00:00');
+          final durationB = _parseDuration(b.duration ?? '0:00:00');
+          comparison = durationA.compareTo(durationB);
+          break;
+        case 'status':
+          final statusA = a.exportStatus.isEmpty ? 'pending' : a.exportStatus;
+          final statusB = b.exportStatus.isEmpty ? 'pending' : b.exportStatus;
+          comparison = statusA.compareTo(statusB);
+          break;
+      }
+      
+      return _sortAscending ? comparison : -comparison;
+    });
+
+    return filteredFiles;
+  }
+
+  int _parseDuration(String duration) {
+    try {
+      final parts = duration.split(':');
+      if (parts.length == 3) {
+        final hours = int.parse(parts[0]);
+        final minutes = int.parse(parts[1]);
+        final seconds = double.parse(parts[2]).round();
+        return hours * 3600 + minutes * 60 + seconds;
+      }
+    } catch (e) {
+      // Return 0 if parsing fails
+    }
+    return 0;
   }
 
   void _showRecentFilesMenu(BuildContext context, Offset position) {
@@ -1357,6 +1404,53 @@ class _MyHomePageState extends State<MyHomePage> {
                                 _statusFilters.add(value);
                               }
                             });
+                          },
+                        ),
+                        const SizedBox(width: 8),
+                        PopupMenuButton<String>(
+                          icon: const Icon(Icons.sort),
+                          tooltip: 'Sort files',
+                          itemBuilder: (context) => [
+                            CheckedPopupMenuItem<String>(
+                              value: 'name',
+                              checked: _sortBy == 'name',
+                              child: const Text('Name'),
+                            ),
+                            CheckedPopupMenuItem<String>(
+                              value: 'size',
+                              checked: _sortBy == 'size',
+                              child: const Text('Size'),
+                            ),
+                            CheckedPopupMenuItem<String>(
+                              value: 'duration',
+                              checked: _sortBy == 'duration',
+                              child: const Text('Duration'),
+                            ),
+                            CheckedPopupMenuItem<String>(
+                              value: 'status',
+                              checked: _sortBy == 'status',
+                              child: const Text('Status'),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            setState(() {
+                              _sortBy = value;
+                            });
+                            _savePreferences();
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(_sortAscending
+                              ? Icons.arrow_upward
+                              : Icons.arrow_downward),
+                          tooltip: _sortAscending
+                              ? 'Sort ascending'
+                              : 'Sort descending',
+                          onPressed: () {
+                            setState(() {
+                              _sortAscending = !_sortAscending;
+                            });
+                            _savePreferences();
                           },
                         ),
                       ],
