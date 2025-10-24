@@ -86,6 +86,11 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _enableDesktopNotifications = true;
   bool _autoFixCompatibility = true;
   List<RecentFile> _recentFiles = [];
+  
+  // Search and Filter state
+  String _searchQuery = '';
+  Set<String> _statusFilters = {}; // 'pending', 'completed', 'failed'
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -235,6 +240,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
     // Add to files list and probe
     await _handleFilePaths([filePath]);
+  }
+
+  List<FileItem> _getFilteredFiles() {
+    if (_searchQuery.isEmpty && _statusFilters.isEmpty) {
+      return _files;
+    }
+
+    return _files.where((file) {
+      // Search filter
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final matchesName = file.name.toLowerCase().contains(query);
+        final matchesPath = file.path.toLowerCase().contains(query);
+        if (!matchesName && !matchesPath) {
+          return false;
+        }
+      }
+
+      // Status filter
+      if (_statusFilters.isNotEmpty) {
+        final status = file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
+        if (!_statusFilters.contains(status)) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
   }
 
   void _showRecentFilesMenu(BuildContext context, Offset position) {
@@ -1246,6 +1279,117 @@ class _MyHomePageState extends State<MyHomePage> {
                             '${_files.length} file(s) | ${FileUtils.formatBytes(_files.fold<int>(0, (sum, f) => sum + (f.fileSize ?? 0)))}'),
                     ],
                   ),
+                  
+                  // Search and filter controls
+                  if (_files.isNotEmpty) ...[
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              hintText: 'Search files by name or path...',
+                              prefixIcon: const Icon(Icons.search),
+                              suffixIcon: _searchQuery.isNotEmpty
+                                  ? IconButton(
+                                      icon: const Icon(Icons.clear),
+                                      onPressed: () {
+                                        setState(() {
+                                          _searchController.clear();
+                                          _searchQuery = '';
+                                        });
+                                      },
+                                    )
+                                  : null,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        PopupMenuButton<String>(
+                          icon: Badge(
+                            isLabelVisible: _statusFilters.isNotEmpty,
+                            label: Text('${_statusFilters.length}'),
+                            child: const Icon(Icons.filter_list),
+                          ),
+                          tooltip: 'Filter by status',
+                          itemBuilder: (context) => [
+                            CheckedPopupMenuItem<String>(
+                              value: 'pending',
+                              checked: _statusFilters.contains('pending'),
+                              child: const Text('Pending'),
+                            ),
+                            CheckedPopupMenuItem<String>(
+                              value: 'completed',
+                              checked: _statusFilters.contains('completed'),
+                              child: const Text('Completed'),
+                            ),
+                            CheckedPopupMenuItem<String>(
+                              value: 'failed',
+                              checked: _statusFilters.contains('failed'),
+                              child: const Text('Failed'),
+                            ),
+                            const PopupMenuDivider(),
+                            const PopupMenuItem<String>(
+                              value: 'clear',
+                              child: Text('Clear Filters'),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            setState(() {
+                              if (value == 'clear') {
+                                _statusFilters.clear();
+                              } else if (_statusFilters.contains(value)) {
+                                _statusFilters.remove(value);
+                              } else {
+                                _statusFilters.add(value);
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    if (_searchQuery.isNotEmpty || _statusFilters.isNotEmpty)
+                      Row(
+                        children: [
+                          Text(
+                            'Showing ${_getFilteredFiles().length} of ${_files.length} files',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          const SizedBox(width: 8),
+                          if (_searchQuery.isNotEmpty || _statusFilters.isNotEmpty)
+                            TextButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                  _statusFilters.clear();
+                                });
+                              },
+                              icon: const Icon(Icons.clear, size: 16),
+                              label: const Text('Clear all filters'),
+                              style: TextButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                minimumSize: const Size(0, 32),
+                              ),
+                            ),
+                        ],
+                      ),
+                  ],
+                  
                   const SizedBox(height: 16),
 
                   // Main content area - scrollable
@@ -1288,13 +1432,37 @@ class _MyHomePageState extends State<MyHomePage> {
                                 // File list on the left
                                 Expanded(
                                   flex: 3,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: _files
-                                        .map((file) => _buildFileCard(file))
-                                        .toList(),
-                                  ),
+                                  child: _getFilteredFiles().isEmpty
+                                      ? Center(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(32.0),
+                                            child: Column(
+                                              children: [
+                                                Icon(Icons.search_off,
+                                                    size: 48,
+                                                    color: Colors.grey[400]),
+                                                const SizedBox(height: 16),
+                                                Text(
+                                                  'No files match your filters',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium
+                                                      ?.copyWith(
+                                                        color: Colors.grey[600],
+                                                      ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      : Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: _getFilteredFiles()
+                                              .map((file) =>
+                                                  _buildFileCard(file))
+                                              .toList(),
+                                        ),
                                 ),
 
                                 const SizedBox(width: 16),
