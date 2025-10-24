@@ -30,10 +30,28 @@ enum AudioCodec {
   const AudioCodec(this.displayName, this.ffmpegName, this.description);
 }
 
+/// Enum for subtitle formats
+enum SubtitleFormat {
+  copy('Copy', 'copy', 'No conversion (fast)'),
+  srt('SRT', 'srt', 'SubRip text format (universal)'),
+  ass('ASS', 'ass', 'Advanced SubStation Alpha (styling)'),
+  ssa('SSA', 'ssa', 'SubStation Alpha'),
+  webvtt('WebVTT', 'webvtt', 'Web Video Text Tracks'),
+  mov_text('MOV Text', 'mov_text', 'MP4 subtitle format'),
+  subrip('SubRip', 'subrip', 'SubRip format (alternative)');
+
+  final String displayName;
+  final String ffmpegName;
+  final String description;
+
+  const SubtitleFormat(this.displayName, this.ffmpegName, this.description);
+}
+
 /// Codec conversion settings for a specific track
 class CodecConversionSettings {
   final VideoCodec? videoCodec;
   final AudioCodec? audioCodec;
+  final SubtitleFormat? subtitleFormat;
   // Video params
   final int? videoCrf; // for constant quality
   final String? videoPreset; // encoder preset string
@@ -48,6 +66,7 @@ class CodecConversionSettings {
   CodecConversionSettings({
     this.videoCodec,
     this.audioCodec,
+    this.subtitleFormat,
     this.videoCrf,
     this.videoPreset,
     this.videoBitrateKbps,
@@ -61,6 +80,7 @@ class CodecConversionSettings {
   CodecConversionSettings copyWith({
     VideoCodec? videoCodec,
     AudioCodec? audioCodec,
+    SubtitleFormat? subtitleFormat,
     int? videoCrf,
     String? videoPreset,
     int? videoBitrateKbps,
@@ -73,6 +93,7 @@ class CodecConversionSettings {
     return CodecConversionSettings(
       videoCodec: videoCodec ?? this.videoCodec,
       audioCodec: audioCodec ?? this.audioCodec,
+      subtitleFormat: subtitleFormat ?? this.subtitleFormat,
       videoCrf: videoCrf ?? this.videoCrf,
       videoPreset: videoPreset ?? this.videoPreset,
       videoBitrateKbps: videoBitrateKbps ?? this.videoBitrateKbps,
@@ -88,6 +109,7 @@ class CodecConversionSettings {
     return {
       'videoCodec': videoCodec?.name,
       'audioCodec': audioCodec?.name,
+      'subtitleFormat': subtitleFormat?.name,
       'videoCrf': videoCrf,
       'videoPreset': videoPreset,
       'videoBitrateKbps': videoBitrateKbps,
@@ -106,6 +128,9 @@ class CodecConversionSettings {
           : null,
       audioCodec: json['audioCodec'] != null
           ? AudioCodec.values.firstWhere((e) => e.name == json['audioCodec'])
+          : null,
+      subtitleFormat: json['subtitleFormat'] != null
+          ? SubtitleFormat.values.firstWhere((e) => e.name == json['subtitleFormat'])
           : null,
       videoCrf: json['videoCrf'] as int?,
       videoPreset: json['videoPreset'] as String?,

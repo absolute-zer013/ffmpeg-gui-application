@@ -293,10 +293,24 @@ class FFmpegExportService {
       }
     }
 
-    // Copy subtitle streams during re-encode
+    // Copy subtitle streams during re-encode (or convert if specified)
+    final selectedSubs = item.selectedSubtitles.toList()..sort();
+    for (var i = 0; i < selectedSubs.length; i++) {
+      final pos = selectedSubs[i];
+      final track = item.subtitleTracks[pos];
+      final settings = item.codecSettings[track.streamIndex];
+      
+      if (settings?.subtitleFormat != null && 
+          settings!.subtitleFormat != SubtitleFormat.copy) {
+        // Convert subtitle format
+        args.addAll(['-c:s:$i', settings.subtitleFormat!.ffmpegName]);
+      } else {
+        // Copy subtitle
+        args.addAll(['-c:s:$i', 'copy']);
+      }
+    }
+    
     args.addAll([
-      '-c:s',
-      'copy', // when autoFix is true and container disallows, we already dropped subs in stage1
       '-map_chapters',
       '0',
       '-map_metadata',
