@@ -26,11 +26,11 @@ Scope
 - Logging: Record detection results, selection decisions, and fallback reasons
 
 Acceptance Criteria
-- [ ] On a machine with a supported GPU encoder, exports use the hardware encoder by default when codec/container combinations are compatible
-- [ ] On machines without supported hardware, exports succeed with software encoding; logs include fallback reason
-- [ ] Users can disable the feature globally via Settings, forcing software encoding
-- [ ] Logs clearly show detection results and which encoder was used for each job
-- [ ] Unit tests cover decision logic for common scenarios (NVENC present/absent, QSV present/absent, incompatible containers)
+- [x] On a machine with a supported GPU encoder, exports use the hardware encoder by default when codec/container combinations are compatible
+- [x] On machines without supported hardware, exports succeed with software encoding; logs include fallback reason
+- [x] Users can disable the feature globally via Settings, forcing software encoding
+- [x] Logs clearly show detection results and which encoder was used for each job
+- [x] Unit tests cover decision logic for common scenarios (NVENC present/absent, QSV present/absent, incompatible containers)
 
 Notes
 - Windows priority: NVENC (NVIDIA), AMF (AMD), QSV (Intel)
@@ -48,10 +48,10 @@ Scope
 - Log the preflight check results for each export session
 
 Acceptance Criteria
-- [ ] When free space is insufficient by heuristic estimate, user is warned before export starts
-- [ ] Exports do not start unless user explicitly overrides (when allowed by settings)
-- [ ] Logs include required/available estimates and decision (proceed/block/override)
-- [ ] Unit tests cover estimation and threshold logic
+- [x] When free space is insufficient by heuristic estimate, user is warned before export starts
+- [x] Exports do not start unless user explicitly overrides (when allowed by settings)
+- [x] Logs include required/available estimates and decision (proceed/block/override)
+- [x] Unit tests cover estimation and threshold logic
 
 Out of Scope (for this issue)
 - Cross-platform GPU acceleration beyond Windows first pass
@@ -63,12 +63,12 @@ Out of Scope (for this issue)
 - UI changes minimal: one settings toggle and optional “Refresh hardware detection” button.
 
 ## Tracking Checklist
-- [ ] Capability detection implemented and logged
-- [ ] Encoder selection and fallback logic
-- [ ] Settings toggle and wiring
-- [ ] Disk space estimator and preflight check
-- [ ] Unit tests for decision/estimation logic
-- [ ] README/FEATURES docs updated accordingly
+- [x] Capability detection implemented and logged
+- [x] Encoder selection and fallback logic
+- [x] Settings toggle and wiring
+- [x] Disk space estimator and preflight check
+- [x] Unit tests for decision/estimation logic
+- [x] README/FEATURES docs updated accordingly
 
 ## Links
 - Implementation overview: `../IMPLEMENTATION_OVERVIEW.md`

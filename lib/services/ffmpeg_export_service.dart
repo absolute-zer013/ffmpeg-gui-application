@@ -6,6 +6,7 @@ import 'package:path/path.dart' as path;
 import '../models/codec_options.dart';
 import '../models/file_item.dart';
 import '../utils/rename_utils.dart';
+import 'ffmpeg_capabilities_service.dart';
 
 /// Service for exporting files using FFmpeg
 class FFmpegExportService {
@@ -152,6 +153,9 @@ class FFmpegExportService {
     required String outputPath,
     String? outputFormat,
     bool autoFix = false,
+    HardwareCapabilities? hwCapabilities,
+    bool useHardwareAcceleration = true,
+    void Function(String)? logCallback,
   }) {
     final args = <String>[
       '-i', inputPath,
@@ -214,8 +218,32 @@ class FFmpegExportService {
 
         if (allSameCodec && videoSettings.length == item.selectedVideo.length) {
           final s0 = videoSettings.values.first;
-          final codec = codecNameOf(s0);
+          var codec = codecNameOf(s0);
           if (codec != null) {
+            // Try to use hardware encoder if available and enabled
+            String? hwEncoder;
+            if (useHardwareAcceleration &&
+                hwCapabilities != null &&
+                hwCapabilities.hasAnyHardwareAcceleration) {
+              hwEncoder = FFmpegCapabilitiesService.selectHardwareEncoder(
+                  codec, hwCapabilities);
+              if (hwEncoder != null &&
+                  (outputFormat == null ||
+                      FFmpegCapabilitiesService
+                          .isEncoderCompatibleWithContainer(
+                              hwEncoder, outputFormat))) {
+                logCallback?.call(
+                    'Using hardware encoder: $hwEncoder (instead of $codec)');
+                codec = hwEncoder;
+              } else if (hwEncoder != null) {
+                logCallback?.call(
+                    'Hardware encoder $hwEncoder not compatible with container $outputFormat, using software encoder $codec');
+              } else {
+                logCallback?.call(
+                    'No hardware encoder available for $codec, using software encoder');
+              }
+            }
+
             args.addAll(['-c:v', codec]);
             if (s0.videoCrf != null) {
               args.addAll(['-crf', s0.videoCrf.toString()]);
@@ -239,8 +267,26 @@ class FFmpegExportService {
           for (final e in videoSettings.entries) {
             final streamIndex = e.key;
             final s = e.value;
-            final codec = s.videoCodec?.ffmpegName ?? s.customVideoCodec;
+            var codec = s.videoCodec?.ffmpegName ?? s.customVideoCodec;
             if (codec != null) {
+              // Try to use hardware encoder if available and enabled
+              String? hwEncoder;
+              if (useHardwareAcceleration &&
+                  hwCapabilities != null &&
+                  hwCapabilities.hasAnyHardwareAcceleration) {
+                hwEncoder = FFmpegCapabilitiesService.selectHardwareEncoder(
+                    codec, hwCapabilities);
+                if (hwEncoder != null &&
+                    (outputFormat == null ||
+                        FFmpegCapabilitiesService
+                            .isEncoderCompatibleWithContainer(
+                                hwEncoder, outputFormat))) {
+                  logCallback?.call(
+                      'Using hardware encoder for stream $streamIndex: $hwEncoder (instead of $codec)');
+                  codec = hwEncoder;
+                }
+              }
+
               args.addAll(['-c:v:$streamIndex', codec]);
             }
             if (s.videoCrf != null) {
@@ -623,6 +669,8 @@ class FFmpegExportService {
     void Function(Process process, String stageLabel)? onProcessStarted,
     bool autoFixIncompat = false,
     String? sessionLogPath,
+    HardwareCapabilities? hwCapabilities,
+    bool useHardwareAcceleration = true,
   }) async {
     final extension = outputFormat;
 
@@ -814,6 +862,12 @@ class FFmpegExportService {
           outputPath: outPath,
           outputFormat: extension,
           autoFix: autoFixIncompat,
+          hwCapabilities: hwCapabilities,
+          useHardwareAcceleration: useHardwareAcceleration,
+          logCallback: (msg) {
+            onLog?.call(msg);
+            logToFile(msg);
+          },
         );
         logToFile('Stage 2 command:');
         logToFile(argsToCmd(stage2Args));
