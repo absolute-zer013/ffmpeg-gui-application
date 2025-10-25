@@ -2,6 +2,64 @@
 
 All notable changes to the FFmpeg Export Tool are documented in this file.
 
+## [Phase 5 - Tier 4] — Complex Features (2025-10-24)
+
+### ✨ New Features
+
+#### Dual Pane Mode (#21)
+- Split-screen layout for comparing source and destination files
+- Horizontal or vertical orientation with resizable divider
+- Detailed track and metadata display in each pane
+- File preview and comparison view
+- **Benefit:** Easily compare files before and after export
+
+#### Waveform Visualization (#23)
+- Visual representation of audio tracks with canvas rendering
+- Zoom controls (1x to 10x) for detailed inspection
+- Pan/scroll through waveform data
+- Click to seek to specific positions
+- Automatic silence detection with highlighting
+- Peak and RMS amplitude calculation
+- Audio extraction and downsampling via FFmpeg
+- **Benefit:** Visual audio inspection and quality analysis
+
+#### Command-Line Interface (#27)
+- Headless automation without GUI via `bin/ffmpeg_cli.dart`
+- Full argument parsing with `args` package
+- JSON output mode for scripting and automation
+- File information display (`--info` flag)
+- Dry-run mode to preview operations (`--dry-run`)
+- Track selection via CLI arguments (`-a`, `-s`)
+- Codec configuration from command line
+- Verification support
+- **Benefit:** Automate batch processing and integrate with scripts
+
+#### Presets Import (#28)
+- Import HandBrake JSON preset files
+- Automatic parameter mapping to FFmpeg
+- Codec translation (video and audio)
+- Quality settings conversion (CRF, bitrate)
+- Resolution and framerate mapping
+- Compatibility warnings for unsupported features
+- Preview preset details before applying
+- **Benefit:** Quickly configure exports using familiar HandBrake presets
+
+### 🧪 Testing
+- Added comprehensive unit tests for all models
+- DualPaneMode model tests
+- WaveformData model tests with silence detection
+- ExternalPreset and PresetMapping tests
+- Total test count: 35+ new tests
+
+### 📚 Documentation
+- Updated README with Tier 4 feature descriptions
+- Updated FEATURES.md with detailed feature documentation
+- Updated PHASE5_TIER4_TRACKING.md with implementation status
+- Added CLI usage examples
+
+### 🔧 Dependencies
+- Added `args: ^2.4.2` for command-line argument parsing
+
 ## [Phase 5a] — Export Stability & Codec Enhancements (2025-10-24)
 
 ### ✨ New Features

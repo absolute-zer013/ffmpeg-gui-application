@@ -622,6 +622,7 @@ class FFmpegExportService {
     Function(String message)? onLog,
     void Function(Process process, String stageLabel)? onProcessStarted,
     bool autoFixIncompat = false,
+    String? sessionLogPath,
   }) async {
     final extension = outputFormat;
 
@@ -645,6 +646,15 @@ class FFmpegExportService {
 
     final outPath = path.join(outputDir.path, outputFileName);
 
+    // Ensure output directory exists before any file/log writes
+    try {
+      if (!outputDir.existsSync()) {
+        outputDir.createSync(recursive: true);
+      }
+    } catch (_) {
+      // Continue; we'll still try to export and log with fallback
+    }
+
     // Prepare run log buffer early so we can always persist logs, even on preflight failure
     final runLog = StringBuffer();
     final startedAt = DateTime.now();
@@ -653,6 +663,33 @@ class FFmpegExportService {
     runLog.writeln('Destination dir: ${outputDir.path}');
     runLog.writeln('Planned output: $outputFileName');
     runLog.writeln('Started: $startedAt');
+
+    // Helper to save run log to primary path, with fallback to input file directory on failure
+    void saveRunLog(String text) {
+      // Choose log target: sessionLogPath if provided; else per-file .log next to output
+      final primaryLogPath =
+          sessionLogPath ?? path.setExtension(outPath, '.log');
+      try {
+        final logFile = File(primaryLogPath);
+        logFile.parent.createSync(recursive: true);
+        // Append to allow multiple files to accumulate in one session log
+        logFile.writeAsStringSync(text + (text.endsWith('\n') ? '' : '\n'),
+            mode: FileMode.append);
+      } catch (_) {
+        try {
+          final fallbackDir = path.dirname(item.path);
+          final fallbackLogPath = path.join(
+            fallbackDir,
+            path.basename(primaryLogPath),
+          );
+          File(fallbackLogPath).writeAsStringSync(
+              text + (text.endsWith('\n') ? '' : '\n'),
+              mode: FileMode.append);
+        } catch (_) {
+          // Swallow as last resort; nothing else to do
+        }
+      }
+    }
 
     // Preflight container compatibility check
     final compatIssues = _getCompatibilityIssues(item, extension);
@@ -668,10 +705,7 @@ class FFmpegExportService {
       final endedAt = DateTime.now();
       runLog.writeln(
           'Finished: $endedAt (elapsed: ${endedAt.difference(startedAt)})');
-      try {
-        final logPath = path.setExtension(outPath, '.log');
-        File(logPath).writeAsStringSync(runLog.toString());
-      } catch (_) {}
+      saveRunLog(runLog.toString());
       return ExportResult(
           success: false, errorMessage: 'Container compatibility check failed');
     }
@@ -762,10 +796,7 @@ class FFmpegExportService {
             : 'Stage 1 failed: ${result.errorMessage ?? 'Unknown error'}');
         logToFile(
             'Finished: $endedAt (elapsed: ${endedAt.difference(startedAt)})');
-        try {
-          final logPath = path.setExtension(outPath, '.log');
-          File(logPath).writeAsStringSync(runLog.toString());
-        } catch (_) {}
+        saveRunLog(runLog.toString());
         return result;
       }
       if (onLog != null) {
@@ -814,10 +845,7 @@ class FFmpegExportService {
               : 'Stage 2 failed: ${result.errorMessage ?? 'Unknown error'}');
           logToFile(
               'Finished: $endedAt (elapsed: ${endedAt.difference(startedAt)})');
-          try {
-            final logPath = path.setExtension(outPath, '.log');
-            File(logPath).writeAsStringSync(runLog.toString());
-          } catch (_) {}
+          saveRunLog(runLog.toString());
           return result;
         }
         if (onLog != null) {
@@ -850,20 +878,14 @@ class FFmpegExportService {
       logToFile('Success: output -> $outPath');
       logToFile(
           'Finished: $endedAt (elapsed: ${endedAt.difference(startedAt)})');
-      try {
-        final logPath = path.setExtension(outPath, '.log');
-        File(logPath).writeAsStringSync(runLog.toString());
-      } catch (_) {}
+      saveRunLog(runLog.toString());
       return ExportResult(success: true, process: null);
     } catch (e) {
       final endedAt = DateTime.now();
       logToFile('Unexpected error: $e');
       logToFile(
           'Finished: $endedAt (elapsed: ${endedAt.difference(startedAt)})');
-      try {
-        final logPath = path.setExtension(outPath, '.log');
-        File(logPath).writeAsStringSync(runLog.toString());
-      } catch (_) {}
+      saveRunLog(runLog.toString());
       return ExportResult(success: false, errorMessage: e.toString());
     }
   }

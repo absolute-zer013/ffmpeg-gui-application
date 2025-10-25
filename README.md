@@ -211,6 +211,55 @@ Additional features planned for future releases:
 - **Export Enhancements**: Trim/cut functionality, resolution/framerate changes
 - **UI/UX Enhancements**: Dual pane mode, waveform visualization, estimated export times
 - **Integration**: Command-line interface, presets import
+## What's New - Phase 5 Tier 4
+
+The latest release includes four complex, high-value features:
+
+### Dual Pane Mode
+Split-screen layout for comparing source and destination files side-by-side:
+- Horizontal or vertical orientation with resizable divider
+- Detailed track and metadata comparison
+- File preview before and after export
+
+### Waveform Visualization
+Visual audio representation with advanced controls:
+- Zoom and pan through audio waveforms
+- Click to seek to specific positions
+- Automatic silence detection
+- Peak and RMS amplitude display
+
+### Command-Line Interface
+Automate exports without the GUI:
+```bash
+# Show file information
+ffmpeg_cli -i input.mkv --info --json
+
+# Export with specific tracks
+ffmpeg_cli -i input.mkv -a 0,1 -s 0 -o output.mkv
+
+# Codec conversion from CLI
+ffmpeg_cli -i input.mkv --video-codec h264 --audio-codec aac
+```
+
+### Presets Import
+Import HandBrake presets for quick configuration:
+- Parse HandBrake JSON preset files
+- Automatic parameter mapping to FFmpeg
+- Compatibility warnings for unsupported features
+- Preview and apply presets with one click
+
+See `docs/FEATURES.md` for complete feature documentation.
+
+## What's Next?
+
+### Phase 5 - Remaining Features
+
+The project roadmap includes additional features planned for future releases:
+
+- **Quality of Life**: Undo/redo
+- **Export Enhancements**: Trim/cut functionality, resolution/framerate changes, estimated export times
+- **Batch Operations**: Multi-profile export
+- **Advanced Features**: Chapter editing, audio/subtitle sync, MKV optimization, watch folder
 
 See `docs/PHASE5_FEATURES.md` for the complete list and `docs/PHASE5_PLANNING.md` for implementation guidance.
 
