@@ -170,7 +170,9 @@ class FFmpegCapabilitiesService {
     // MP4/M4V/MOV compatibility
     if (['mp4', 'm4v', 'mov'].contains(ext)) {
       // MP4 supports H.264, H.265, AV1 hardware encoders
-      return enc.contains('h264') || enc.contains('hevc') || enc.contains('av1');
+      return enc.contains('h264') ||
+          enc.contains('hevc') ||
+          enc.contains('av1');
     }
 
     // MKV compatibility - supports almost everything

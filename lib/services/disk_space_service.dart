@@ -46,8 +46,8 @@ class DiskSpaceService {
     int totalEstimate = 0;
 
     for (final file in files) {
-      // Base estimate on file size
-      final fileSize = file.size;
+      // Base estimate on file size (bytes). If unknown, assume 0.
+      final int fileSize = file.fileSize ?? 0;
 
       // Default estimate: assume output size similar to input (copy/remux)
       double multiplier = 1.1; // 10% buffer for remuxing overhead
@@ -194,19 +194,21 @@ class DiskSpaceService {
 
     if (availableBytes == null) {
       // Cannot determine space - allow with warning
-      message = 'Cannot determine available disk space. Export may fail if insufficient space.';
+      message =
+          'Cannot determine available disk space. Export may fail if insufficient space.';
     } else if (availableBytes < requiredBytes) {
       hasSufficientSpace = false;
       message =
           'Insufficient disk space in output directory. Required: ${DiskSpaceCheckResult._formatBytes(requiredBytes)}, Available: ${DiskSpaceCheckResult._formatBytes(availableBytes)}';
-    } else if (tempAvailableBytes != null && tempAvailableBytes < requiredBytes) {
+    } else if (tempAvailableBytes != null &&
+        tempAvailableBytes < requiredBytes) {
       hasSufficientSpace = false;
       message =
           'Insufficient disk space in temporary directory. Required: ${DiskSpaceCheckResult._formatBytes(requiredBytes)}, Available: ${DiskSpaceCheckResult._formatBytes(tempAvailableBytes)}';
     } else {
       // All good
       message =
-          'Sufficient space. Required: ${DiskSpaceCheckResult._formatBytes(requiredBytes)}, Available: ${DiskSpaceCheckResult._formatBytes(availableBytes ?? 0)}';
+          'Sufficient space. Required: ${DiskSpaceCheckResult._formatBytes(requiredBytes)}, Available: ${DiskSpaceCheckResult._formatBytes(availableBytes)}';
     }
 
     return DiskSpaceCheckResult(

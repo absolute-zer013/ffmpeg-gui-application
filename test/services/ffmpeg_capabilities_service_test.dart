@@ -80,7 +80,9 @@ void main() {
       expect(encoder, equals('h264_amf'));
     });
 
-    test('selectHardwareEncoder falls back to QSV when NVENC and AMF unavailable', () {
+    test(
+        'selectHardwareEncoder falls back to QSV when NVENC and AMF unavailable',
+        () {
       final capabilities = HardwareCapabilities(
         hasNVENC: false,
         hasAMF: false,

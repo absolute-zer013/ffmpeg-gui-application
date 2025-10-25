@@ -1043,8 +1043,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // Process files in parallel batches
     for (var i = 0; i < _files.length; i += _maxConcurrentExports) {
       final batch = _files.skip(i).take(_maxConcurrentExports).toList();
-      await Future.wait(batch.map((file) =>
-          _exportFile(file, outDir, sessionLogPath, hwCapabilities)));
+      await Future.wait(batch.map(
+          (file) => _exportFile(file, outDir, sessionLogPath, hwCapabilities)));
     }
 
     setState(() {

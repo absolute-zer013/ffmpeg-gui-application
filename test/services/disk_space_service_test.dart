@@ -12,7 +12,7 @@ void main() {
           path: '/test/video1.mkv',
           audioTracks: [],
           subtitleTracks: [],
-        )..size = 1000 * 1024 * 1024, // 1000 MB
+        )..fileSize = 1000 * 1024 * 1024, // 1000 MB
       ];
 
       final estimate = DiskSpaceService.estimateRequiredSpace(files);
@@ -22,15 +22,16 @@ void main() {
       expect(estimate, lessThan(2000 * 1024 * 1024));
     });
 
-    test('estimateRequiredSpace for high quality re-encode adds 20% buffer', () {
+    test('estimateRequiredSpace for high quality re-encode adds 20% buffer',
+        () {
       final files = [
         FileItem(
           path: '/test/video1.mkv',
           audioTracks: [],
           subtitleTracks: [],
         )
-          ..size = 1000 * 1024 * 1024 // 1000 MB
-          ..qualityPreset = QualityPreset.highQuality()
+          ..fileSize = 1000 * 1024 * 1024 // 1000 MB
+          ..qualityPreset = QualityPreset.highQuality
           ..codecSettings = {
             0: CodecConversionSettings(videoCodec: VideoCodec.h264),
           },
@@ -44,15 +45,17 @@ void main() {
       expect(estimate, lessThan(3500 * 1024 * 1024));
     });
 
-    test('estimateRequiredSpace for fast/low quality re-encode uses 50% multiplier', () {
+    test(
+        'estimateRequiredSpace for fast/low quality re-encode uses 50% multiplier',
+        () {
       final files = [
         FileItem(
           path: '/test/video1.mkv',
           audioTracks: [],
           subtitleTracks: [],
         )
-          ..size = 1000 * 1024 * 1024 // 1000 MB
-          ..qualityPreset = QualityPreset.fast()
+          ..fileSize = 1000 * 1024 * 1024 // 1000 MB
+          ..qualityPreset = QualityPreset.fast
           ..codecSettings = {
             0: CodecConversionSettings(videoCodec: VideoCodec.h264),
           },
@@ -72,12 +75,12 @@ void main() {
           path: '/test/video1.mkv',
           audioTracks: [],
           subtitleTracks: [],
-        )..size = 500 * 1024 * 1024, // 500 MB
+        )..fileSize = 500 * 1024 * 1024, // 500 MB
         FileItem(
           path: '/test/video2.mkv',
           audioTracks: [],
           subtitleTracks: [],
-        )..size = 500 * 1024 * 1024, // 500 MB
+        )..fileSize = 500 * 1024 * 1024, // 500 MB
       ];
 
       final estimate = DiskSpaceService.estimateRequiredSpace(files);
@@ -120,7 +123,7 @@ void main() {
           audioTracks: [],
           subtitleTracks: [],
         )
-          ..size = 1000 * 1024 * 1024 // 1000 MB
+          ..fileSize = 1000 * 1024 * 1024 // 1000 MB
           ..codecSettings = {
             0: CodecConversionSettings(audioCodec: AudioCodec.aac),
           },
@@ -134,14 +137,16 @@ void main() {
       expect(estimate, lessThan(3000 * 1024 * 1024));
     });
 
-    test('estimateRequiredSpace accounts for two-stage pipeline needing temp space', () {
+    test(
+        'estimateRequiredSpace accounts for two-stage pipeline needing temp space',
+        () {
       final files = [
         FileItem(
           path: '/test/video1.mkv',
           audioTracks: [],
           subtitleTracks: [],
         )
-          ..size = 1000 * 1024 * 1024 // 1000 MB
+          ..fileSize = 1000 * 1024 * 1024 // 1000 MB
           ..codecSettings = {
             0: CodecConversionSettings(videoCodec: VideoCodec.h264),
           },

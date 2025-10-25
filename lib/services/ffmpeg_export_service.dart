@@ -229,8 +229,9 @@ class FFmpegExportService {
                   codec, hwCapabilities);
               if (hwEncoder != null &&
                   (outputFormat == null ||
-                      FFmpegCapabilitiesService.isEncoderCompatibleWithContainer(
-                          hwEncoder, outputFormat))) {
+                      FFmpegCapabilitiesService
+                          .isEncoderCompatibleWithContainer(
+                              hwEncoder, outputFormat))) {
                 logCallback?.call(
                     'Using hardware encoder: $hwEncoder (instead of $codec)');
                 codec = hwEncoder;
