@@ -146,7 +146,7 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
                 const SizedBox(height: 12),
                 if (!_customResolution) ...[
                   DropdownButtonFormField<String>(
-                    value: _selectedPreset,
+                    initialValue: _selectedPreset,
                     decoration: const InputDecoration(
                       labelText: 'Resolution Preset',
                       border: OutlineInputBorder(),
@@ -212,7 +212,7 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
                 ),
                 const SizedBox(height: 8),
                 DropdownButtonFormField<double?>(
-                  value: _selectedFramerate,
+                  initialValue: _selectedFramerate,
                   decoration: const InputDecoration(
                     labelText: 'Target Framerate',
                     border: OutlineInputBorder(),
@@ -241,7 +241,8 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(

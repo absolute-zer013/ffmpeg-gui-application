@@ -90,7 +90,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   // Search and Filter state
   String _searchQuery = '';
-  Set<String> _statusFilters = {}; // 'pending', 'completed', 'failed'
+  final Set<String> _statusFilters =
+      <String>{}; // 'pending', 'completed', 'failed'
   final TextEditingController _searchController = TextEditingController();
 
   // Sort state

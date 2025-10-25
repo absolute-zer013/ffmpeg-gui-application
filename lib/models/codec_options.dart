@@ -37,7 +37,7 @@ enum SubtitleFormat {
   ass('ASS', 'ass', 'Advanced SubStation Alpha (styling)'),
   ssa('SSA', 'ssa', 'SubStation Alpha'),
   webvtt('WebVTT', 'webvtt', 'Web Video Text Tracks'),
-  mov_text('MOV Text', 'mov_text', 'MP4 subtitle format'),
+  movText('MOV Text', 'mov_text', 'MP4 subtitle format'),
   subrip('SubRip', 'subrip', 'SubRip format (alternative)');
 
   final String displayName;

@@ -16,7 +16,7 @@ void main() {
       expect(SubtitleFormat.ass.ffmpegName, 'ass');
       expect(SubtitleFormat.ssa.ffmpegName, 'ssa');
       expect(SubtitleFormat.webvtt.ffmpegName, 'webvtt');
-      expect(SubtitleFormat.mov_text.ffmpegName, 'mov_text');
+      expect(SubtitleFormat.movText.ffmpegName, 'mov_text');
     });
 
     test('Each format has a description', () {

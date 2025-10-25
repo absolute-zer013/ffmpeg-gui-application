@@ -102,9 +102,9 @@ class _MultiProfileExportDialogState extends State<MultiProfileExportDialog> {
                           });
                         },
                         title: Text(profile.name),
-                        subtitle: profile.description != null
+                        subtitle: profile.description.isNotEmpty
                             ? Text(
-                                profile.description!,
+                                profile.description,
                                 style: const TextStyle(fontSize: 12),
                               )
                             : null,

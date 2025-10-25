@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import '../models/trim_settings.dart';
 
 /// Dialog for configuring trim/cut settings (Feature #9)

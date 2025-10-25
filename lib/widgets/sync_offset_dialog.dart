@@ -129,7 +129,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                 ),
               ],
             ),
-            if (track.language != null) ...[
+            if (track.language.isNotEmpty) ...[
               const SizedBox(height: 4),
               Text(
                 'Language: ${track.language}',
@@ -143,11 +143,11 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                   flex: 2,
                   child: TextField(
                     controller: controller,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Offset (milliseconds)',
                       hintText: '0',
                       helperText: 'Positive = delay, Negative = advance',
-                      border: const OutlineInputBorder(),
+                      border: OutlineInputBorder(),
                       isDense: true,
                       suffixText: 'ms',
                     ),
@@ -228,13 +228,13 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                           _updateOffset(streamIndex, '0');
                         }
                       : null,
-                  child: const Text('Reset'),
                   style: TextButton.styleFrom(
                     padding:
                         const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
+                  child: const Text('Reset'),
                 ),
               ],
             ),
