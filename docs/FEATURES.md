@@ -463,6 +463,44 @@
    - Conflict resolution strategies
    - Full test coverage for all transformations
 
+## 🆕 Upcoming Features (2025-10-25)
+
+### 40. **✓ GPU Acceleration Auto-Detect and Smart Offload**
+   - Automatic hardware encoder detection at startup (NVENC, AMF, QSV)
+   - Smart encoder selection based on available hardware
+   - Priority order: NVENC (NVIDIA) > AMF (AMD) > QSV (Intel)
+   - Transparent fallback to software encoding when:
+     - No compatible hardware encoder exists
+     - Hardware initialization fails
+     - Container format incompatible with hardware encoder
+   - User setting: "Use hardware acceleration when available" (default: ON)
+   - Detailed logging of:
+     - Hardware detection results
+     - Encoder selection decisions
+     - Fallback reasons
+   - Platform support: Windows (primary), cross-platform extensible
+   - Supports hardware encoders for H.264, H.265/HEVC, and AV1 (where available)
+   - Container compatibility checking for MP4, MKV, WebM
+
+### 41. **✓ Disk Space Preflight and Temp Path Guard**
+   - Pre-export disk space estimation with heuristics:
+     - Copy/remux: 1.1x input size
+     - High quality re-encode (CRF 18): 1.2x input size
+     - Balanced re-encode (CRF 23): 0.8x input size
+     - Fast re-encode (CRF 28): 0.5x input size
+     - Audio-only re-encode: 1.05x input size
+   - Two-stage pipeline space accounting (temp + final file)
+   - 500MB safety margin added to all estimates
+   - Free space checking on:
+     - Output directory volume
+     - Temporary working directory volume (if different)
+   - Warning dialog when space insufficient with:
+     - Required vs. available space display
+     - Option to override and continue anyway
+   - Platform support: Windows (PowerShell), Unix (df command)
+   - Detailed logging of preflight check results
+   - User-friendly space formatting (KB, MB, GB)
+
 ---
 
 Note: Dual Pane Mode and Waveform Visualization are implemented at the module level but are disabled in the main UI as of 2025-10-25. They can be re-enabled in a future release.
@@ -490,3 +528,5 @@ Note: Dual Pane Mode and Waveform Visualization are implemented at the module le
 - ✅ **Multi-Profile Export (Feature #37 / Phase 5 Tier 3)**
 - ✅ **Watch Folder (Feature #38 / Phase 5 Tier 3)**
 - ✅ **Batch Rename v2 (Feature #39 / Phase 5 Tier 3)**
+- ✅ **GPU Acceleration Auto-Detect (Feature #40 / Upcoming)**
+- ✅ **Disk Space Preflight Check (Feature #41 / Upcoming)**

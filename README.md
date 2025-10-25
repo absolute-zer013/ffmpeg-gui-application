@@ -253,16 +253,33 @@ Import HandBrake presets for quick configuration:
 
 See `docs/FEATURES.md` for complete feature documentation.
 
+## What's New - Latest Features (2025-10-25)
+
+### GPU Acceleration Auto-Detect
+Automatic hardware encoder detection and utilization:
+- Detects NVENC (NVIDIA), AMF (AMD), and QSV (Intel) hardware encoders
+- Automatically uses hardware encoding when available and compatible
+- Transparent fallback to software encoding when needed
+- User toggle in Settings: "Use hardware acceleration when available"
+- Detailed logging of detection and selection decisions
+- Supports H.264, H.265/HEVC, and AV1 hardware encoders
+
+### Disk Space Preflight Check
+Prevent mid-export failures with automatic disk space verification:
+- Estimates required disk space before export starts
+- Checks both output directory and temporary working directory
+- Warning dialog when insufficient space detected
+- Option to override and continue anyway
+- Smart estimation based on codec, quality settings, and re-encoding
+- Human-readable space formatting (KB, MB, GB)
+
 ## What's Next?
 
 ### Phase 5 - Remaining Features
 
 The project roadmap includes additional features planned for future releases:
 
-- **Quality of Life**: Undo/redo
 - **Export Enhancements**: Trim/cut functionality, resolution/framerate changes, estimated export times
-- **Batch Operations**: Multi-profile export
-- **Advanced Features**: Chapter editing, audio/subtitle sync, MKV optimization, watch folder
 - **UI/UX Enhancements**: Re-assess Dual Pane Mode and Waveform Visualization for an opt-in/experimental channel before re-enabling in the main UI
 
 See `docs/PHASE5_FEATURES.md` for the complete list and `docs/PHASE5_PLANNING.md` for implementation guidance.
