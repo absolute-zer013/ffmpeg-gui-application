@@ -2,13 +2,13 @@
 class SyncOffset {
   /// Stream index to apply offset to
   final int streamIndex;
-  
+
   /// Offset in milliseconds (can be positive or negative)
   final int offsetMs;
-  
+
   /// Stream type ('audio' or 'subtitle')
   final String streamType;
-  
+
   /// Track description for display
   final String? trackDescription;
 
@@ -28,7 +28,7 @@ class SyncOffset {
     final seconds = (absMs / 1000).floor();
     final ms = absMs % 1000;
     final sign = offsetMs >= 0 ? '+' : '-';
-    
+
     if (seconds > 0) {
       return '$sign${seconds}s ${ms}ms';
     } else {

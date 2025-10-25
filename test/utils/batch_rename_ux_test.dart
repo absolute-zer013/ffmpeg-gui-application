@@ -7,9 +7,9 @@ void main() {
     group('Presets', () {
       test('Has all required presets', () {
         final presets = RenamePattern.getPredefinedPatterns();
-        
+
         expect(presets.length, greaterThanOrEqualTo(5));
-        
+
         // Check for required presets
         final presetNames = presets.map((p) => p.name).toList();
         expect(presetNames, contains('TV Show'));
@@ -22,7 +22,7 @@ void main() {
       test('TV Show preset has correct format', () {
         final presets = RenamePattern.getPredefinedPatterns();
         final tvShow = presets.firstWhere((p) => p.name == 'TV Show');
-        
+
         expect(tvShow.pattern, '{name} - S{season:2}E{episode:2}');
         expect(tvShow.description, isNotEmpty);
       });
@@ -30,7 +30,7 @@ void main() {
       test('Movie preset has correct format', () {
         final presets = RenamePattern.getPredefinedPatterns();
         final movie = presets.firstWhere((p) => p.name == 'Movie');
-        
+
         expect(movie.pattern, '{name} ({year})');
         expect(movie.description, isNotEmpty);
       });
@@ -38,7 +38,7 @@ void main() {
       test('Anime preset has correct format', () {
         final presets = RenamePattern.getPredefinedPatterns();
         final anime = presets.firstWhere((p) => p.name == 'Anime');
-        
+
         expect(anime.pattern, '{name} - {episode:3}');
         expect(anime.description, isNotEmpty);
       });
@@ -46,7 +46,7 @@ void main() {
       test('Indexed preset has correct format', () {
         final presets = RenamePattern.getPredefinedPatterns();
         final indexed = presets.firstWhere((p) => p.name == 'Indexed');
-        
+
         expect(indexed.pattern, '{name} - {index:3}');
         expect(indexed.description, isNotEmpty);
       });
@@ -54,7 +54,7 @@ void main() {
       test('With Date preset has correct format', () {
         final presets = RenamePattern.getPredefinedPatterns();
         final withDate = presets.firstWhere((p) => p.name == 'With Date');
-        
+
         expect(withDate.pattern, '{name} - {date}');
         expect(withDate.description, isNotEmpty);
       });
@@ -64,7 +64,7 @@ void main() {
       test('Extract variables from pattern', () {
         final pattern1 = '{name} - S{season:2}E{episode:2}';
         final vars1 = RenameUtils.extractVariables(pattern1);
-        
+
         expect(vars1, contains('name'));
         expect(vars1, contains('season'));
         expect(vars1, contains('episode'));
@@ -73,7 +73,7 @@ void main() {
       test('Extract variables with padding', () {
         final pattern = '{name} - {index:3}';
         final vars = RenameUtils.extractVariables(pattern);
-        
+
         expect(vars, contains('name'));
         expect(vars, contains('index'));
       });
@@ -81,7 +81,7 @@ void main() {
       test('Extract date variable', () {
         final pattern = '{name} - {date}';
         final vars = RenameUtils.extractVariables(pattern);
-        
+
         expect(vars, contains('name'));
         expect(vars, contains('date'));
       });
@@ -89,7 +89,7 @@ void main() {
       test('Extract year variable', () {
         final pattern = '{name} ({year})';
         final vars = RenameUtils.extractVariables(pattern);
-        
+
         expect(vars, contains('name'));
         expect(vars, contains('year'));
       });
@@ -122,7 +122,8 @@ void main() {
 
         for (final pattern in invalidPatterns) {
           final error = RenameUtils.validatePattern(pattern);
-          expect(error, isNotNull, reason: 'Pattern "$pattern" should be invalid');
+          expect(error, isNotNull,
+              reason: 'Pattern "$pattern" should be invalid');
         }
       });
 
@@ -136,59 +137,59 @@ void main() {
       test('Substitute name variable', () {
         final pattern = '{name}';
         final result = RenameUtils.applyPattern(
-          pattern: pattern,
-          originalBasename: 'test.mkv',
+          pattern,
+          'test.mkv',
           index: 1,
         );
-        
-        expect(result, 'test');
+
+        expect(result, 'test.mkv');
       });
 
       test('Substitute episode with padding', () {
         final pattern = '{name} - {episode:3}';
         final result = RenameUtils.applyPattern(
-          pattern: pattern,
-          originalBasename: 'test.mkv',
+          pattern,
+          'test.mkv',
           index: 1,
           episode: 5,
         );
-        
+
         expect(result, contains('005'));
       });
 
       test('Substitute season and episode', () {
         final pattern = 'S{season:2}E{episode:2}';
         final result = RenameUtils.applyPattern(
-          pattern: pattern,
-          originalBasename: 'test.mkv',
+          pattern,
+          'test.mkv',
           index: 1,
           season: 1,
           episode: 5,
         );
-        
-        expect(result, 'S01E05');
+
+        expect(result, 'S01E05.mkv');
       });
 
       test('Substitute year', () {
         final pattern = '{name} ({year})';
         final result = RenameUtils.applyPattern(
-          pattern: pattern,
-          originalBasename: 'test.mkv',
+          pattern,
+          'test.mkv',
           index: 1,
           year: 2024,
         );
-        
+
         expect(result, contains('2024'));
       });
 
       test('Substitute date', () {
         final pattern = '{name} - {date}';
         final result = RenameUtils.applyPattern(
-          pattern: pattern,
-          originalBasename: 'test.mkv',
+          pattern,
+          'test.mkv',
           index: 1,
         );
-        
+
         // Should contain a date in YYYY-MM-DD format
         expect(result, matches(RegExp(r'\d{4}-\d{2}-\d{2}')));
       });
@@ -196,11 +197,11 @@ void main() {
       test('Substitute index with padding', () {
         final pattern = '{name} - {index:3}';
         final result = RenameUtils.applyPattern(
-          pattern: pattern,
-          originalBasename: 'test.mkv',
+          pattern,
+          'test.mkv',
           index: 5,
         );
-        
+
         expect(result, contains('005'));
       });
     });

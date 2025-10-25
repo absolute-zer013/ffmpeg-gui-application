@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../models/file_item.dart';
 // Quality presets no longer edited via the video dialog here.
 import '../models/codec_options.dart';
+import '../models/trim_settings.dart';
+import '../models/resolution_settings.dart';
+import '../models/sync_offset.dart';
 import '../utils/file_utils.dart';
 import 'metadata_editor_dialog.dart';
 import 'codec_settings_dialog.dart';
@@ -505,7 +508,8 @@ class FileCard extends StatelessWidget {
                                         .contains(track.position),
                                     onChanged: (value) {
                                       if (value == true) {
-                                        item.selectedSubtitles.add(track.position);
+                                        item.selectedSubtitles
+                                            .add(track.position);
                                         item.defaultSubtitle ??= track.position;
                                       } else {
                                         item.selectedSubtitles
@@ -526,10 +530,12 @@ class FileCard extends StatelessWidget {
                                   value: item.defaultSubtitle == track.position,
                                   onChanged: (value) {
                                     if (value == true) {
-                                      item.selectedSubtitles.add(track.position);
+                                      item.selectedSubtitles
+                                          .add(track.position);
                                       item.defaultSubtitle = track.position;
                                     } else {
-                                      if (item.defaultSubtitle == track.position) {
+                                      if (item.defaultSubtitle ==
+                                          track.position) {
                                         item.defaultSubtitle = null;
                                       }
                                     }
@@ -542,12 +548,15 @@ class FileCard extends StatelessWidget {
                             ),
                             if (item.selectedSubtitles.contains(track.position))
                               Padding(
-                                padding: const EdgeInsets.only(left: 16.0, bottom: 8.0),
+                                padding: const EdgeInsets.only(
+                                    left: 16.0, bottom: 8.0),
                                 child: Row(
                                   children: [
-                                    const Text('Format: ', style: TextStyle(fontSize: 11)),
+                                    const Text('Format: ',
+                                        style: TextStyle(fontSize: 11)),
                                     DropdownButton<SubtitleFormat>(
-                                      value: item.codecSettings[track.streamIndex]
+                                      value: item
+                                              .codecSettings[track.streamIndex]
                                               ?.subtitleFormat ??
                                           SubtitleFormat.copy,
                                       isDense: true,
@@ -555,9 +564,11 @@ class FileCard extends StatelessWidget {
                                       onChanged: (newFormat) {
                                         if (newFormat != null) {
                                           final currentSettings =
-                                              item.codecSettings[track.streamIndex] ??
+                                              item.codecSettings[
+                                                      track.streamIndex] ??
                                                   CodecConversionSettings();
-                                          item.codecSettings[track.streamIndex] =
+                                          item.codecSettings[
+                                                  track.streamIndex] =
                                               currentSettings.copyWith(
                                                   subtitleFormat: newFormat);
                                           onChanged();
@@ -568,7 +579,8 @@ class FileCard extends StatelessWidget {
                                                 value: format,
                                                 child: Tooltip(
                                                   message: format.description,
-                                                  child: Text(format.displayName),
+                                                  child:
+                                                      Text(format.displayName),
                                                 ),
                                               ))
                                           .toList(),

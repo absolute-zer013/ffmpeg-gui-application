@@ -34,10 +34,11 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
     _enabled = widget.initialSettings?.enabled ?? false;
     _selectedPreset = widget.initialSettings?.presetName;
     _selectedFramerate = widget.initialSettings?.framerate;
-    
-    if (widget.initialSettings != null && 
+
+    if (widget.initialSettings != null &&
         widget.initialSettings!.presetName == null &&
-        (widget.initialSettings!.width != null || widget.initialSettings!.height != null)) {
+        (widget.initialSettings!.width != null ||
+            widget.initialSettings!.height != null)) {
       _customResolution = true;
     }
 
@@ -57,12 +58,15 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
   }
 
   double? _estimateSizeMultiplier() {
-    if (!_enabled || widget.originalWidth == null || widget.originalHeight == null) {
+    if (!_enabled ||
+        widget.originalWidth == null ||
+        widget.originalHeight == null) {
       return null;
     }
 
     final settings = _buildSettings();
-    return settings.estimateSizeMultiplier(widget.originalWidth!, widget.originalHeight!);
+    return settings.estimateSizeMultiplier(
+        widget.originalWidth!, widget.originalHeight!);
   }
 
   ResolutionSettings _buildSettings() {
@@ -92,7 +96,7 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
   @override
   Widget build(BuildContext context) {
     final sizeMultiplier = _estimateSizeMultiplier();
-    
+
     return AlertDialog(
       title: const Text('Resolution & Framerate Settings'),
       content: SizedBox(
@@ -114,7 +118,8 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
               ),
               const SizedBox(height: 16),
               if (_enabled) ...[
-                if (widget.originalWidth != null && widget.originalHeight != null) ...[
+                if (widget.originalWidth != null &&
+                    widget.originalHeight != null) ...[
                   Text(
                     'Original: ${widget.originalWidth}x${widget.originalHeight}',
                     style: Theme.of(context).textTheme.bodySmall,
@@ -220,7 +225,8 @@ class _ResolutionSettingsDialogState extends State<ResolutionSettingsDialog> {
                     ...ResolutionSettings.framerateOptions.map((fps) {
                       return DropdownMenuItem(
                         value: fps,
-                        child: Text('${fps.toStringAsFixed(fps == fps.toInt() ? 0 : 2)} fps'),
+                        child: Text(
+                            '${fps.toStringAsFixed(fps == fps.toInt() ? 0 : 2)} fps'),
                       );
                     }),
                   ],

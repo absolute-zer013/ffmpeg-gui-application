@@ -20,7 +20,7 @@ void main() {
     test('addRecentFile adds file to list', () async {
       await RecentFilesService.addRecentFile('/path/to/file1.mkv');
       final files = await RecentFilesService.loadRecentFiles();
-      
+
       expect(files.length, 1);
       expect(files[0].path, '/path/to/file1.mkv');
     });
@@ -29,9 +29,9 @@ void main() {
       await RecentFilesService.addRecentFile('/path/to/file1.mkv');
       await RecentFilesService.addRecentFile('/path/to/file2.mkv');
       await RecentFilesService.addRecentFile('/path/to/file3.mkv');
-      
+
       final files = await RecentFilesService.loadRecentFiles();
-      
+
       expect(files.length, 3);
       expect(files[0].path, '/path/to/file3.mkv'); // Most recent first
       expect(files[1].path, '/path/to/file2.mkv');
@@ -42,9 +42,9 @@ void main() {
       await RecentFilesService.addRecentFile('/path/to/file1.mkv');
       await RecentFilesService.addRecentFile('/path/to/file2.mkv');
       await RecentFilesService.addRecentFile('/path/to/file1.mkv'); // Duplicate
-      
+
       final files = await RecentFilesService.loadRecentFiles();
-      
+
       expect(files.length, 2);
       expect(files[0].path, '/path/to/file1.mkv'); // Moved to top
       expect(files[1].path, '/path/to/file2.mkv');
@@ -55,9 +55,9 @@ void main() {
       for (int i = 0; i < 25; i++) {
         await RecentFilesService.addRecentFile('/path/to/file$i.mkv');
       }
-      
+
       final files = await RecentFilesService.loadRecentFiles();
-      
+
       expect(files.length, 20); // Should be limited to 20
       expect(files[0].path, '/path/to/file24.mkv'); // Most recent
       expect(files[19].path, '/path/to/file5.mkv'); // Oldest kept
@@ -67,11 +67,11 @@ void main() {
       await RecentFilesService.addRecentFile('/path/to/file1.mkv');
       await RecentFilesService.addRecentFile('/path/to/file2.mkv');
       await RecentFilesService.addRecentFile('/path/to/file3.mkv');
-      
+
       await RecentFilesService.removeRecentFile('/path/to/file2.mkv');
-      
+
       final files = await RecentFilesService.loadRecentFiles();
-      
+
       expect(files.length, 2);
       expect(files.any((f) => f.path == '/path/to/file2.mkv'), false);
     });
@@ -79,9 +79,9 @@ void main() {
     test('clearRecentFiles removes all files', () async {
       await RecentFilesService.addRecentFile('/path/to/file1.mkv');
       await RecentFilesService.addRecentFile('/path/to/file2.mkv');
-      
+
       await RecentFilesService.clearRecentFiles();
-      
+
       final files = await RecentFilesService.loadRecentFiles();
       expect(files, isEmpty);
     });
@@ -89,14 +89,15 @@ void main() {
     test('RecentFile serialization works correctly', () {
       final now = DateTime.now();
       final file = RecentFile(path: '/path/to/file.mkv', processedAt: now);
-      
+
       final json = file.toJson();
       expect(json['path'], '/path/to/file.mkv');
       expect(json['processedAt'], now.toIso8601String());
-      
+
       final restored = RecentFile.fromJson(json);
       expect(restored.path, file.path);
-      expect(restored.processedAt.toIso8601String(), file.processedAt.toIso8601String());
+      expect(restored.processedAt.toIso8601String(),
+          file.processedAt.toIso8601String());
     });
   });
 }

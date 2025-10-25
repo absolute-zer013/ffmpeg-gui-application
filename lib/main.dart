@@ -87,12 +87,12 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _enableDesktopNotifications = true;
   bool _autoFixCompatibility = true;
   List<RecentFile> _recentFiles = [];
-  
+
   // Search and Filter state
   String _searchQuery = '';
   Set<String> _statusFilters = {}; // 'pending', 'completed', 'failed'
   final TextEditingController _searchController = TextEditingController();
-  
+
   // Sort state
   String _sortBy = 'name'; // 'name', 'size', 'duration', 'status'
   bool _sortAscending = true;
@@ -248,7 +248,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     // Add to files list and probe
-    await _handleFilePaths([filePath]);
+    await _handleDrop([filePath]);
   }
 
   List<FileItem> _getFilteredFiles() {
@@ -267,7 +267,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // Apply status filter
     if (_statusFilters.isNotEmpty) {
       filteredFiles = filteredFiles.where((file) {
-        final status = file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
+        final status =
+            file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
         return _statusFilters.contains(status);
       }).toList();
     }
@@ -275,7 +276,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // Apply sorting
     filteredFiles.sort((a, b) {
       int comparison = 0;
-      
+
       switch (_sortBy) {
         case 'name':
           comparison = a.name.toLowerCase().compareTo(b.name.toLowerCase());
@@ -296,7 +297,7 @@ class _MyHomePageState extends State<MyHomePage> {
           comparison = statusA.compareTo(statusB);
           break;
       }
-      
+
       return _sortAscending ? comparison : -comparison;
     });
 
@@ -337,8 +338,8 @@ class _MyHomePageState extends State<MyHomePage> {
         position.dx,
         position.dy,
       ),
-      items: [
-        ..._recentFiles.take(10).map((recentFile) {
+      items: <PopupMenuEntry<String>>[
+        ..._recentFiles.take(10).map<PopupMenuEntry<String>>((recentFile) {
           final fileName = path.basename(recentFile.path);
           return PopupMenuItem<String>(
             value: recentFile.path,
@@ -1002,10 +1003,11 @@ class _MyHomePageState extends State<MyHomePage> {
     });
 
     _appendLog('Processing: ${item.name}');
-    
+
     // Calculate initial ETA based on historical data
     if (item.fileSize != null) {
-      final eta = await PerformanceTrackingService.estimateExportTime(item.fileSize!);
+      final eta =
+          await PerformanceTrackingService.estimateExportTime(item.fileSize!);
       if (eta != null) {
         setState(() {
           item.estimatedTimeRemaining = eta;
@@ -1022,9 +1024,12 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             item.exportProgress = progress;
             // Update ETA based on actual progress
-            if (item.exportStartTime != null && item.fileSize != null && progress > 0.01) {
+            if (item.exportStartTime != null &&
+                item.fileSize != null &&
+                progress > 0.01) {
               final elapsed = DateTime.now().difference(item.exportStartTime!);
-              final remaining = PerformanceTrackingService.calculateRemainingTime(
+              final remaining =
+                  PerformanceTrackingService.calculateRemainingTime(
                 fileSizeBytes: item.fileSize!,
                 progressPercent: progress * 100,
                 elapsedTime: elapsed,
@@ -1063,7 +1068,7 @@ class _MyHomePageState extends State<MyHomePage> {
           item.estimatedTimeRemaining = null;
         });
         _appendLog('✓ Completed: ${item.name}');
-        
+
         // Record performance metrics for future ETA calculations (Feature #25)
         if (item.exportStartTime != null && item.fileSize != null) {
           final duration = DateTime.now().difference(item.exportStartTime!);
@@ -1291,9 +1296,11 @@ class _MyHomePageState extends State<MyHomePage> {
                             .findRenderObject() as RenderBox;
                         final RelativeRect position = RelativeRect.fromRect(
                           Rect.fromPoints(
-                            button.localToGlobal(button.size.bottomRight(Offset.zero),
+                            button.localToGlobal(
+                                button.size.bottomRight(Offset.zero),
                                 ancestor: overlay),
-                            button.localToGlobal(button.size.bottomRight(Offset.zero),
+                            button.localToGlobal(
+                                button.size.bottomRight(Offset.zero),
                                 ancestor: overlay),
                           ),
                           Offset.zero & overlay.size,
@@ -1359,7 +1366,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             '${_files.length} file(s) | ${FileUtils.formatBytes(_files.fold<int>(0, (sum, f) => sum + (f.fileSize ?? 0)))}'),
                     ],
                   ),
-                  
+
                   // Search and filter controls
                   if (_files.isNotEmpty) ...[
                     const SizedBox(height: 12),
@@ -1497,7 +1504,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(width: 8),
-                          if (_searchQuery.isNotEmpty || _statusFilters.isNotEmpty)
+                          if (_searchQuery.isNotEmpty ||
+                              _statusFilters.isNotEmpty)
                             TextButton.icon(
                               onPressed: () {
                                 setState(() {
@@ -1509,14 +1517,15 @@ class _MyHomePageState extends State<MyHomePage> {
                               icon: const Icon(Icons.clear, size: 16),
                               label: const Text('Clear all filters'),
                               style: TextButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
                                 minimumSize: const Size(0, 32),
                               ),
                             ),
                         ],
                       ),
                   ],
-                  
+
                   const SizedBox(height: 16),
 
                   // Main content area - scrollable

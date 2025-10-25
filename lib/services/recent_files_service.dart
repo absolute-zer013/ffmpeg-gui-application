@@ -19,9 +19,7 @@ class RecentFilesService {
 
     try {
       final List<dynamic> decoded = json.decode(recentFilesJson);
-      return decoded
-          .map((fileJson) => RecentFile.fromJson(fileJson))
-          .toList();
+      return decoded.map((fileJson) => RecentFile.fromJson(fileJson)).toList();
     } catch (e) {
       // If parsing fails, return empty list
       return [];

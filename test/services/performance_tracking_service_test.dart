@@ -176,7 +176,8 @@ void main() {
       );
 
       expect(
-        PerformanceTrackingService.formatDuration(const Duration(seconds: 3665)),
+        PerformanceTrackingService.formatDuration(
+            const Duration(seconds: 3665)),
         '1h 1m',
       );
     });

@@ -174,7 +174,8 @@ void main() {
       );
 
       expect(offset1, equals(offset2));
-      expect(offset1, equals(offset3)); // Equality only checks streamIndex and streamType
+      expect(offset1,
+          equals(offset3)); // Equality only checks streamIndex and streamType
       expect(offset1, isNot(equals(offset4)));
     });
 

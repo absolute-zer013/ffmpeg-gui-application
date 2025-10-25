@@ -27,7 +27,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
   @override
   void initState() {
     super.initState();
-    
+
     // Initialize controllers for all tracks
     for (final track in [...widget.audioTracks, ...widget.subtitleTracks]) {
       _controllers[track.streamIndex] = TextEditingController();
@@ -65,7 +65,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
     final seconds = (absMs / 1000).floor();
     final ms = absMs % 1000;
     final sign = offsetMs >= 0 ? '+' : '-';
-    
+
     if (seconds > 0) {
       return '$sign${seconds}s ${ms}ms';
     } else {
@@ -75,7 +75,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
 
   List<SyncOffset> _buildOffsets() {
     final offsets = <SyncOffset>[];
-    
+
     for (final track in widget.audioTracks) {
       final offsetMs = _offsets[track.streamIndex] ?? 0;
       if (offsetMs != 0) {
@@ -87,7 +87,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
         ));
       }
     }
-    
+
     for (final track in widget.subtitleTracks) {
       final offsetMs = _offsets[track.streamIndex] ?? 0;
       if (offsetMs != 0) {
@@ -99,7 +99,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
         ));
       }
     }
-    
+
     return offsets;
   }
 
@@ -107,7 +107,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
     final streamIndex = track.streamIndex;
     final controller = _controllers[streamIndex]!;
     final currentOffset = _offsets[streamIndex] ?? 0;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -151,7 +151,8 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                       isDense: true,
                       suffixText: 'ms',
                     ),
-                    keyboardType: const TextInputType.numberWithOptions(signed: true),
+                    keyboardType:
+                        const TextInputType.numberWithOptions(signed: true),
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^-?\d*')),
                     ],
@@ -165,7 +166,8 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                     children: [
                       const Text(
                         'Preview:',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -174,7 +176,9 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                           fontSize: 14,
                           color: currentOffset == 0
                               ? Colors.grey
-                              : (currentOffset > 0 ? Colors.orange : Colors.blue),
+                              : (currentOffset > 0
+                                  ? Colors.orange
+                                  : Colors.blue),
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -195,7 +199,8 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                   icon: const Icon(Icons.remove, size: 16),
                   label: const Text('100ms'),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -209,7 +214,8 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                   icon: const Icon(Icons.add, size: 16),
                   label: const Text('100ms'),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -224,7 +230,8 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                       : null,
                   child: const Text('Reset'),
                   style: TextButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
@@ -241,7 +248,7 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
   Widget build(BuildContext context) {
     final hasAudio = widget.audioTracks.isNotEmpty;
     final hasSubtitles = widget.subtitleTracks.isNotEmpty;
-    
+
     return AlertDialog(
       title: const Text('Audio/Subtitle Sync'),
       content: SizedBox(
@@ -263,11 +270,10 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                ...widget.audioTracks
-                    .map((track) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: _buildTrackOffset(track, 'audio'),
-                        )),
+                ...widget.audioTracks.map((track) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildTrackOffset(track, 'audio'),
+                    )),
               ],
               if (hasAudio && hasSubtitles) const SizedBox(height: 16),
               if (hasSubtitles) ...[
@@ -276,11 +282,10 @@ class _SyncOffsetDialogState extends State<SyncOffsetDialog> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 const SizedBox(height: 8),
-                ...widget.subtitleTracks
-                    .map((track) => Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: _buildTrackOffset(track, 'subtitle'),
-                        )),
+                ...widget.subtitleTracks.map((track) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: _buildTrackOffset(track, 'subtitle'),
+                    )),
               ],
               if (!hasAudio && !hasSubtitles) ...[
                 const Center(

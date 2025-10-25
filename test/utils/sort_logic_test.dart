@@ -39,7 +39,8 @@ void main() {
 
     test('Sort by name ascending', () {
       final sorted = List<FileItem>.from(testFiles);
-      sorted.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      sorted
+          .sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
 
       expect(sorted[0].name, 'A File.mkv');
       expect(sorted[1].name, 'B File.mkv');
@@ -48,7 +49,8 @@ void main() {
 
     test('Sort by name descending', () {
       final sorted = List<FileItem>.from(testFiles);
-      sorted.sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
+      sorted
+          .sort((a, b) => b.name.toLowerCase().compareTo(a.name.toLowerCase()));
 
       expect(sorted[0].name, 'C File.mkv');
       expect(sorted[1].name, 'B File.mkv');

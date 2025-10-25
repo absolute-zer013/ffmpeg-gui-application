@@ -4,10 +4,10 @@ import 'export_profile.dart';
 class MultiProfileExportConfig {
   /// List of profiles to export with
   final List<ExportProfile> profiles;
-  
+
   /// Suffix strategy for output filenames
   final FilenameSuffixStrategy suffixStrategy;
-  
+
   /// Whether to export profiles in parallel or sequentially
   final bool parallel;
 
@@ -18,14 +18,14 @@ class MultiProfileExportConfig {
   });
 
   /// Generate output filename with appropriate suffix
-  String generateFilename(String originalName, ExportProfile profile, int index) {
+  String generateFilename(
+      String originalName, ExportProfile profile, int index) {
     // Use path package for proper extension handling
     final baseName = originalName.substring(
-      0, 
-      originalName.lastIndexOf('.') > 0 
-        ? originalName.lastIndexOf('.') 
-        : originalName.length
-    );
+        0,
+        originalName.lastIndexOf('.') > 0
+            ? originalName.lastIndexOf('.')
+            : originalName.length);
     final extension = originalName.lastIndexOf('.') > 0
         ? originalName.substring(originalName.lastIndexOf('.') + 1)
         : 'mkv';
@@ -35,11 +35,12 @@ class MultiProfileExportConfig {
       case FilenameSuffixStrategy.profileName:
         suffix = profile.name.replaceAll(RegExp(r'[^\w_-]'), '_');
         break;
-      case FilenameSuffixStrategy.index:
+      case FilenameSuffixStrategy.sequential:
         suffix = (index + 1).toString().padLeft(2, '0');
         break;
       case FilenameSuffixStrategy.profileNameAndIndex:
-        suffix = '${profile.name.replaceAll(RegExp(r'[^\w_-]'), '_')}_${(index + 1).toString().padLeft(2, '0')}';
+        suffix =
+            '${profile.name.replaceAll(RegExp(r'[^\w_-]'), '_')}_${(index + 1).toString().padLeft(2, '0')}';
         break;
     }
 
@@ -84,10 +85,10 @@ class MultiProfileExportConfig {
 enum FilenameSuffixStrategy {
   /// Use profile name as suffix (e.g., "movie-HighQuality.mkv")
   profileName,
-  
+
   /// Use sequential index as suffix (e.g., "movie-01.mkv", "movie-02.mkv")
-  index,
-  
+  sequential,
+
   /// Use both profile name and index (e.g., "movie-HighQuality_01.mkv")
   profileNameAndIndex,
 }
@@ -97,7 +98,7 @@ extension FilenameSuffixStrategyExtension on FilenameSuffixStrategy {
     switch (this) {
       case FilenameSuffixStrategy.profileName:
         return 'Profile Name';
-      case FilenameSuffixStrategy.index:
+      case FilenameSuffixStrategy.sequential:
         return 'Sequential Number';
       case FilenameSuffixStrategy.profileNameAndIndex:
         return 'Profile Name + Number';
@@ -108,7 +109,7 @@ extension FilenameSuffixStrategyExtension on FilenameSuffixStrategy {
     switch (this) {
       case FilenameSuffixStrategy.profileName:
         return 'Uses profile name as suffix (e.g., movie-HighQuality.mkv)';
-      case FilenameSuffixStrategy.index:
+      case FilenameSuffixStrategy.sequential:
         return 'Uses sequential numbers (e.g., movie-01.mkv, movie-02.mkv)';
       case FilenameSuffixStrategy.profileNameAndIndex:
         return 'Combines profile name and number (e.g., movie-HighQuality_01.mkv)';

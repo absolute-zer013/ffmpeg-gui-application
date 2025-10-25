@@ -2,16 +2,16 @@
 class ResolutionSettings {
   /// Target width (null means keep original)
   final int? width;
-  
+
   /// Target height (null means keep original)
   final int? height;
-  
+
   /// Target framerate (null means keep original)
   final double? framerate;
-  
+
   /// Preset name if using a preset
   final String? presetName;
-  
+
   /// Whether resolution/framerate conversion is enabled
   final bool enabled;
 
@@ -25,11 +25,16 @@ class ResolutionSettings {
 
   /// Common resolution presets
   static const Map<String, ResolutionSettings> presets = {
-    '4K (3840x2160)': ResolutionSettings(width: 3840, height: 2160, presetName: '4K', enabled: true),
-    '1080p (1920x1080)': ResolutionSettings(width: 1920, height: 1080, presetName: '1080p', enabled: true),
-    '720p (1280x720)': ResolutionSettings(width: 1280, height: 720, presetName: '720p', enabled: true),
-    '480p (854x480)': ResolutionSettings(width: 854, height: 480, presetName: '480p', enabled: true),
-    '360p (640x360)': ResolutionSettings(width: 640, height: 360, presetName: '360p', enabled: true),
+    '4K (3840x2160)': ResolutionSettings(
+        width: 3840, height: 2160, presetName: '4K', enabled: true),
+    '1080p (1920x1080)': ResolutionSettings(
+        width: 1920, height: 1080, presetName: '1080p', enabled: true),
+    '720p (1280x720)': ResolutionSettings(
+        width: 1280, height: 720, presetName: '720p', enabled: true),
+    '480p (854x480)': ResolutionSettings(
+        width: 854, height: 480, presetName: '480p', enabled: true),
+    '360p (640x360)': ResolutionSettings(
+        width: 640, height: 360, presetName: '360p', enabled: true),
   };
 
   /// Common framerate options
@@ -47,7 +52,7 @@ class ResolutionSettings {
   /// Get FFmpeg scale filter string
   String? get scaleFilter {
     if (!enabled || (width == null && height == null)) return null;
-    
+
     if (width != null && height != null) {
       return 'scale=$width:$height';
     } else if (width != null) {
@@ -62,12 +67,12 @@ class ResolutionSettings {
   /// Returns a multiplier for the original file size
   double estimateSizeMultiplier(int originalWidth, int originalHeight) {
     if (!enabled || (width == null && height == null)) return 1.0;
-    
+
     final targetWidth = width ?? originalWidth;
     final targetHeight = height ?? originalHeight;
     final originalPixels = originalWidth * originalHeight;
     final targetPixels = targetWidth * targetHeight;
-    
+
     // Rough estimate: size is proportional to pixel count
     // Apply a small overhead for encoding
     return (targetPixels / originalPixels) * 1.1;
@@ -122,6 +127,8 @@ class ResolutionSettings {
     if (presetName != null) {
       parts.add('($presetName)');
     }
-    return parts.isEmpty ? 'Resolution: Custom' : 'Resolution: ${parts.join(' ')}';
+    return parts.isEmpty
+        ? 'Resolution: Custom'
+        : 'Resolution: ${parts.join(' ')}';
   }
 }

@@ -29,12 +29,10 @@ class _MultiProfileExportDialogState extends State<MultiProfileExportDialog> {
   @override
   void initState() {
     super.initState();
-    _selectedProfileNames = widget.initialConfig?.profiles
-            .map((p) => p.name)
-            .toSet() ??
-        {};
-    _suffixStrategy =
-        widget.initialConfig?.suffixStrategy ?? FilenameSuffixStrategy.profileName;
+    _selectedProfileNames =
+        widget.initialConfig?.profiles.map((p) => p.name).toSet() ?? {};
+    _suffixStrategy = widget.initialConfig?.suffixStrategy ??
+        FilenameSuffixStrategy.profileName;
     _parallel = widget.initialConfig?.parallel ?? false;
   }
 
@@ -112,7 +110,9 @@ class _MultiProfileExportDialogState extends State<MultiProfileExportDialog> {
                             : null,
                         secondary: Icon(
                           Icons.folder_special,
-                          color: isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                          color: isSelected
+                              ? Theme.of(context).primaryColor
+                              : Colors.grey,
                         ),
                       );
                     },

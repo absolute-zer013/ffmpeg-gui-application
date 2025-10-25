@@ -5,13 +5,13 @@ import 'dart:convert';
 class PerformanceMetrics {
   /// Export speed in MB/s
   final double speedMBps;
-  
+
   /// Timestamp when this metric was recorded
   final DateTime timestamp;
-  
+
   /// File size in bytes
   final int fileSizeBytes;
-  
+
   /// Duration taken to export in seconds
   final double durationSeconds;
 
@@ -45,7 +45,8 @@ class PerformanceMetrics {
 class PerformanceTrackingService {
   static const String _prefsKey = 'performance_metrics';
   static const int _maxHistorySize = 50; // Keep last 50 exports
-  static const int _maxHistoryAgeDays = 30; // Only keep metrics from last 30 days
+  static const int _maxHistoryAgeDays =
+      30; // Only keep metrics from last 30 days
 
   /// Record a completed export for performance tracking
   static Future<void> recordExport({
@@ -64,14 +65,15 @@ class PerformanceTrackingService {
 
     final prefs = await SharedPreferences.getInstance();
     final history = await _loadMetrics();
-    
+
     // Add new metric
     history.add(metric);
-    
+
     // Remove old metrics (older than max age)
-    final cutoffDate = DateTime.now().subtract(const Duration(days: _maxHistoryAgeDays));
+    final cutoffDate =
+        DateTime.now().subtract(const Duration(days: _maxHistoryAgeDays));
     history.removeWhere((m) => m.timestamp.isBefore(cutoffDate));
-    
+
     // Keep only most recent metrics if we exceed max size
     if (history.length > _maxHistorySize) {
       history.sort((a, b) => b.timestamp.compareTo(a.timestamp));
@@ -92,7 +94,8 @@ class PerformanceTrackingService {
     try {
       final List<dynamic> jsonList = jsonDecode(jsonStr);
       return jsonList
-          .map((json) => PerformanceMetrics.fromJson(json as Map<String, dynamic>))
+          .map((json) =>
+              PerformanceMetrics.fromJson(json as Map<String, dynamic>))
           .toList();
     } catch (e) {
       return [];
@@ -107,7 +110,7 @@ class PerformanceTrackingService {
     // Use weighted average, giving more weight to recent exports
     double totalWeight = 0;
     double weightedSum = 0;
-    
+
     for (var i = 0; i < metrics.length; i++) {
       // More recent exports get higher weight (exponential decay)
       final weight = 1.0 / (i + 1);
@@ -125,7 +128,7 @@ class PerformanceTrackingService {
 
     final fileSizeMB = fileSizeBytes / (1024 * 1024);
     final estimatedSeconds = fileSizeMB / avgSpeed;
-    
+
     return Duration(seconds: estimatedSeconds.ceil());
   }
 
@@ -138,7 +141,7 @@ class PerformanceTrackingService {
       0,
       (sum, size) => sum + (size / (1024 * 1024)),
     );
-    
+
     final estimatedSeconds = totalSizeMB / avgSpeed;
     return Duration(seconds: estimatedSeconds.ceil());
   }
@@ -151,10 +154,10 @@ class PerformanceTrackingService {
   }) {
     if (progressPercent <= 0 || progressPercent >= 100) return null;
 
-    final totalEstimatedSeconds = 
+    final totalEstimatedSeconds =
         elapsedTime.inSeconds / (progressPercent / 100);
     final remainingSeconds = totalEstimatedSeconds - elapsedTime.inSeconds;
-    
+
     return Duration(seconds: remainingSeconds.ceil());
   }
 
@@ -202,8 +205,12 @@ class PerformanceTrackingService {
       'medianSpeed': medianSpeed,
       'minSpeed': minSpeed,
       'maxSpeed': maxSpeed,
-      'oldestDate': metrics.map((m) => m.timestamp).reduce((a, b) => a.isBefore(b) ? a : b),
-      'newestDate': metrics.map((m) => m.timestamp).reduce((a, b) => a.isAfter(b) ? a : b),
+      'oldestDate': metrics
+          .map((m) => m.timestamp)
+          .reduce((a, b) => a.isBefore(b) ? a : b),
+      'newestDate': metrics
+          .map((m) => m.timestamp)
+          .reduce((a, b) => a.isAfter(b) ? a : b),
     };
   }
 }

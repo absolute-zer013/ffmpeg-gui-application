@@ -55,7 +55,8 @@ void main() {
 
     test('Filter by status - pending', () {
       final filtered = testFiles.where((file) {
-        final status = file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
+        final status =
+            file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
         return status == 'pending';
       }).toList();
 
@@ -65,7 +66,8 @@ void main() {
 
     test('Filter by status - completed', () {
       final filtered = testFiles.where((file) {
-        final status = file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
+        final status =
+            file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
         return status == 'completed';
       }).toList();
 
@@ -75,7 +77,8 @@ void main() {
 
     test('Filter by status - failed', () {
       final filtered = testFiles.where((file) {
-        final status = file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
+        final status =
+            file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
         return status == 'failed';
       }).toList();
 
@@ -86,14 +89,16 @@ void main() {
     test('Combined filter - name and status', () {
       final query = 'movie';
       final statusFilter = 'completed';
-      
+
       final filtered = testFiles.where((file) {
         // Name filter
-        final matchesName = file.name.toLowerCase().contains(query.toLowerCase());
+        final matchesName =
+            file.name.toLowerCase().contains(query.toLowerCase());
         if (!matchesName) return false;
-        
+
         // Status filter
-        final status = file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
+        final status =
+            file.exportStatus.isEmpty ? 'pending' : file.exportStatus;
         return status == statusFilter;
       }).toList();
 

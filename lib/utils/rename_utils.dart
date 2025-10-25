@@ -157,6 +157,26 @@ class RenameUtils {
       }
     }
 
+    // Check for unknown variables
+    final validVariables = {
+      'name',
+      'ext',
+      'date',
+      'time',
+      'year',
+      'month',
+      'day',
+      'index',
+      'episode',
+      'season'
+    };
+    final variables = extractVariables(pattern);
+    for (final variable in variables) {
+      if (!validVariables.contains(variable)) {
+        return 'Unknown variable: {$variable}';
+      }
+    }
+
     return null;
   }
 

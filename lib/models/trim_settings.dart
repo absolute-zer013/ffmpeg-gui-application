@@ -2,10 +2,10 @@
 class TrimSettings {
   /// Start time in seconds (null means start from beginning)
   final double? startTime;
-  
+
   /// End time in seconds (null means go to the end)
   final double? endTime;
-  
+
   /// Whether trim settings are enabled
   final bool enabled;
 
@@ -31,16 +31,16 @@ class TrimSettings {
   /// Parse time string in HH:MM:SS or MM:SS or SS format to seconds
   static double? _parseTimeString(String timeStr) {
     if (timeStr.isEmpty) return null;
-    
+
     try {
       final parts = timeStr.split(':').map((s) => s.trim()).toList();
       double seconds = 0;
-      
+
       if (parts.length == 3) {
         // HH:MM:SS
-        seconds = int.parse(parts[0]) * 3600 + 
-                  int.parse(parts[1]) * 60 + 
-                  double.parse(parts[2]);
+        seconds = int.parse(parts[0]) * 3600 +
+            int.parse(parts[1]) * 60 +
+            double.parse(parts[2]);
       } else if (parts.length == 2) {
         // MM:SS
         seconds = int.parse(parts[0]) * 60 + double.parse(parts[1]);
@@ -48,7 +48,7 @@ class TrimSettings {
         // SS
         seconds = double.parse(parts[0]);
       }
-      
+
       return seconds >= 0 ? seconds : null;
     } catch (e) {
       return null;
@@ -61,16 +61,16 @@ class TrimSettings {
     final minutes = ((seconds % 3600) ~/ 60);
     final secs = (seconds % 60).toInt();
     final ms = ((seconds % 1) * 100).toInt();
-    
+
     if (hours > 0) {
       return '${hours.toString().padLeft(2, '0')}:'
-             '${minutes.toString().padLeft(2, '0')}:'
-             '${secs.toString().padLeft(2, '0')}'
-             '${ms > 0 ? '.$ms' : ''}';
+          '${minutes.toString().padLeft(2, '0')}:'
+          '${secs.toString().padLeft(2, '0')}'
+          '${ms > 0 ? '.$ms' : ''}';
     } else {
       return '${minutes.toString().padLeft(2, '0')}:'
-             '${secs.toString().padLeft(2, '0')}'
-             '${ms > 0 ? '.$ms' : ''}';
+          '${secs.toString().padLeft(2, '0')}'
+          '${ms > 0 ? '.$ms' : ''}';
     }
   }
 

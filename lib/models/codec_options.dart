@@ -130,7 +130,8 @@ class CodecConversionSettings {
           ? AudioCodec.values.firstWhere((e) => e.name == json['audioCodec'])
           : null,
       subtitleFormat: json['subtitleFormat'] != null
-          ? SubtitleFormat.values.firstWhere((e) => e.name == json['subtitleFormat'])
+          ? SubtitleFormat.values
+              .firstWhere((e) => e.name == json['subtitleFormat'])
           : null,
       videoCrf: json['videoCrf'] as int?,
       videoPreset: json['videoPreset'] as String?,

@@ -32,32 +32,33 @@ class FFmpegExportService {
     bool autoFix = false,
   }) {
     final args = <String>[];
-    
+
     // Add trim/cut settings (Feature #9) - must come before -i
     if (item.trimSettings != null && item.trimSettings!.enabled) {
       if (item.trimSettings!.startTime != null) {
         args.addAll(['-ss', item.trimSettings!.startTime.toString()]);
       }
     }
-    
+
     // Add audio/subtitle sync offsets (Feature #17) - must come before -i
     if (item.syncOffsets != null && item.syncOffsets!.isNotEmpty) {
       for (final offset in item.syncOffsets!) {
         args.addAll(['-itsoffset', offset.offsetSeconds.toString()]);
       }
     }
-    
+
     args.addAll([
-      '-i', inputPath,
+      '-i',
+      inputPath,
     ]);
-    
+
     // Add end time for trim/cut (Feature #9) - comes after -i
     if (item.trimSettings != null && item.trimSettings!.enabled) {
       if (item.trimSettings!.endTime != null) {
         args.addAll(['-to', item.trimSettings!.endTime.toString()]);
       }
     }
-    
+
     args.addAll([
       '-map', '0',
       '-y', // Overwrite output files
@@ -325,8 +326,8 @@ class FFmpegExportService {
       final pos = selectedSubs[i];
       final track = item.subtitleTracks[pos];
       final settings = item.codecSettings[track.streamIndex];
-      
-      if (settings?.subtitleFormat != null && 
+
+      if (settings?.subtitleFormat != null &&
           settings!.subtitleFormat != SubtitleFormat.copy) {
         // Convert subtitle format
         args.addAll(['-c:s:$i', settings.subtitleFormat!.ffmpegName]);
@@ -335,7 +336,7 @@ class FFmpegExportService {
         args.addAll(['-c:s:$i', 'copy']);
       }
     }
-    
+
     // Apply resolution/framerate changes (Feature #10)
     final filters = <String>[];
     if (item.resolutionSettings != null && item.resolutionSettings!.enabled) {
@@ -347,11 +348,11 @@ class FFmpegExportService {
         args.addAll(['-r', item.resolutionSettings!.framerate.toString()]);
       }
     }
-    
+
     if (filters.isNotEmpty) {
       args.addAll(['-vf', filters.join(',')]);
     }
-    
+
     args.addAll([
       '-map_chapters',
       '0',
