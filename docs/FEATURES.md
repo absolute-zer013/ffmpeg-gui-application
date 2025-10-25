@@ -243,7 +243,7 @@
 
 ## 🆕 Phase 5 - Tier 4 (Complex Features)
 
-### 30. **✓ Dual Pane Mode**
+### 30. Dual Pane Mode (disabled in GUI)
    - Split screen layout for comparing files
    - Horizontal or vertical orientation
    - Resizable divider with drag support
@@ -253,7 +253,7 @@
    - Responsive layout adjusts to screen size
    - Preview files before and after export
 
-### 31. **✓ Waveform Visualization**
+### 31. Waveform Visualization (disabled in GUI)
    - Visual representation of audio tracks
    - Canvas-based rendering for smooth performance
    - Zoom in/out controls (1x to 10x)
@@ -465,7 +465,9 @@
 
 ---
 
-**All 20 original features + 19 NEW enhancement features have been fully implemented!** 🎉
+Note: Dual Pane Mode and Waveform Visualization are implemented at the module level but are disabled in the main UI as of 2025-10-25. They can be re-enabled in a future release.
+
+**All core features are implemented; Tier 4 GUI features are available but disabled by default.** 🎉
 
 ### Summary
 - ✅ 20 Original core features (progress, cancellation, drag-drop, profiles, etc.)

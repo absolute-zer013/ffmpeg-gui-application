@@ -213,20 +213,23 @@ Additional features planned for future releases:
 - **Integration**: Command-line interface, presets import
 ## What's New - Phase 5 Tier 4
 
-The latest release includes four complex, high-value features:
+The latest release includes several complex, high-value features. Note: Two GUI features are currently disabled by default based on user feedback; see details below.
 
-### Dual Pane Mode
-Split-screen layout for comparing source and destination files side-by-side:
-- Horizontal or vertical orientation with resizable divider
-- Detailed track and metadata comparison
-- File preview before and after export
+### Dual Pane Mode (removed)
+Split-screen layout for comparing source and destination files side-by-side.
 
-### Waveform Visualization
-Visual audio representation with advanced controls:
-- Zoom and pan through audio waveforms
-- Click to seek to specific positions
-- Automatic silence detection
-- Peak and RMS amplitude display
+Status as of 2025-10-25:
+- Fully removed from the codebase (widgets/models/tests retired)
+- Previously caused layout issues in some environments and was deprioritized
+- If reintroducing in future, it should be reimplemented from scratch to match current architecture
+
+### Waveform Visualization (removed)
+Visual audio representation with zoom/pan and silence detection.
+
+Status as of 2025-10-25:
+- Fully removed from the codebase (model/service/widget/tests retired)
+- Removed due to startup overhead and limited value for most workflows
+- If reintroducing in future, it should be reimplemented with a lighter architecture
 
 ### Command-Line Interface
 Automate exports without the GUI:
@@ -260,8 +263,11 @@ The project roadmap includes additional features planned for future releases:
 - **Export Enhancements**: Trim/cut functionality, resolution/framerate changes, estimated export times
 - **Batch Operations**: Multi-profile export
 - **Advanced Features**: Chapter editing, audio/subtitle sync, MKV optimization, watch folder
+- **UI/UX Enhancements**: Re-assess Dual Pane Mode and Waveform Visualization for an opt-in/experimental channel before re-enabling in the main UI
 
 See `docs/PHASE5_FEATURES.md` for the complete list and `docs/PHASE5_PLANNING.md` for implementation guidance.
+
+Note on logging: exports now write to a single session log that always records failures as well as successes. See `docs/CHANGELOG.md` for details.
 
 ## Testing & Quality Assurance
 

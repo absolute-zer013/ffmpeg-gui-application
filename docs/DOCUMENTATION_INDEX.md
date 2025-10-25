@@ -7,6 +7,7 @@ Complete guide to all project documentation. Start here to find what you need.
 ### Getting Started
 - **[README.md](../README.md)** - Project overview, setup, and basic usage
 - **[FEATURES.md](FEATURES.md)** - Complete list of implemented features
+- **[IMPLEMENTATION_OVERVIEW.md](IMPLEMENTATION_OVERVIEW.md)** - Consolidated implementation summary (replaces phase reports)
 
 ### Testing & Quality
 - **[TESTING.md](TESTING.md)** - Testing guide and running tests
@@ -16,63 +17,29 @@ Complete guide to all project documentation. Start here to find what you need.
 - **[DEPLOYMENT.md](DEPLOYMENT.md)** - Build and distribution instructions
 
 ### Enhancement Planning
-- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - Complete roadmap (Phases 1-5)
-- **[PHASES_REPORT.md](PHASES_REPORT.md)** - Phase summaries (Phases 1-5)
+- **[ENHANCEMENTS.md](ENHANCEMENTS.md)** - Roadmap and ideas
+- **[issues/NEW_FEATURES_COMBINED_ISSUE.md](issues/NEW_FEATURES_COMBINED_ISSUE.md)** - Single tracking issue for upcoming features
+  
 
-## Documentation by Phase
+## Current Documentation Map
 
-### Phase 1 — Core Workflow Upgrades ✅ Completed
-**Features:** Export Profiles, Video Stream Selection, Metadata Editor
+We’ve consolidated all phase reports and summaries into a single overview:
 
-**Documentation:**
-- Summary: `PHASES_REPORT.md` (Phase 1 section)
-- Detailed descriptions: `ENHANCEMENTS.md` (Features #2, #6, #16)
-- Implementation: `FEATURES.md` (Features #21-23)
-
-### Phase 2 — Advanced Export ✅ Completed
-**Features:** Codec Conversion, Quality Presets, Verification Mode
-
-**Documentation:**
-- Summary: `PHASES_REPORT.md` (Phase 2 section)
-- Detailed descriptions: `ENHANCEMENTS.md` (Features #7, #8, #20)
-- Implementation: `FEATURES.md` (Features #24-26)
-
-### Phase 3 — Batch Power ✅ Completed
-**Features:** Advanced Rename Patterns, Auto-Detect Rules, Configuration Import/Export
-
-**Documentation:**
-- Summary: `PHASES_REPORT.md` (Phase 3 section)
-- Detailed descriptions: `ENHANCEMENTS.md` (Features #11-13)
-- Implementation: `FEATURES.md` (Features #27-29)
-
-### Phase 4 — UI Polish ✅ Completed
-**Features:** File Preview, Export Queue Management, Better Notifications, Batch Codec/Quality Apply
-
-**Documentation:**
-- Summary: `PHASES_REPORT.md` (Phase 4 section)
-- Detailed descriptions: `ENHANCEMENTS.md` (Features #22, #24, #29, #30)
-- Implementation: `FEATURES.md` (Features #30-33)
-
-### Phase 5 — Consolidated Backlog 📋 Planning
-**Features:** 17 remaining planned features across 5 categories
-
-**Documentation:**
-- **[PHASE5_TRACKING_ISSUE.md](issues/PHASE5_TRACKING_ISSUE.md)** - Tracking issue with checklist
-- **[PHASE5_PLANNING.md](PHASE5_PLANNING.md)** - Detailed implementation guidance
-- **[PHASE5_FEATURES.md](PHASE5_FEATURES.md)** - Quick reference table
-- **Summary:** `PHASES_REPORT.md` (Phase 5 section)
-- **Detailed descriptions:** `ENHANCEMENTS.md` (Phase 5 section)
+- Implementation overview: `IMPLEMENTATION_OVERVIEW.md`
+- Implemented feature details: `FEATURES.md`
+- Roadmap and ideas: `ENHANCEMENTS.md`
+- Upcoming work (single tracker): `issues/NEW_FEATURES_COMBINED_ISSUE.md`
+  
 
 ## Documentation by Type
 
 ### Planning Documents
 | Document | Purpose | Audience |
 |----------|---------|----------|
-| [ENHANCEMENTS.md](ENHANCEMENTS.md) | Complete roadmap with all planned features | Developers, Contributors |
-| [PHASES_REPORT.md](PHASES_REPORT.md) | Executive summary of all phases | Product Owners, Managers |
-| [PHASE5_PLANNING.md](PHASE5_PLANNING.md) | Phase 5 implementation guidance | Developers, Contributors |
-| [PHASE5_FEATURES.md](PHASE5_FEATURES.md) | Phase 5 quick reference | All stakeholders |
-| [issues/PHASE5_TRACKING_ISSUE.md](issues/PHASE5_TRACKING_ISSUE.md) | Phase 5 tracking checklist | Project Managers |
+| [ENHANCEMENTS.md](ENHANCEMENTS.md) | Roadmap and candidate features | Developers, Contributors |
+| [IMPLEMENTATION_OVERVIEW.md](IMPLEMENTATION_OVERVIEW.md) | Consolidated view of what’s shipped | Product Owners, Managers |
+| [issues/NEW_FEATURES_COMBINED_ISSUE.md](issues/NEW_FEATURES_COMBINED_ISSUE.md) | Single tracking issue for upcoming work | Project Managers |
+  
 
 ### Implementation Documents
 | Document | Purpose | Audience |
@@ -88,29 +55,17 @@ Complete guide to all project documentation. Start here to find what you need.
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Build and release process | Developers, DevOps |
 | [CI_CD_SETUP.md](../CI_CD_SETUP.md) | CI/CD configuration | DevOps |
 
-## Phase 5 Documentation Deep Dive
+## Where to Find Things Now
 
-Phase 5 has the most comprehensive planning documentation. Here's how to use it:
-
-### For Project Managers
-1. Start with **[PHASES_REPORT.md](PHASES_REPORT.md)** (Phase 5 section) for overview
-2. Review **[PHASE5_FEATURES.md](PHASE5_FEATURES.md)** for feature list and priorities
-3. Use **[issues/PHASE5_TRACKING_ISSUE.md](issues/PHASE5_TRACKING_ISSUE.md)** for tracking progress
-
-### For Developers
-1. Read **[PHASE5_PLANNING.md](PHASE5_PLANNING.md)** for implementation strategy
-2. Use **[ENHANCEMENTS.md](ENHANCEMENTS.md)** for detailed feature descriptions
-3. Follow sub-issue template in **[PHASE5_PLANNING.md](PHASE5_PLANNING.md)** for new features
-
-### For Product Owners
-1. Start with **[PHASE5_FEATURES.md](PHASE5_FEATURES.md)** for feature priorities
-2. Review **[ENHANCEMENTS.md](ENHANCEMENTS.md)** for user-facing descriptions
-3. Track progress in **[issues/PHASE5_TRACKING_ISSUE.md](issues/PHASE5_TRACKING_ISSUE.md)**
+We’ve simplified the docs:
+- What’s shipped → `IMPLEMENTATION_OVERVIEW.md` and `FEATURES.md`
+- What’s next → `ENHANCEMENTS.md` and `issues/NEW_FEATURES_COMBINED_ISSUE.md`
+- How to test/build/deploy → `TESTING.md`, `DEPLOYMENT.md`
 
 ### For Contributors
-1. Read **[PHASE5_PLANNING.md](PHASE5_PLANNING.md)** development guidelines
-2. Pick a feature from **[PHASE5_FEATURES.md](PHASE5_FEATURES.md)**
-3. Follow implementation checklist in **[PHASE5_PLANNING.md](PHASE5_PLANNING.md)**
+1. Review **[ENHANCEMENTS.md](ENHANCEMENTS.md)** for candidate features
+2. Check **[issues/NEW_FEATURES_COMBINED_ISSUE.md](issues/NEW_FEATURES_COMBINED_ISSUE.md)** for current focus
+3. Propose changes via PRs and update **[FEATURES.md](FEATURES.md)** when implemented
 
 ## Documentation Structure
 
@@ -121,18 +76,15 @@ Phase 5 has the most comprehensive planning documentation. Here's how to use it:
 │
 ├── docs/
 │   ├── DOCUMENTATION_INDEX.md    # This file
-│   ├── FEATURES.md               # Implemented features (Phases 1-4)
-│   ├── ENHANCEMENTS.md           # Complete roadmap (Phases 1-5)
-│   ├── PHASES_REPORT.md          # Phase summaries (Phases 1-5)
+│   ├── IMPLEMENTATION_OVERVIEW.md# Consolidated implementation overview
+│   ├── FEATURES.md               # Implemented features
+│   ├── ENHANCEMENTS.md           # Roadmap and ideas
 │   ├── TESTING.md                # Testing guide
 │   ├── DEPLOYMENT.md             # Deployment guide
 │   ├── QUICK_REFERENCE.md        # Quick usage reference
 │   │
-│   ├── PHASE5_PLANNING.md        # Phase 5 implementation guide
-│   ├── PHASE5_FEATURES.md        # Phase 5 feature reference
-│   │
 │   └── issues/
-│       └── PHASE5_TRACKING_ISSUE.md  # Phase 5 tracking checklist
+│       └── NEW_FEATURES_COMBINED_ISSUE.md  # Single tracking issue for upcoming work
 ```
 
 ## Finding Information
@@ -141,13 +93,13 @@ Phase 5 has the most comprehensive planning documentation. Here's how to use it:
 → [FEATURES.md](FEATURES.md) or [README.md](../README.md)
 
 ### "What features are planned?"
-→ [ENHANCEMENTS.md](ENHANCEMENTS.md) or [PHASE5_FEATURES.md](PHASE5_FEATURES.md)
+→ [ENHANCEMENTS.md](ENHANCEMENTS.md) and [issues/NEW_FEATURES_COMBINED_ISSUE.md](issues/NEW_FEATURES_COMBINED_ISSUE.md)
 
 ### "How do I implement feature Y?"
-→ [PHASE5_PLANNING.md](PHASE5_PLANNING.md) and [ENHANCEMENTS.md](ENHANCEMENTS.md)
+→ [ENHANCEMENTS.md](ENHANCEMENTS.md)
 
 ### "What's the status of Phase Z?"
-→ [PHASES_REPORT.md](PHASES_REPORT.md)
+→ Use `IMPLEMENTATION_OVERVIEW.md` (we no longer track by phase)
 
 ### "How do I run tests?"
 → [TESTING.md](TESTING.md)
@@ -155,20 +107,18 @@ Phase 5 has the most comprehensive planning documentation. Here's how to use it:
 ### "How do I build and deploy?"
 → [DEPLOYMENT.md](DEPLOYMENT.md)
 
-### "What's in Phase 5?"
-→ [PHASE5_FEATURES.md](PHASE5_FEATURES.md) (quick reference)  
-→ [PHASE5_PLANNING.md](PHASE5_PLANNING.md) (implementation details)  
-→ [issues/PHASE5_TRACKING_ISSUE.md](issues/PHASE5_TRACKING_ISSUE.md) (tracking)
+### "What's next to build?"
+→ [issues/NEW_FEATURES_COMBINED_ISSUE.md](issues/NEW_FEATURES_COMBINED_ISSUE.md)
 
 ## Contributing
 
 When adding new features:
-1. Review the appropriate planning document (e.g., [PHASE5_PLANNING.md](PHASE5_PLANNING.md))
-2. Follow the sub-issue template
+1. Review the roadmap in [ENHANCEMENTS.md](ENHANCEMENTS.md)
+2. Align with the focus in [issues/NEW_FEATURES_COMBINED_ISSUE.md](issues/NEW_FEATURES_COMBINED_ISSUE.md)
 3. Update documentation when complete:
    - Mark feature as implemented in [ENHANCEMENTS.md](ENHANCEMENTS.md)
    - Add to [FEATURES.md](FEATURES.md) with details
-   - Update tracking issue checklist
+   - Update the combined issue checklist if applicable
    - Update README.md if notable
 
 ## Documentation Maintenance
@@ -177,9 +127,8 @@ When adding new features:
 - **README.md**: When adding major features visible to users
 - **FEATURES.md**: When completing any feature from the roadmap
 - **ENHANCEMENTS.md**: When a feature is completed (mark with ✅)
-- **PHASES_REPORT.md**: When completing a phase or updating phase status
-- **PHASE5_* files**: When planning changes or features are completed
-- **Tracking issues**: When feature status changes
+- **CHANGELOG.md** and **CHANGELOG_SUMMARY.md**: When features land
+- **issues/NEW_FEATURES_COMBINED_ISSUE.md**: When focus or status changes
 
 ### Documentation Standards
 - Use Markdown for all documentation
@@ -199,5 +148,5 @@ If you can't find what you need:
 
 ---
 
-**Last Updated:** 2025-10-22  
-**Documentation Version:** 5.0 (reflects Phases 1-5)
+**Last Updated:** 2025-10-25  
+**Documentation Version:** 6.2 (consolidated; single tracker retained)

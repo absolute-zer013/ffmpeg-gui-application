@@ -2,6 +2,15 @@
 
 All notable changes to the FFmpeg Export Tool are documented in this file.
 
+## [2025-10-25] — Status Update and Logging Improvements
+
+### 🔄 Status Changes
+- Dual Pane Mode (#21) and Waveform Visualization (#23) have been removed from the main UI. Both features remain implemented at the module level with tests and can be re-enabled in a future release. Decision was based on user feedback (discoverability, layout overflow) and startup performance considerations.
+
+### 📝 Logging Improvements
+- Consolidated logging into a single session log file per run. All exports (successes and failures) append to this log, and logs are always written on failure.
+- Improved FFmpeg invocation flags to reduce noise where applicable.
+
 ## [Phase 5 - Tier 4] — Complex Features (2025-10-24)
 
 ### ✨ New Features
