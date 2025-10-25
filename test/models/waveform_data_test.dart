@@ -125,8 +125,9 @@ void main() {
         channels: 1,
       );
 
-      final silenceRegions = waveform.detectSilence(threshold: 0.01, minDuration: 0.5);
-      
+      final silenceRegions =
+          waveform.detectSilence(threshold: 0.01, minDuration: 0.5);
+
       expect(silenceRegions.isNotEmpty, true);
       // Should detect the middle silent section
     });
@@ -143,7 +144,7 @@ void main() {
       );
 
       final json = waveform.toJson();
-      
+
       expect(json['filePath'], '/path/to/file.mkv');
       expect(json['trackIndex'], 0);
       expect(json['sampleRate'], 1000);
@@ -156,7 +157,7 @@ void main() {
   group('SilenceRegion', () {
     test('creates instance correctly', () {
       const region = SilenceRegion(start: 1.0, end: 3.0);
-      
+
       expect(region.start, 1.0);
       expect(region.end, 3.0);
       expect(region.duration, 2.0);
@@ -164,7 +165,7 @@ void main() {
 
     test('toString formats correctly', () {
       const region = SilenceRegion(start: 1.5, end: 4.7);
-      
+
       final str = region.toString();
       expect(str, contains('1.5'));
       expect(str, contains('4.7'));

@@ -5,7 +5,7 @@ void main() {
   group('DualPaneMode', () {
     test('creates instance with default values', () {
       const mode = DualPaneMode();
-      
+
       expect(mode.enabled, false);
       expect(mode.orientation, DualPaneOrientation.horizontal);
       expect(mode.dividerPosition, 0.5);
@@ -23,7 +23,7 @@ void main() {
         rightPaneFilePath: '/path/to/file2.mkv',
         showDifferences: true,
       );
-      
+
       expect(mode.enabled, true);
       expect(mode.orientation, DualPaneOrientation.vertical);
       expect(mode.dividerPosition, 0.7);
@@ -34,12 +34,12 @@ void main() {
 
     test('copyWith returns new instance with updated values', () {
       const mode = DualPaneMode(enabled: false, dividerPosition: 0.5);
-      
+
       final updated = mode.copyWith(
         enabled: true,
         dividerPosition: 0.6,
       );
-      
+
       expect(updated.enabled, true);
       expect(updated.dividerPosition, 0.6);
       expect(updated.orientation, mode.orientation);
@@ -50,9 +50,9 @@ void main() {
         enabled: true,
         leftPaneFilePath: '/path/to/file.mkv',
       );
-      
+
       final updated = mode.copyWith(dividerPosition: 0.7);
-      
+
       expect(updated.enabled, true);
       expect(updated.leftPaneFilePath, '/path/to/file.mkv');
       expect(updated.dividerPosition, 0.7);
@@ -67,9 +67,9 @@ void main() {
         rightPaneFilePath: '/path/to/file2.mkv',
         showDifferences: true,
       );
-      
+
       final json = mode.toJson();
-      
+
       expect(json['enabled'], true);
       expect(json['orientation'], 'vertical');
       expect(json['dividerPosition'], 0.6);
@@ -87,9 +87,9 @@ void main() {
         'rightPaneFilePath': '/path/to/file2.mkv',
         'showDifferences': true,
       };
-      
+
       final mode = DualPaneMode.fromJson(json);
-      
+
       expect(mode.enabled, true);
       expect(mode.orientation, DualPaneOrientation.vertical);
       expect(mode.dividerPosition, 0.6);
@@ -100,9 +100,9 @@ void main() {
 
     test('fromJson handles missing values with defaults', () {
       final json = <String, dynamic>{};
-      
+
       final mode = DualPaneMode.fromJson(json);
-      
+
       expect(mode.enabled, false);
       expect(mode.orientation, DualPaneOrientation.horizontal);
       expect(mode.dividerPosition, 0.5);
@@ -115,9 +115,9 @@ void main() {
       final json = {
         'orientation': 'invalid',
       };
-      
+
       final mode = DualPaneMode.fromJson(json);
-      
+
       expect(mode.orientation, DualPaneOrientation.horizontal);
     });
 
@@ -130,10 +130,10 @@ void main() {
         rightPaneFilePath: '/path/to/file2.mkv',
         showDifferences: true,
       );
-      
+
       final json = original.toJson();
       final restored = DualPaneMode.fromJson(json);
-      
+
       expect(restored.enabled, original.enabled);
       expect(restored.orientation, original.orientation);
       expect(restored.dividerPosition, original.dividerPosition);
@@ -146,8 +146,10 @@ void main() {
   group('DualPaneOrientation', () {
     test('has correct values', () {
       expect(DualPaneOrientation.values.length, 2);
-      expect(DualPaneOrientation.values, contains(DualPaneOrientation.horizontal));
-      expect(DualPaneOrientation.values, contains(DualPaneOrientation.vertical));
+      expect(
+          DualPaneOrientation.values, contains(DualPaneOrientation.horizontal));
+      expect(
+          DualPaneOrientation.values, contains(DualPaneOrientation.vertical));
     });
   });
 }

@@ -13,7 +13,7 @@ class PresetImportService {
     }
 
     final extension = path.extension(filePath).toLowerCase();
-    
+
     if (extension == '.json') {
       return await _importHandBrakeJson(file);
     } else if (extension == '.xml') {
@@ -28,13 +28,14 @@ class PresetImportService {
     try {
       final content = await file.readAsString();
       final json = jsonDecode(content);
-      
+
       final presets = <ExternalPreset>[];
-      
+
       // HandBrake JSON format can have multiple structures
       if (json is List) {
         for (var presetData in json) {
-          final preset = _parseHandBrakePreset(presetData as Map<String, dynamic>);
+          final preset =
+              _parseHandBrakePreset(presetData as Map<String, dynamic>);
           if (preset != null) presets.add(preset);
         }
       } else if (json is Map) {
@@ -42,7 +43,8 @@ class PresetImportService {
         if (json.containsKey('PresetList')) {
           final presetList = json['PresetList'] as List;
           for (var presetData in presetList) {
-            final preset = _parseHandBrakePreset(presetData as Map<String, dynamic>);
+            final preset =
+                _parseHandBrakePreset(presetData as Map<String, dynamic>);
             if (preset != null) presets.add(preset);
           }
         } else {
@@ -50,7 +52,7 @@ class PresetImportService {
           if (preset != null) presets.add(preset);
         }
       }
-      
+
       return presets;
     } catch (e) {
       throw Exception('Failed to parse HandBrake JSON: $e');
@@ -67,13 +69,15 @@ class PresetImportService {
   /// Parses a single HandBrake preset and maps it to FFmpeg parameters.
   ExternalPreset? _parseHandBrakePreset(Map<String, dynamic> data) {
     try {
-      final name = data['PresetName'] as String? ?? data['name'] as String? ?? 'Unnamed';
-      final description = data['PresetDescription'] as String? ?? data['description'] as String?;
+      final name =
+          data['PresetName'] as String? ?? data['name'] as String? ?? 'Unnamed';
+      final description = data['PresetDescription'] as String? ??
+          data['description'] as String?;
       final category = data['Type'] as String? ?? data['category'] as String?;
-      
+
       // Map HandBrake parameters to FFmpeg
       final mapping = _mapHandBrakeToFFmpeg(data);
-      
+
       return ExternalPreset(
         name: name,
         description: description,
@@ -92,7 +96,7 @@ class PresetImportService {
   PresetMapping _mapHandBrakeToFFmpeg(Map<String, dynamic> data) {
     final warnings = <String>[];
     bool isCompatible = true;
-    
+
     // Video codec mapping
     String? videoCodec;
     final videoEncoder = data['VideoEncoder'] as String?;
@@ -103,7 +107,7 @@ class PresetImportService {
         isCompatible = false;
       }
     }
-    
+
     // Audio codec mapping
     String? audioCodec;
     final audioEncoders = data['AudioList'] as List?;
@@ -117,7 +121,7 @@ class PresetImportService {
         }
       }
     }
-    
+
     // Video quality
     String? videoQuality;
     if (data.containsKey('VideoQualitySlider')) {
@@ -127,7 +131,7 @@ class PresetImportService {
       final bitrate = data['VideoAvgBitrate'];
       videoQuality = '${bitrate}k';
     }
-    
+
     // Audio bitrate
     String? audioBitrate;
     if (audioEncoders != null && audioEncoders.isNotEmpty) {
@@ -137,7 +141,7 @@ class PresetImportService {
         audioBitrate = '${bitrate}k';
       }
     }
-    
+
     // Audio sample rate
     int? audioSampleRate;
     if (audioEncoders != null && audioEncoders.isNotEmpty) {
@@ -147,24 +151,24 @@ class PresetImportService {
         audioSampleRate = int.tryParse(samplerate);
       }
     }
-    
+
     // Resolution
     String? resolution;
     if (data.containsKey('PictureWidth') && data.containsKey('PictureHeight')) {
       final width = data['PictureWidth'];
       final height = data['PictureHeight'];
       if (width != null && height != null) {
-        resolution = '${width}x${height}';
+        resolution = '${width}x$height';
       }
     }
-    
+
     // Frame rate
     String? frameRate;
     final videoFramerate = data['VideoFramerate'] as String?;
     if (videoFramerate != null && videoFramerate != 'auto') {
       frameRate = videoFramerate;
     }
-    
+
     // Format
     String? format;
     final fileFormat = data['FileFormat'] as String?;
@@ -174,19 +178,21 @@ class PresetImportService {
         warnings.add('Unsupported file format: $fileFormat');
       }
     }
-    
+
     // Additional args
     final additionalArgs = <String>[];
-    
+
     // Check for filters
-    if (data.containsKey('PictureDecombDeinterlace') && data['PictureDecombDeinterlace'] == true) {
+    if (data.containsKey('PictureDecombDeinterlace') &&
+        data['PictureDecombDeinterlace'] == true) {
       warnings.add('Deinterlacing may require manual configuration in FFmpeg');
     }
-    
-    if (data.containsKey('PictureDetelecine') && data['PictureDetelecine'] != 'off') {
+
+    if (data.containsKey('PictureDetelecine') &&
+        data['PictureDetelecine'] != 'off') {
       warnings.add('Detelecine filter not directly supported');
     }
-    
+
     return PresetMapping(
       videoCodec: videoCodec,
       audioCodec: audioCodec,
@@ -205,43 +211,73 @@ class PresetImportService {
   /// Maps HandBrake video encoder to FFmpeg codec.
   String? _mapVideoEncoder(String encoder) {
     final encoderLower = encoder.toLowerCase();
-    
-    if (encoderLower.contains('x264')) return 'h264';
-    if (encoderLower.contains('x265') || encoderLower.contains('hevc')) return 'hevc';
-    if (encoderLower.contains('vp9')) return 'vp9';
-    if (encoderLower.contains('vp8')) return 'vp8';
-    if (encoderLower.contains('av1')) return 'av1';
-    if (encoderLower.contains('mpeg4')) return 'mpeg4';
-    if (encoderLower.contains('mpeg2')) return 'mpeg2';
-    
+
+    if (encoderLower.contains('x264')) {
+      return 'h264';
+    }
+    if (encoderLower.contains('x265') || encoderLower.contains('hevc')) {
+      return 'hevc';
+    }
+    if (encoderLower.contains('vp9')) {
+      return 'vp9';
+    }
+    if (encoderLower.contains('vp8')) {
+      return 'vp8';
+    }
+    if (encoderLower.contains('av1')) {
+      return 'av1';
+    }
+    if (encoderLower.contains('mpeg4')) {
+      return 'mpeg4';
+    }
+    if (encoderLower.contains('mpeg2')) {
+      return 'mpeg2';
+    }
+
     return null;
   }
 
   /// Maps HandBrake audio encoder to FFmpeg codec.
   String? _mapAudioEncoder(String encoder) {
     final encoderLower = encoder.toLowerCase();
-    
-    if (encoderLower.contains('aac')) return 'aac';
-    if (encoderLower.contains('mp3') || encoderLower.contains('lame')) return 'mp3';
-    if (encoderLower.contains('opus')) return 'opus';
-    if (encoderLower.contains('vorbis')) return 'vorbis';
-    if (encoderLower.contains('flac')) return 'flac';
-    if (encoderLower.contains('ac3')) return 'ac3';
-    if (encoderLower.contains('eac3')) return 'eac3';
-    if (encoderLower.contains('dts')) return 'dts';
-    
+
+    if (encoderLower.contains('aac')) {
+      return 'aac';
+    }
+    if (encoderLower.contains('mp3') || encoderLower.contains('lame')) {
+      return 'mp3';
+    }
+    if (encoderLower.contains('opus')) {
+      return 'opus';
+    }
+    if (encoderLower.contains('vorbis')) {
+      return 'vorbis';
+    }
+    if (encoderLower.contains('flac')) {
+      return 'flac';
+    }
+    if (encoderLower.contains('ac3')) {
+      return 'ac3';
+    }
+    if (encoderLower.contains('eac3')) {
+      return 'eac3';
+    }
+    if (encoderLower.contains('dts')) {
+      return 'dts';
+    }
+
     return null;
   }
 
   /// Maps HandBrake file format to FFmpeg format.
   String? _mapFileFormat(String format) {
     final formatLower = format.toLowerCase();
-    
+
     if (formatLower.contains('mp4') || formatLower == 'av_mp4') return 'mp4';
     if (formatLower.contains('mkv') || formatLower == 'av_mkv') return 'mkv';
     if (formatLower.contains('webm')) return 'webm';
     if (formatLower.contains('avi')) return 'avi';
-    
+
     return null;
   }
 

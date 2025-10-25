@@ -961,10 +961,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
     final startTime = DateTime.now();
 
+    // Prepare a single session log file path for this run
+    final sessionStamp = DateTime.now();
+    final stampStr = '${sessionStamp.year.toString().padLeft(4, '0')}'
+        '${sessionStamp.month.toString().padLeft(2, '0')}'
+        '${sessionStamp.day.toString().padLeft(2, '0')}_'
+        '${sessionStamp.hour.toString().padLeft(2, '0')}'
+        '${sessionStamp.minute.toString().padLeft(2, '0')}'
+        '${sessionStamp.second.toString().padLeft(2, '0')}';
+    final sessionLogPath =
+        path.join(outDir.path, 'export_session_$stampStr.log');
+
     // Process files in parallel batches
     for (var i = 0; i < _files.length; i += _maxConcurrentExports) {
       final batch = _files.skip(i).take(_maxConcurrentExports).toList();
-      await Future.wait(batch.map((file) => _exportFile(file, outDir)));
+      await Future.wait(
+          batch.map((file) => _exportFile(file, outDir, sessionLogPath)));
     }
 
     setState(() {
@@ -995,7 +1007,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return FFmpegExportService.generateExportSummary(_files, _outputFormat);
   }
 
-  Future<void> _exportFile(FileItem item, Directory outDir) async {
+  Future<void> _exportFile(
+      FileItem item, Directory outDir, String sessionLogPath) async {
     setState(() {
       item.exportStatus = 'processing';
       item.exportProgress = 0.0;
@@ -1058,6 +1071,7 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         },
         autoFixIncompat: _autoFixCompatibility,
+        sessionLogPath: sessionLogPath,
       );
 
       // Process lifecycle is handled by onProcessStarted callback above.

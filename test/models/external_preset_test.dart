@@ -22,7 +22,7 @@ void main() {
         videoCodec: 'h264',
         audioCodec: 'aac',
       );
-      
+
       final preset = ExternalPreset(
         name: 'Test Preset',
         description: 'A test preset',
@@ -138,7 +138,7 @@ void main() {
 
     test('copyWith creates new instance with updated values', () {
       const mapping = PresetMapping(videoCodec: 'h264');
-      
+
       final updated = mapping.copyWith(audioCodec: 'aac');
 
       expect(updated.videoCodec, 'h264');

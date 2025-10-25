@@ -36,7 +36,8 @@ class _PresetImportDialogState extends State<PresetImportDialog> {
               padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.primaryContainer,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(12)),
               ),
               child: Row(
                 children: [
@@ -204,7 +205,7 @@ class _PresetImportDialogState extends State<PresetImportDialog> {
             itemBuilder: (context, index) {
               final preset = _presets![index];
               final isSelected = _selectedPreset == preset;
-              
+
               return Card(
                 color: isSelected
                     ? Theme.of(context).colorScheme.primaryContainer
@@ -222,8 +223,7 @@ class _PresetImportDialogState extends State<PresetImportDialog> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (preset.description != null)
-                        Text(preset.description!),
+                      if (preset.description != null) Text(preset.description!),
                       const SizedBox(height: 4),
                       if (preset.mapping != null)
                         Text(
@@ -235,12 +235,16 @@ class _PresetImportDialogState extends State<PresetImportDialog> {
                         ...preset.mapping!.warnings.map(
                           (warning) => Row(
                             children: [
-                              const Icon(Icons.warning_amber, size: 12, color: Colors.orange),
+                              const Icon(Icons.warning_amber,
+                                  size: 12, color: Colors.orange),
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
                                   warning,
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodySmall
+                                      ?.copyWith(
                                         color: Colors.orange,
                                       ),
                                 ),

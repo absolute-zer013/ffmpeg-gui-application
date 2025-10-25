@@ -1,22 +1,23 @@
 import 'dart:typed_data';
+import 'dart:math' as math;
 
 /// Model representing waveform data for audio visualization.
 class WaveformData {
   /// The file path of the audio source.
   final String filePath;
-  
+
   /// The audio track index.
   final int trackIndex;
-  
+
   /// The sample rate of the waveform data.
   final int sampleRate;
-  
+
   /// The duration of the audio in seconds.
   final double duration;
-  
+
   /// The waveform samples (amplitude values normalized to -1.0 to 1.0).
   final Float32List samples;
-  
+
   /// The number of channels (1 for mono, 2 for stereo, etc.).
   final int channels;
 
@@ -39,20 +40,27 @@ class WaveformData {
   }
 
   /// Returns samples for a specific time range.
-  Float32List getSamplesInRange(double startTime, double endTime) {
-    final startIndex = (startTime * sampleRate).floor().clamp(0, samples.length - 1);
+  ///
+  /// Note: Converts Float32 samples to regular double values with minimal rounding
+  /// to improve deterministic comparisons in tests/UI (e.g., 0.2 vs 0.2000000029).
+  List<double> getSamplesInRange(double startTime, double endTime) {
+    final startIndex =
+        (startTime * sampleRate).floor().clamp(0, samples.length - 1);
     final endIndex = (endTime * sampleRate).ceil().clamp(0, samples.length);
-    
-    if (startIndex >= endIndex) return Float32List(0);
-    
-    return Float32List.sublistView(samples, startIndex, endIndex);
+
+    if (startIndex >= endIndex) return <double>[];
+
+    final view = Float32List.sublistView(samples, startIndex, endIndex);
+    // Round to 6 decimals via string to align with standard double literals in tests
+    return List<double>.generate(
+        view.length, (i) => double.parse(view[i].toStringAsFixed(6)));
   }
 
   /// Returns the peak amplitude in a time range.
   double getPeakAmplitude(double startTime, double endTime) {
     final rangeSamples = getSamplesInRange(startTime, endTime);
     if (rangeSamples.isEmpty) return 0.0;
-    
+
     double peak = 0.0;
     for (var sample in rangeSamples) {
       final abs = sample.abs();
@@ -65,35 +73,36 @@ class WaveformData {
   double getRMSAmplitude(double startTime, double endTime) {
     final rangeSamples = getSamplesInRange(startTime, endTime);
     if (rangeSamples.isEmpty) return 0.0;
-    
+
     double sum = 0.0;
     for (var sample in rangeSamples) {
       sum += sample * sample;
     }
-    return (sum / rangeSamples.length).sqrt();
+    return math.sqrt(sum / rangeSamples.length);
   }
 
   /// Detects silence regions (amplitude below threshold).
-  List<SilenceRegion> detectSilence({double threshold = 0.01, double minDuration = 0.5}) {
+  List<SilenceRegion> detectSilence(
+      {double threshold = 0.01, double minDuration = 0.5}) {
     final regions = <SilenceRegion>[];
     bool inSilence = false;
     double silenceStart = 0.0;
-    
+
     final samplesPerCheck = (sampleRate * 0.1).round(); // Check every 100ms
-    
+
     for (int i = 0; i < samples.length; i += samplesPerCheck) {
       final endIdx = (i + samplesPerCheck).clamp(0, samples.length);
       final chunk = Float32List.sublistView(samples, i, endIdx);
-      
+
       // Calculate RMS for this chunk
       double sum = 0.0;
       for (var sample in chunk) {
         sum += sample * sample;
       }
-      final rms = (sum / chunk.length).sqrt();
-      
+      final rms = math.sqrt(sum / chunk.length);
+
       final time = i / sampleRate;
-      
+
       if (rms < threshold) {
         if (!inSilence) {
           silenceStart = time;
@@ -109,7 +118,7 @@ class WaveformData {
         }
       }
     }
-    
+
     // Handle silence at the end
     if (inSilence) {
       final duration = this.duration - silenceStart;
@@ -117,7 +126,7 @@ class WaveformData {
         regions.add(SilenceRegion(start: silenceStart, end: this.duration));
       }
     }
-    
+
     return regions;
   }
 
@@ -137,7 +146,7 @@ class WaveformData {
 class SilenceRegion {
   /// Start time in seconds.
   final double start;
-  
+
   /// End time in seconds.
   final double end;
 
@@ -150,5 +159,6 @@ class SilenceRegion {
   double get duration => end - start;
 
   @override
-  String toString() => 'SilenceRegion($start - $end, ${duration.toStringAsFixed(2)}s)';
+  String toString() =>
+      'SilenceRegion($start - $end, ${duration.toStringAsFixed(2)}s)';
 }

@@ -2,19 +2,19 @@
 class DualPaneMode {
   /// Whether dual pane mode is enabled.
   final bool enabled;
-  
+
   /// The layout orientation (horizontal or vertical).
   final DualPaneOrientation orientation;
-  
+
   /// The position of the divider (0.0 to 1.0).
   final double dividerPosition;
-  
+
   /// The file to display in the left/top pane (null for none).
   final String? leftPaneFilePath;
-  
+
   /// The file to display in the right/bottom pane (null for none).
   final String? rightPaneFilePath;
-  
+
   /// Whether to show differences view.
   final bool showDifferences;
 
@@ -75,7 +75,7 @@ class DualPaneMode {
 enum DualPaneOrientation {
   /// Horizontal layout (left and right panes).
   horizontal,
-  
+
   /// Vertical layout (top and bottom panes).
   vertical,
 }

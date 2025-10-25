@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 import '../models/dual_pane_mode.dart';
 import '../models/file_item.dart';
 import 'file_preview_dialog.dart';
@@ -45,11 +46,13 @@ class _DualPaneWidgetState extends State<DualPaneWidget> {
       return const SizedBox.shrink();
     }
 
-    final isHorizontal = widget.mode.orientation == DualPaneOrientation.horizontal;
+    final isHorizontal =
+        widget.mode.orientation == DualPaneOrientation.horizontal;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final maxSize = isHorizontal ? constraints.maxWidth : constraints.maxHeight;
+        final maxSize =
+            isHorizontal ? constraints.maxWidth : constraints.maxHeight;
         final pane1Size = maxSize * _dividerPosition;
         final pane2Size = maxSize * (1 - _dividerPosition);
 
@@ -62,20 +65,27 @@ class _DualPaneWidgetState extends State<DualPaneWidget> {
               child: _buildPane(widget.leftFile, 'Left Pane'),
             ),
             MouseRegion(
-              cursor: isHorizontal ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow,
+              cursor: isHorizontal
+                  ? SystemMouseCursors.resizeColumn
+                  : SystemMouseCursors.resizeRow,
               child: GestureDetector(
                 onPanUpdate: (details) {
                   setState(() {
                     if (isHorizontal) {
-                      _dividerPosition = (_dividerPosition * maxSize + details.delta.dx) / maxSize;
+                      _dividerPosition =
+                          (_dividerPosition * maxSize + details.delta.dx) /
+                              maxSize;
                     } else {
-                      _dividerPosition = (_dividerPosition * maxSize + details.delta.dy) / maxSize;
+                      _dividerPosition =
+                          (_dividerPosition * maxSize + details.delta.dy) /
+                              maxSize;
                     }
                     _dividerPosition = _dividerPosition.clamp(0.2, 0.8);
                   });
                 },
                 onPanEnd: (_) {
-                  widget.onModeChanged(widget.mode.copyWith(dividerPosition: _dividerPosition));
+                  widget.onModeChanged(
+                      widget.mode.copyWith(dividerPosition: _dividerPosition));
                 },
                 child: Container(
                   width: isHorizontal ? 8 : null,
@@ -120,7 +130,10 @@ class _DualPaneWidgetState extends State<DualPaneWidget> {
             Text(
               'No file selected for $paneName',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.5),
+                    color: Theme.of(context)
+                        .colorScheme
+                        .secondary
+                        .withOpacity(0.5),
                   ),
             ),
           ],
@@ -138,13 +151,14 @@ class _DualPaneWidgetState extends State<DualPaneWidget> {
             padding: const EdgeInsets.all(12.0),
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primaryContainer,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
             ),
             child: Row(
               children: [
                 Expanded(
                   child: Text(
-                    file.fileName,
+                    file.name,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
@@ -167,32 +181,33 @@ class _DualPaneWidgetState extends State<DualPaneWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildInfoSection('File Information', [
-                    _buildInfoRow('Size', _formatFileSize(file.fileSize)),
+                    _buildInfoRow('Size', _formatFileSize(file.fileSize ?? 0)),
                     _buildInfoRow('Duration', file.duration ?? 'Unknown'),
-                    _buildInfoRow('Format', file.format ?? 'Unknown'),
+                    _buildInfoRow(
+                        'Format', p.extension(file.path).toUpperCase()),
                   ]),
                   const SizedBox(height: 16),
                   _buildInfoSection('Video Tracks', [
                     _buildInfoRow('Count', '${file.videoTracks.length}'),
                     ...file.videoTracks.map((track) => _buildInfoRow(
-                          'Video ${track.index}',
-                          '${track.codec} (${track.language ?? "Unknown"})',
+                          'Video ${track.position + 1}',
+                          '${track.codec} (${track.language})',
                         )),
                   ]),
                   const SizedBox(height: 16),
                   _buildInfoSection('Audio Tracks', [
                     _buildInfoRow('Count', '${file.audioTracks.length}'),
                     ...file.audioTracks.map((track) => _buildInfoRow(
-                          'Audio ${track.index}',
-                          '${track.codec} - ${track.title ?? track.language ?? "Unknown"}',
+                          'Audio ${track.position + 1}',
+                          '${track.codec} - ${track.title ?? track.language}',
                         )),
                   ]),
                   const SizedBox(height: 16),
                   _buildInfoSection('Subtitle Tracks', [
                     _buildInfoRow('Count', '${file.subtitleTracks.length}'),
                     ...file.subtitleTracks.map((track) => _buildInfoRow(
-                          'Subtitle ${track.index}',
-                          '${track.codec} - ${track.title ?? track.language ?? "Unknown"}',
+                          'Subtitle ${track.position + 1}',
+                          '${track.codec} - ${track.title ?? track.language}',
                         )),
                   ]),
                 ],
@@ -205,7 +220,8 @@ class _DualPaneWidgetState extends State<DualPaneWidget> {
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
                 color: Theme.of(context).colorScheme.secondaryContainer,
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(12)),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(12)),
               ),
               child: const Row(
                 children: [
@@ -275,7 +291,7 @@ class _DualPaneWidgetState extends State<DualPaneWidget> {
   void _showFullFilePreview(FileItem file) {
     showDialog(
       context: context,
-      builder: (context) => FilePreviewDialog(file: file),
+      builder: (context) => FilePreviewDialog(fileItem: file),
     );
   }
 }

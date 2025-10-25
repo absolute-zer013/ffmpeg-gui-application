@@ -11,20 +11,35 @@ import '../lib/models/codec_options.dart';
 /// Allows automation and scripting without the GUI.
 void main(List<String> arguments) async {
   final parser = ArgParser()
-    ..addFlag('help', abbr: 'h', negatable: false, help: 'Show this help message')
-    ..addFlag('version', abbr: 'v', negatable: false, help: 'Show version information')
-    ..addOption('input', abbr: 'i', help: 'Input file path (required)', mandatory: false)
-    ..addMultiOption('audio', abbr: 'a', help: 'Audio track indices to keep (comma-separated)')
-    ..addMultiOption('subtitle', abbr: 's', help: 'Subtitle track indices to keep (comma-separated)')
-    ..addOption('output', abbr: 'o', help: 'Output file path (default: same directory with _filtered suffix)')
-    ..addOption('format', abbr: 'f', help: 'Output format (mkv, mp4, avi)', defaultsTo: 'mkv')
+    ..addFlag('help',
+        abbr: 'h', negatable: false, help: 'Show this help message')
+    ..addFlag('version',
+        abbr: 'v', negatable: false, help: 'Show version information')
+    ..addOption('input',
+        abbr: 'i', help: 'Input file path (required)', mandatory: false)
+    ..addMultiOption('audio',
+        abbr: 'a', help: 'Audio track indices to keep (comma-separated)')
+    ..addMultiOption('subtitle',
+        abbr: 's', help: 'Subtitle track indices to keep (comma-separated)')
+    ..addOption('output',
+        abbr: 'o',
+        help:
+            'Output file path (default: same directory with _filtered suffix)')
+    ..addOption('format',
+        abbr: 'f', help: 'Output format (mkv, mp4, avi)', defaultsTo: 'mkv')
     ..addFlag('json', negatable: false, help: 'Output results in JSON format')
-    ..addFlag('info', negatable: false, help: 'Show file information only (no processing)')
-    ..addFlag('dry-run', negatable: false, help: 'Show what would be done without executing')
+    ..addFlag('info',
+        negatable: false, help: 'Show file information only (no processing)')
+    ..addFlag('dry-run',
+        negatable: false, help: 'Show what would be done without executing')
     ..addOption('video-codec', help: 'Video codec (copy, h264, hevc, vp9, av1)')
-    ..addOption('audio-codec', help: 'Audio codec (copy, aac, mp3, opus, ac3, flac)')
+    ..addOption('audio-codec',
+        help: 'Audio codec (copy, aac, mp3, opus, ac3, flac)')
     ..addOption('audio-bitrate', help: 'Audio bitrate (e.g., 192k)')
-    ..addFlag('verify', negatable: true, defaultsTo: false, help: 'Verify output file after export');
+    ..addFlag('verify',
+        negatable: true,
+        defaultsTo: false,
+        help: 'Verify output file after export');
 
   try {
     final results = parser.parse(arguments);
@@ -60,7 +75,8 @@ void main(List<String> arguments) async {
     final fileInfo = await ffprobeService.analyzeFile(inputFile);
 
     if (fileInfo == null) {
-      _printError('Failed to analyze input file. Make sure ffprobe is installed.');
+      _printError(
+          'Failed to analyze input file. Make sure ffprobe is installed.');
       exit(1);
     }
 
@@ -75,14 +91,17 @@ void main(List<String> arguments) async {
 
     // Parse track selections
     final audioTracks = _parseTrackIndices(results['audio'] as List<String>);
-    final subtitleTracks = _parseTrackIndices(results['subtitle'] as List<String>);
+    final subtitleTracks =
+        _parseTrackIndices(results['subtitle'] as List<String>);
 
     // Set track selections
     for (var i = 0; i < fileInfo.audioTracks.length; i++) {
-      fileInfo.audioTracks[i].selected = audioTracks.isEmpty || audioTracks.contains(i);
+      fileInfo.audioTracks[i].selected =
+          audioTracks.isEmpty || audioTracks.contains(i);
     }
     for (var i = 0; i < fileInfo.subtitleTracks.length; i++) {
-      fileInfo.subtitleTracks[i].selected = subtitleTracks.isEmpty || subtitleTracks.contains(i);
+      fileInfo.subtitleTracks[i].selected =
+          subtitleTracks.isEmpty || subtitleTracks.contains(i);
     }
 
     // Set codec options if specified
@@ -96,7 +115,7 @@ void main(List<String> arguments) async {
 
     // Determine output path
     final outputFormat = results['format'] as String;
-    final outputPath = results['output'] as String? ?? 
+    final outputPath = results['output'] as String? ??
         _generateOutputPath(inputFile, outputFormat);
 
     if (dryRun) {
@@ -116,15 +135,17 @@ void main(List<String> arguments) async {
         print('  Input: $inputFile');
         print('  Output: $outputPath');
         print('  Format: $outputFormat');
-        print('  Audio tracks: ${audioTracks.isEmpty ? "all" : audioTracks.join(", ")}');
-        print('  Subtitle tracks: ${subtitleTracks.isEmpty ? "all" : subtitleTracks.join(", ")}');
+        print(
+            '  Audio tracks: ${audioTracks.isEmpty ? "all" : audioTracks.join(", ")}');
+        print(
+            '  Subtitle tracks: ${subtitleTracks.isEmpty ? "all" : subtitleTracks.join(", ")}');
       }
       exit(0);
     }
 
     // Execute export
     final exportService = FFmpegExportService();
-    
+
     if (!jsonOutput) {
       print('Processing file: $inputFile');
       print('Output: $outputPath');
@@ -139,7 +160,7 @@ void main(List<String> arguments) async {
     if (success) {
       final outputFile = File(outputPath);
       final outputSize = outputFile.existsSync() ? outputFile.lengthSync() : 0;
-      
+
       if (jsonOutput) {
         _printJson({
           'success': true,
@@ -218,12 +239,14 @@ void _printFileInfo(FileItem file) {
   print('');
   print('Audio Tracks: ${file.audioTracks.length}');
   for (var track in file.audioTracks) {
-    print('  [${track.index}] ${track.codec} - ${track.title ?? track.language ?? "Unknown"}');
+    print(
+        '  [${track.index}] ${track.codec} - ${track.title ?? track.language ?? "Unknown"}');
   }
   print('');
   print('Subtitle Tracks: ${file.subtitleTracks.length}');
   for (var track in file.subtitleTracks) {
-    print('  [${track.index}] ${track.codec} - ${track.title ?? track.language ?? "Unknown"}');
+    print(
+        '  [${track.index}] ${track.codec} - ${track.title ?? track.language ?? "Unknown"}');
   }
 }
 
@@ -234,24 +257,30 @@ Map<String, dynamic> _fileItemToJson(FileItem file) {
     'fileSize': file.fileSize,
     'duration': file.duration,
     'format': file.format,
-    'videoTracks': file.videoTracks.map((t) => {
-      'index': t.index,
-      'codec': t.codec,
-      'language': t.language,
-    }).toList(),
-    'audioTracks': file.audioTracks.map((t) => {
-      'index': t.index,
-      'codec': t.codec,
-      'title': t.title,
-      'language': t.language,
-      'channels': t.channels,
-    }).toList(),
-    'subtitleTracks': file.subtitleTracks.map((t) => {
-      'index': t.index,
-      'codec': t.codec,
-      'title': t.title,
-      'language': t.language,
-    }).toList(),
+    'videoTracks': file.videoTracks
+        .map((t) => {
+              'index': t.index,
+              'codec': t.codec,
+              'language': t.language,
+            })
+        .toList(),
+    'audioTracks': file.audioTracks
+        .map((t) => {
+              'index': t.index,
+              'codec': t.codec,
+              'title': t.title,
+              'language': t.language,
+              'channels': t.channels,
+            })
+        .toList(),
+    'subtitleTracks': file.subtitleTracks
+        .map((t) => {
+              'index': t.index,
+              'codec': t.codec,
+              'title': t.title,
+              'language': t.language,
+            })
+        .toList(),
   };
 }
 

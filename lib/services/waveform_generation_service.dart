@@ -5,7 +5,7 @@ import '../models/waveform_data.dart';
 /// Service for generating waveform data from audio files.
 class WaveformGenerationService {
   /// Generates waveform data from an audio file.
-  /// 
+  ///
   /// Uses FFmpeg to extract raw audio data and downsample it for visualization.
   /// [filePath] - Path to the audio/video file
   /// [trackIndex] - Index of the audio track to extract
@@ -22,10 +22,14 @@ class WaveformGenerationService {
       final probeResult = await Process.run(
         'ffprobe',
         [
-          '-v', 'error',
-          '-select_streams', 'a:$trackIndex',
-          '-show_entries', 'stream=codec_name,sample_rate,channels,duration',
-          '-of', 'default=noprint_wrappers=1',
+          '-v',
+          'error',
+          '-select_streams',
+          'a:$trackIndex',
+          '-show_entries',
+          'stream=codec_name,sample_rate,channels,duration',
+          '-of',
+          'default=noprint_wrappers=1',
           filePath,
         ],
       );
@@ -37,17 +41,11 @@ class WaveformGenerationService {
       // Parse ffprobe output
       final output = probeResult.stdout.toString();
       final lines = output.split('\n');
-      
-      int originalSampleRate = 44100;
-      int channels = 2;
+
       double duration = 0.0;
-      
+
       for (var line in lines) {
-        if (line.startsWith('sample_rate=')) {
-          originalSampleRate = int.tryParse(line.split('=')[1]) ?? 44100;
-        } else if (line.startsWith('channels=')) {
-          channels = int.tryParse(line.split('=')[1]) ?? 2;
-        } else if (line.startsWith('duration=')) {
+        if (line.startsWith('duration=')) {
           duration = double.tryParse(line.split('=')[1]) ?? 0.0;
         }
       }
@@ -99,10 +97,10 @@ class WaveformGenerationService {
     // Each float32 is 4 bytes
     final numFloats = rawData.length ~/ 4;
     final actualSamples = numFloats < maxSamples ? numFloats : maxSamples;
-    
+
     final samples = Float32List(actualSamples);
     final byteData = ByteData.sublistView(Uint8List.fromList(rawData));
-    
+
     if (numFloats <= maxSamples) {
       // Use all samples
       for (int i = 0; i < actualSamples; i++) {
@@ -114,7 +112,7 @@ class WaveformGenerationService {
       for (int i = 0; i < actualSamples; i++) {
         final startIdx = (i * chunkSize).floor();
         final endIdx = ((i + 1) * chunkSize).floor();
-        
+
         double peak = 0.0;
         for (int j = startIdx; j < endIdx && j < numFloats; j++) {
           final sample = byteData.getFloat32(j * 4, Endian.little);
@@ -125,7 +123,7 @@ class WaveformGenerationService {
         samples[i] = peak;
       }
     }
-    
+
     return samples;
   }
 

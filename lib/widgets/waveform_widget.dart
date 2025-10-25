@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../models/waveform_data.dart';
 
@@ -43,7 +42,8 @@ class _WaveformWidgetState extends State<WaveformWidget> {
   @override
   void didUpdateWidget(WaveformWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.waveformData != oldWidget.waveformData && widget.showSilenceRegions) {
+    if (widget.waveformData != oldWidget.waveformData &&
+        widget.showSilenceRegions) {
       _detectSilence();
     }
   }
@@ -76,7 +76,8 @@ class _WaveformWidgetState extends State<WaveformWidget> {
               onPressed: () {
                 setState(() {
                   _zoomLevel = (_zoomLevel / 1.5).clamp(1.0, 10.0);
-                  _scrollOffset = _scrollOffset.clamp(0.0, 1.0 - (1.0 / _zoomLevel));
+                  _scrollOffset =
+                      _scrollOffset.clamp(0.0, 1.0 - (1.0 / _zoomLevel));
                 });
               },
               tooltip: 'Zoom out',
@@ -125,7 +126,7 @@ class _WaveformWidgetState extends State<WaveformWidget> {
             builder: (context, constraints) {
               final indicatorWidth = constraints.maxWidth / _zoomLevel;
               final indicatorOffset = _scrollOffset * constraints.maxWidth;
-              
+
               return Container(
                 height: 8,
                 decoration: BoxDecoration(
@@ -158,26 +159,27 @@ class _WaveformWidgetState extends State<WaveformWidget> {
   void _handleTap(Offset localPosition) {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final width = box.size.width;
-    
+
     // Calculate the time position based on tap location
     final visibleFraction = 1.0 / _zoomLevel;
     final startFraction = _scrollOffset;
     final tapFraction = localPosition.dx / width;
     final timeFraction = startFraction + (tapFraction * visibleFraction);
     final timePosition = timeFraction * widget.waveformData.duration;
-    
+
     widget.onSeek?.call(timePosition);
   }
 
   void _handlePan(Offset delta) {
     if (_zoomLevel <= 1.0) return;
-    
+
     setState(() {
       final RenderBox box = context.findRenderObject() as RenderBox;
       final width = box.size.width;
-      
+
       final scrollDelta = -delta.dx / width;
-      _scrollOffset = (_scrollOffset + scrollDelta).clamp(0.0, 1.0 - (1.0 / _zoomLevel));
+      _scrollOffset =
+          (_scrollOffset + scrollDelta).clamp(0.0, 1.0 - (1.0 / _zoomLevel));
     });
   }
 }
@@ -206,7 +208,8 @@ class WaveformPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     // Draw background
     final backgroundPaint = Paint()..color = backgroundColor;
-    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), backgroundPaint);
+    canvas.drawRect(
+        Rect.fromLTWH(0, 0, size.width, size.height), backgroundPaint);
 
     // Draw silence regions
     if (silenceRegions != null) {
@@ -214,13 +217,15 @@ class WaveformPainter extends CustomPainter {
       for (var region in silenceRegions!) {
         final startFraction = region.start / waveformData.duration;
         final endFraction = region.end / waveformData.duration;
-        
+
         final visibleStart = scrollOffset;
         final visibleEnd = scrollOffset + (1.0 / zoomLevel);
-        
+
         if (endFraction > visibleStart && startFraction < visibleEnd) {
-          final x1 = ((startFraction - scrollOffset) * zoomLevel * size.width).clamp(0.0, size.width);
-          final x2 = ((endFraction - scrollOffset) * zoomLevel * size.width).clamp(0.0, size.width);
+          final x1 = ((startFraction - scrollOffset) * zoomLevel * size.width)
+              .clamp(0.0, size.width);
+          final x2 = ((endFraction - scrollOffset) * zoomLevel * size.width)
+              .clamp(0.0, size.width);
           canvas.drawRect(
             Rect.fromLTRB(x1, 0, x2, size.height),
             silencePaint,
@@ -248,14 +253,14 @@ class WaveformPainter extends CustomPainter {
     for (int x = 0; x < size.width; x++) {
       final sampleStart = startSample + (x * samplesPerPixel).floor();
       final sampleEnd = startSample + ((x + 1) * samplesPerPixel).ceil();
-      
+
       // Find peak in this pixel range
       double peak = 0.0;
       for (int i = sampleStart; i < sampleEnd && i < totalSamples; i++) {
         final sample = waveformData.getSample(i).abs();
         if (sample > peak) peak = sample;
       }
-      
+
       // Draw vertical line for this pixel
       final amplitude = peak * centerY;
       canvas.drawLine(
@@ -280,7 +285,7 @@ class WaveformPainter extends CustomPainter {
       final positionFraction = currentPosition! / waveformData.duration;
       final visibleStart = scrollOffset;
       final visibleEnd = scrollOffset + visibleFraction;
-      
+
       if (positionFraction >= visibleStart && positionFraction <= visibleEnd) {
         final x = ((positionFraction - scrollOffset) * zoomLevel * size.width);
         final markerPaint = Paint()
@@ -298,11 +303,11 @@ class WaveformPainter extends CustomPainter {
   @override
   bool shouldRepaint(WaveformPainter oldDelegate) {
     return oldDelegate.waveformData != waveformData ||
-           oldDelegate.zoomLevel != zoomLevel ||
-           oldDelegate.scrollOffset != scrollOffset ||
-           oldDelegate.currentPosition != currentPosition ||
-           oldDelegate.waveformColor != waveformColor ||
-           oldDelegate.backgroundColor != backgroundColor ||
-           oldDelegate.silenceRegions != silenceRegions;
+        oldDelegate.zoomLevel != zoomLevel ||
+        oldDelegate.scrollOffset != scrollOffset ||
+        oldDelegate.currentPosition != currentPosition ||
+        oldDelegate.waveformColor != waveformColor ||
+        oldDelegate.backgroundColor != backgroundColor ||
+        oldDelegate.silenceRegions != silenceRegions;
   }
 }
