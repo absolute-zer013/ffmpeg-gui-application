@@ -20,6 +20,8 @@ import 'services/rule_service.dart';
 import 'services/notification_service.dart';
 import 'services/recent_files_service.dart';
 import 'services/performance_tracking_service.dart';
+import 'services/ffmpeg_capabilities_service.dart';
+import 'services/disk_space_service.dart';
 // import 'models/quality_preset.dart'; // Not used in the codec dialogs anymore
 import 'utils/file_utils.dart';
 import 'widgets/file_card.dart';
@@ -86,6 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final bool _autoApplyRules = true;
   bool _enableDesktopNotifications = true;
   bool _autoFixCompatibility = true;
+  bool _useHardwareAcceleration = true;
   List<RecentFile> _recentFiles = [];
 
   // Search and Filter state
@@ -194,6 +197,8 @@ class _MyHomePageState extends State<MyHomePage> {
       _enableDesktopNotifications =
           prefs.getBool('enableDesktopNotifications') ?? true;
       _autoFixCompatibility = prefs.getBool('autoFixCompatibility') ?? true;
+      _useHardwareAcceleration =
+          prefs.getBool('useHardwareAcceleration') ?? true;
       _sortBy = prefs.getString('sortBy') ?? 'name';
       _sortAscending = prefs.getBool('sortAscending') ?? true;
     });
@@ -210,6 +215,7 @@ class _MyHomePageState extends State<MyHomePage> {
     await prefs.setBool(
         'enableDesktopNotifications', _enableDesktopNotifications);
     await prefs.setBool('autoFixCompatibility', _autoFixCompatibility);
+    await prefs.setBool('useHardwareAcceleration', _useHardwareAcceleration);
     await prefs.setString('sortBy', _sortBy);
     await prefs.setBool('sortAscending', _sortAscending);
   }
@@ -945,6 +951,68 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     final outDir = Directory(outDirPath);
+
+    // Detect hardware capabilities if hardware acceleration is enabled
+    HardwareCapabilities? hwCapabilities;
+    if (_useHardwareAcceleration) {
+      _appendLog('Detecting hardware acceleration capabilities...');
+      hwCapabilities =
+          await FFmpegCapabilitiesService.detectHardwareCapabilities();
+      _appendLog('Hardware detection: ${hwCapabilities.toString()}');
+    } else {
+      _appendLog('Hardware acceleration disabled in settings');
+    }
+
+    // Perform disk space preflight check
+    _appendLog('Checking available disk space...');
+    final spaceCheck = await DiskSpaceService.checkDiskSpace(
+      files: _files,
+      outputDirectory: outDirPath,
+    );
+    _appendLog(spaceCheck.message);
+
+    // Warn user if insufficient space
+    if (!spaceCheck.hasSufficientSpace) {
+      if (!mounted) return;
+      final shouldContinue = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Insufficient Disk Space'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(spaceCheck.message),
+              const SizedBox(height: 16),
+              Text('Required: ${spaceCheck.formattedRequired}'),
+              Text('Available: ${spaceCheck.formattedAvailable}'),
+              const SizedBox(height: 16),
+              const Text(
+                'Export may fail. Do you want to continue anyway?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Continue Anyway'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldContinue != true) {
+        _appendLog('Export cancelled due to insufficient disk space');
+        return;
+      }
+      _appendLog('User chose to continue despite insufficient space warning');
+    }
+
     setState(() {
       _lastOutputDir = outDirPath;
       _running = true;
@@ -975,8 +1043,8 @@ class _MyHomePageState extends State<MyHomePage> {
     // Process files in parallel batches
     for (var i = 0; i < _files.length; i += _maxConcurrentExports) {
       final batch = _files.skip(i).take(_maxConcurrentExports).toList();
-      await Future.wait(
-          batch.map((file) => _exportFile(file, outDir, sessionLogPath)));
+      await Future.wait(batch.map((file) =>
+          _exportFile(file, outDir, sessionLogPath, hwCapabilities)));
     }
 
     setState(() {
@@ -1007,8 +1075,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return FFmpegExportService.generateExportSummary(_files, _outputFormat);
   }
 
-  Future<void> _exportFile(
-      FileItem item, Directory outDir, String sessionLogPath) async {
+  Future<void> _exportFile(FileItem item, Directory outDir,
+      String sessionLogPath, HardwareCapabilities? hwCapabilities) async {
     setState(() {
       item.exportStatus = 'processing';
       item.exportProgress = 0.0;
@@ -1072,6 +1140,8 @@ class _MyHomePageState extends State<MyHomePage> {
         },
         autoFixIncompat: _autoFixCompatibility,
         sessionLogPath: sessionLogPath,
+        hwCapabilities: hwCapabilities,
+        useHardwareAcceleration: _useHardwareAcceleration,
       );
 
       // Process lifecycle is handled by onProcessStarted callback above.
@@ -1978,6 +2048,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 onChanged: (value) {
                   setState(() {
                     _enableDesktopNotifications = value;
+                  });
+                  this.setState(() {});
+                },
+              ),
+              const SizedBox(height: 16),
+              const Text('Hardware Acceleration:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              SwitchListTile(
+                title: const Text('Use hardware acceleration when available'),
+                subtitle: const Text(
+                    'Automatically use GPU encoders (NVENC, AMF, QSV) for faster encoding'),
+                value: _useHardwareAcceleration,
+                onChanged: (value) {
+                  setState(() {
+                    _useHardwareAcceleration = value;
                   });
                   this.setState(() {});
                 },
