@@ -25,7 +25,7 @@ void main() {
 
     test('applyFindReplace replaces text in proposed names', () {
       final paths = ['C:/v/MyVideo.mkv', 'C:/v/MyMovie.mkv'];
-      
+
       final plan = RenameService.planBatchRenames(
         pattern: '{name}',
         paths: paths,
@@ -43,7 +43,7 @@ void main() {
 
     test('applyFindReplace with regex works correctly', () {
       final paths = ['C:/v/Video123.mkv', 'C:/v/Video456.mkv'];
-      
+
       final plan = RenameService.planBatchRenames(
         pattern: '{name}',
         paths: paths,
@@ -62,7 +62,7 @@ void main() {
 
     test('applyFindReplace case insensitive works', () {
       final paths = ['C:/v/MyVideo.mkv'];
-      
+
       final plan = RenameService.planBatchRenames(
         pattern: '{name}',
         paths: paths,
@@ -80,7 +80,7 @@ void main() {
 
     test('exportToCsv generates valid CSV', () {
       final paths = ['C:/v/file1.mkv', 'C:/v/file2.mkv'];
-      
+
       final plan = RenameService.planBatchRenames(
         pattern: '{name}',
         paths: paths,
@@ -95,7 +95,7 @@ void main() {
 
     test('exportToMarkdown generates valid Markdown', () {
       final paths = ['C:/v/file1.mkv', 'C:/v/file2.mkv'];
-      
+
       final plan = RenameService.planBatchRenames(
         pattern: '{name}',
         paths: paths,

@@ -62,7 +62,7 @@ class RenameService {
   }
 
   /// Applies global find/replace to proposed names
-  /// 
+  ///
   /// [plan] - The original batch rename plan
   /// [findText] - Text to find
   /// [replaceText] - Text to replace with
@@ -164,7 +164,7 @@ class RenameService {
   }
 
   /// Applies transformations to rename plan
-  /// 
+  ///
   /// [transformation] - Type of transformation to apply
   static BatchRenamePlan applyTransformation(
     BatchRenamePlan plan,
@@ -244,7 +244,7 @@ class RenameService {
   /// Converts string to title case
   static String _toTitleCase(String text) {
     if (text.isEmpty) return text;
-    
+
     return text.split(' ').map((word) {
       if (word.isEmpty) return word;
       return word[0].toUpperCase() + word.substring(1).toLowerCase();

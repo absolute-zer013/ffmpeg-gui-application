@@ -46,7 +46,7 @@ void main() {
     test('executeCommand executes and adds to undo stack', () {
       int value = 0;
       final command = TestCommand(value, 5, 'Add 5');
-      
+
       service.executeCommand(command);
 
       expect(command.value, equals(5));
@@ -58,7 +58,7 @@ void main() {
     test('undo reverses the last command', () {
       int value = 0;
       final command = TestCommand(value, 5, 'Add 5');
-      
+
       service.executeCommand(command);
       expect(command.value, equals(5));
 
@@ -73,7 +73,7 @@ void main() {
     test('redo reapplies undone command', () {
       int value = 0;
       final command = TestCommand(value, 5, 'Add 5');
-      
+
       service.executeCommand(command);
       service.undo();
       expect(command.value, equals(0));
@@ -90,10 +90,10 @@ void main() {
       int value = 0;
       final command1 = TestCommand(value, 5, 'Add 5');
       final command2 = TestCommand(value, 3, 'Add 3');
-      
+
       service.executeCommand(command1);
       service.executeCommand(command2);
-      
+
       expect(command1.value, equals(5));
       expect(command2.value, equals(3));
 
@@ -120,7 +120,7 @@ void main() {
       int value = 0;
       final command1 = TestCommand(value, 5, 'Add 5');
       final command2 = TestCommand(value, 3, 'Add 3');
-      
+
       service.executeCommand(command1);
       service.undo();
       expect(service.canRedo, isTrue);

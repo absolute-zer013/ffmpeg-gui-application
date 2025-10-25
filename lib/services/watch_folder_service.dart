@@ -8,10 +8,10 @@ class WatchFolderService {
   WatchFolderConfig? _config;
   StreamSubscription<FileSystemEvent>? _watcherSubscription;
   final Set<String> _processedFiles = {};
-  
+
   /// Callback for when a new file is detected
   final void Function(String filePath)? onFileDetected;
-  
+
   /// Callback for errors
   final void Function(String error)? onError;
 
@@ -32,7 +32,7 @@ class WatchFolderService {
     }
 
     final directory = Directory(config.folderPath);
-    
+
     if (!await directory.exists()) {
       onError?.call('Watch folder does not exist: ${config.folderPath}');
       return;
@@ -41,7 +41,7 @@ class WatchFolderService {
     try {
       // Watch for file system events
       final watcher = directory.watch(recursive: config.recursive);
-      
+
       _watcherSubscription = watcher.listen(
         (event) => _handleFileSystemEvent(event),
         onError: (error) => onError?.call('Watch error: $error'),
@@ -102,11 +102,11 @@ class WatchFolderService {
   ) async {
     try {
       final entities = directory.listSync(recursive: config.recursive);
-      
+
       for (final entity in entities) {
         if (entity is File) {
           final filePath = entity.path;
-          
+
           if (_matchesPatterns(filePath, config.filePatterns) &&
               !_processedFiles.contains(filePath)) {
             _processedFiles.add(filePath);
@@ -122,18 +122,18 @@ class WatchFolderService {
   /// Checks if a file matches any of the patterns
   bool _matchesPatterns(String filePath, List<String> patterns) {
     final fileName = path.basename(filePath).toLowerCase();
-    
+
     for (final pattern in patterns) {
       final regexPattern = pattern
           .replaceAll('.', r'\.')
           .replaceAll('*', '.*')
           .replaceAll('?', '.');
-      
+
       if (RegExp('^$regexPattern\$').hasMatch(fileName.toLowerCase())) {
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -141,24 +141,24 @@ class WatchFolderService {
   Future<bool> _checkFileComplete(String filePath) async {
     try {
       final file = File(filePath);
-      
+
       if (!await file.exists()) {
         return false;
       }
 
       // Get initial size
       final initialSize = await file.length();
-      
+
       // Wait a short period
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       // Check if size changed
       if (!await file.exists()) {
         return false;
       }
-      
+
       final finalSize = await file.length();
-      
+
       // File is complete if size hasn't changed
       return initialSize == finalSize;
     } catch (e) {

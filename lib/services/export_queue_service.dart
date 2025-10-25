@@ -226,16 +226,13 @@ class ExportQueueService {
     final profiles = config.profiles;
 
     for (int i = 0; i < profiles.length; i++) {
-      final profile = profiles[i];
-      
-      // Generate output filename with appropriate suffix
-      final originalPath = fileItem.path;
-      final outputPath = _generateOutputPath(originalPath, profile, i, config);
+      // Generate output filename with appropriate suffix (computed later when exporting)
+      // final outputPath = _generateOutputPath(fileItem.path, profile, i, config);
 
       // Create a copy of the file item with the modified output path
       // Note: FileItem doesn't have outputPath field, so we'll store it in metadata
       // For now, we'll just queue the items and handle the naming in the export service
-      
+
       final id = (++_idCounter).toString();
       final queueItem = ExportQueueItem(
         id: id,
@@ -252,6 +249,7 @@ class ExportQueueService {
   }
 
   /// Generates output path for multi-profile export
+  // ignore: unused_element
   String _generateOutputPath(
     String originalPath,
     ExportProfile profile,
@@ -260,9 +258,8 @@ class ExportQueueService {
   ) {
     // Extract directory and filename
     final lastSeparator = originalPath.lastIndexOf(RegExp(r'[/\\]'));
-    final directory = lastSeparator >= 0
-        ? originalPath.substring(0, lastSeparator + 1)
-        : '';
+    final directory =
+        lastSeparator >= 0 ? originalPath.substring(0, lastSeparator + 1) : '';
     final fileName = lastSeparator >= 0
         ? originalPath.substring(lastSeparator + 1)
         : originalPath;

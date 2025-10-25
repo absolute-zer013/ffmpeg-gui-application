@@ -3,6 +3,7 @@ class ExportProfile {
   final String id;
   final String name;
   final String description;
+  final bool removeEnglishAudio;
   final Set<String> selectedAudioLanguages;
   final Set<String> selectedSubtitleDescriptions;
   final String? defaultSubtitleDescription;
@@ -10,15 +11,17 @@ class ExportProfile {
   final DateTime modifiedAt;
 
   ExportProfile({
-    required this.id,
+    String? id,
     required this.name,
     this.description = '',
+    this.removeEnglishAudio = false,
     Set<String>? selectedAudioLanguages,
     Set<String>? selectedSubtitleDescriptions,
     this.defaultSubtitleDescription,
     DateTime? createdAt,
     DateTime? modifiedAt,
-  })  : selectedAudioLanguages = selectedAudioLanguages ?? <String>{},
+  })  : id = id ?? DateTime.now().microsecondsSinceEpoch.toString(),
+        selectedAudioLanguages = selectedAudioLanguages ?? <String>{},
         selectedSubtitleDescriptions =
             selectedSubtitleDescriptions ?? <String>{},
         createdAt = createdAt ?? DateTime.now(),
@@ -30,6 +33,7 @@ class ExportProfile {
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String? ?? '',
+      removeEnglishAudio: json['removeEnglishAudio'] as bool? ?? false,
       selectedAudioLanguages: (json['selectedAudioLanguages'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toSet() ??
@@ -51,6 +55,7 @@ class ExportProfile {
       'id': id,
       'name': name,
       'description': description,
+      'removeEnglishAudio': removeEnglishAudio,
       'selectedAudioLanguages': selectedAudioLanguages.toList(),
       'selectedSubtitleDescriptions': selectedSubtitleDescriptions.toList(),
       'defaultSubtitleDescription': defaultSubtitleDescription,
@@ -64,6 +69,7 @@ class ExportProfile {
     String? id,
     String? name,
     String? description,
+    bool? removeEnglishAudio,
     Set<String>? selectedAudioLanguages,
     Set<String>? selectedSubtitleDescriptions,
     String? defaultSubtitleDescription,
@@ -74,6 +80,7 @@ class ExportProfile {
       id: id ?? this.id,
       name: name ?? this.name,
       description: description ?? this.description,
+      removeEnglishAudio: removeEnglishAudio ?? this.removeEnglishAudio,
       selectedAudioLanguages:
           selectedAudioLanguages ?? this.selectedAudioLanguages,
       selectedSubtitleDescriptions:

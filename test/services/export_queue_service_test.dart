@@ -251,7 +251,7 @@ void main() {
     test('addMultiProfileExport adds multiple items for each profile', () {
       final profile1 = ExportProfile(name: 'HD', removeEnglishAudio: true);
       final profile2 = ExportProfile(name: 'SD', removeEnglishAudio: false);
-      
+
       final config = MultiProfileExportConfig(
         profiles: [profile1, profile2],
         suffixStrategy: FilenameSuffixStrategy.profileName,
@@ -267,7 +267,7 @@ void main() {
     test('addMultiProfileExport respects priority', () {
       final profile1 = ExportProfile(name: 'HD', removeEnglishAudio: true);
       final profile2 = ExportProfile(name: 'SD', removeEnglishAudio: false);
-      
+
       final config = MultiProfileExportConfig(
         profiles: [profile1, profile2],
       );
@@ -286,7 +286,7 @@ void main() {
       final profile1 = ExportProfile(name: 'HD', removeEnglishAudio: true);
       final profile2 = ExportProfile(name: 'SD', removeEnglishAudio: false);
       final profile3 = ExportProfile(name: 'Mobile', removeEnglishAudio: true);
-      
+
       final config = MultiProfileExportConfig(
         profiles: [profile1, profile2, profile3],
       );

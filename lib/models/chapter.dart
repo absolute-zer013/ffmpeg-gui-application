@@ -2,13 +2,13 @@
 class Chapter {
   /// Unique ID for the chapter
   final int id;
-  
+
   /// Start time in seconds
   final double startTime;
-  
+
   /// End time in seconds
   final double endTime;
-  
+
   /// Chapter title
   final String title;
 
@@ -68,11 +68,11 @@ class Chapter {
     if (parts.length != 3) {
       throw FormatException('Invalid time format: $timeString');
     }
-    
+
     final hours = int.parse(parts[0]);
     final minutes = int.parse(parts[1]);
     final seconds = double.parse(parts[2]);
-    
+
     return hours * 3600.0 + minutes * 60.0 + seconds;
   }
 

@@ -9,7 +9,8 @@ void main() {
       expect(settings.reorderStreams, isTrue);
       expect(settings.removeMetadata, isFalse);
       expect(settings.optimizeHeader, isTrue);
-      expect(settings.reorderPolicy, equals(StreamReorderPolicy.typeBasedDefault));
+      expect(
+          settings.reorderPolicy, equals(StreamReorderPolicy.typeBasedDefault));
     });
 
     test('copyWith creates modified copy', () {

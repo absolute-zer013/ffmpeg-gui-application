@@ -11,7 +11,7 @@ void main() {
     setUp(() {
       detectedFiles = [];
       errors = [];
-      
+
       service = WatchFolderService(
         onFileDetected: (filePath) => detectedFiles.add(filePath),
         onError: (error) => errors.add(error),
@@ -29,7 +29,7 @@ void main() {
 
     test('stopWatching clears state', () async {
       await service.stopWatching();
-      
+
       expect(service.isWatching, isFalse);
       expect(service.processedFiles, isEmpty);
     });
@@ -48,7 +48,7 @@ void main() {
       );
 
       await service.startWatching(config);
-      
+
       // Config should be stored even if watching is disabled
       expect(service.config, equals(config));
     });
@@ -60,7 +60,7 @@ void main() {
       );
 
       await service.startWatching(config);
-      
+
       expect(service.isWatching, isFalse);
     });
 

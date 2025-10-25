@@ -2,13 +2,13 @@
 class OptimizationSettings {
   /// Whether to reorder streams by type (video, audio, subtitle)
   final bool reorderStreams;
-  
+
   /// Whether to remove unnecessary metadata
   final bool removeMetadata;
-  
+
   /// Whether to optimize header compression
   final bool optimizeHeader;
-  
+
   /// Policy for stream reordering
   final StreamReorderPolicy reorderPolicy;
 
@@ -59,10 +59,10 @@ class OptimizationSettings {
 enum StreamReorderPolicy {
   /// Keep original order
   keepOriginal,
-  
+
   /// Video → Audio → Subtitle (with default tracks first)
   typeBasedDefault,
-  
+
   /// Video → Audio → Subtitle (all in original order within type)
   typeBasedOriginal,
 }
@@ -95,13 +95,13 @@ extension StreamReorderPolicyExtension on StreamReorderPolicy {
 class OptimizationResult {
   /// Original file size in bytes
   final int originalSize;
-  
+
   /// Optimized file size in bytes
   final int optimizedSize;
-  
+
   /// Error message if optimization failed
   final String? error;
-  
+
   /// Duration of optimization in milliseconds
   final int durationMs;
 

@@ -33,15 +33,17 @@ class ChapterService {
       final chapters = <Chapter>[];
       for (int i = 0; i < chaptersJson.length; i++) {
         final chapterData = chaptersJson[i] as Map<String, dynamic>;
-        
+
         final startTime = double.tryParse(
-          chapterData['start_time']?.toString() ?? '0',
-        ) ?? 0.0;
-        
+              chapterData['start_time']?.toString() ?? '0',
+            ) ??
+            0.0;
+
         final endTime = double.tryParse(
-          chapterData['end_time']?.toString() ?? '0',
-        ) ?? 0.0;
-        
+              chapterData['end_time']?.toString() ?? '0',
+            ) ??
+            0.0;
+
         final tags = chapterData['tags'] as Map<String, dynamic>?;
         final title = tags?['title']?.toString() ?? 'Chapter ${i + 1}';
 
@@ -84,7 +86,7 @@ class ChapterService {
     // Create temporary metadata file
     final tempDir = Directory.systemTemp.createTempSync('chapters_');
     final metadataFile = File('${tempDir.path}/metadata.txt');
-    
+
     try {
       // Write metadata
       final metadata = generateMetadataFile(chapters);
@@ -149,7 +151,7 @@ class ChapterService {
   static List<Chapter> sortChapters(List<Chapter> chapters) {
     final sorted = List<Chapter>.from(chapters);
     sorted.sort((a, b) => a.startTime.compareTo(b.startTime));
-    
+
     // Reassign IDs after sorting
     return sorted
         .asMap()

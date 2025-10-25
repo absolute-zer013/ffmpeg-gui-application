@@ -14,7 +14,7 @@ class CommandHistoryService {
   Stream<void> get historyChanged => _historyChangedController.stream;
 
   /// Creates a new CommandHistoryService
-  /// 
+  ///
   /// [maxHistorySize] limits the number of commands stored (default: 50)
   CommandHistoryService({int maxHistorySize = 50})
       : _maxHistorySize = maxHistorySize;
@@ -23,15 +23,15 @@ class CommandHistoryService {
   void executeCommand(Command command) {
     command.execute();
     _undoStack.add(command);
-    
+
     // Limit stack size
     if (_undoStack.length > _maxHistorySize) {
       _undoStack.removeAt(0);
     }
-    
+
     // Clear redo stack when new command is executed
     _redoStack.clear();
-    
+
     _notifyHistoryChanged();
   }
 
@@ -40,11 +40,11 @@ class CommandHistoryService {
     if (_undoStack.isEmpty) {
       return false;
     }
-    
+
     final command = _undoStack.removeLast();
     command.undo();
     _redoStack.add(command);
-    
+
     _notifyHistoryChanged();
     return true;
   }
@@ -54,11 +54,11 @@ class CommandHistoryService {
     if (_redoStack.isEmpty) {
       return false;
     }
-    
+
     final command = _redoStack.removeLast();
     command.execute();
     _undoStack.add(command);
-    
+
     _notifyHistoryChanged();
     return true;
   }

@@ -19,7 +19,7 @@ class MkvOptimizationService {
     OptimizationSettings settings,
   ) async {
     final startTime = DateTime.now();
-    
+
     try {
       // Get original file size
       final file = File(filePath);
@@ -76,7 +76,7 @@ class MkvOptimizationService {
     } catch (e) {
       final file = File(filePath);
       final size = await file.length();
-      
+
       return OptimizationResult(
         originalSize: size,
         optimizedSize: size,
@@ -96,7 +96,7 @@ class MkvOptimizationService {
     }
 
     // Create temporary output file
-    final tempFile = '${filePath}.temp.mkv';
+    final tempFile = '$filePath.temp.mkv';
 
     try {
       // Get stream information
@@ -125,10 +125,10 @@ class MkvOptimizationService {
         if (line.trim().isEmpty) continue;
         final parts = line.split(',');
         if (parts.length < 2) continue;
-        
+
         final index = int.tryParse(parts[0]);
         final type = parts[1].trim();
-        
+
         if (index != null && streams.containsKey(type)) {
           streams[type]!.add(index);
         }
@@ -136,17 +136,17 @@ class MkvOptimizationService {
 
       // Build FFmpeg map arguments based on policy
       final mapArgs = <String>[];
-      
+
       // Add video streams
       for (final index in streams['video']!) {
         mapArgs.addAll(['-map', '0:$index']);
       }
-      
+
       // Add audio streams
       for (final index in streams['audio']!) {
         mapArgs.addAll(['-map', '0:$index']);
       }
-      
+
       // Add subtitle streams
       for (final index in streams['subtitle']!) {
         mapArgs.addAll(['-map', '0:$index']);
@@ -171,7 +171,7 @@ class MkvOptimizationService {
       // Replace original file with reordered version
       final originalFile = File(filePath);
       final tempFileObj = File(tempFile);
-      
+
       await originalFile.delete();
       await tempFileObj.rename(filePath);
     } catch (e) {

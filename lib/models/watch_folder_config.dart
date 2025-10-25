@@ -4,22 +4,22 @@ import 'export_profile.dart';
 class WatchFolderConfig {
   /// Path to the folder to watch
   final String folderPath;
-  
+
   /// Whether watch folder is enabled
   final bool enabled;
-  
+
   /// File patterns to watch (e.g., '*.mkv', '*.mp4')
   final List<String> filePatterns;
-  
+
   /// Whether to automatically add matching files to the list
   final bool autoAdd;
-  
+
   /// Whether to automatically export added files
   final bool autoExport;
-  
+
   /// Profile to use for auto-export (if autoExport is true)
   final ExportProfile? autoExportProfile;
-  
+
   /// Whether to watch subdirectories
   final bool recursive;
 
@@ -69,10 +69,9 @@ class WatchFolderConfig {
     return WatchFolderConfig(
       folderPath: json['folderPath'] as String,
       enabled: json['enabled'] as bool? ?? false,
-      filePatterns: (json['filePatterns'] as List?)
-              ?.map((e) => e.toString())
-              .toList() ??
-          ['*.mkv', '*.mp4'],
+      filePatterns:
+          (json['filePatterns'] as List?)?.map((e) => e.toString()).toList() ??
+              ['*.mkv', '*.mp4'],
       autoAdd: json['autoAdd'] as bool? ?? true,
       autoExport: json['autoExport'] as bool? ?? false,
       autoExportProfile: json['autoExportProfile'] != null
