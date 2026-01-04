@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:file_picker/file_picker.dart';
@@ -70,6 +71,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  double get _dialogContentWidth =>
+      math.min(MediaQuery.of(context).size.width * 0.9, 600);
+
   // List of file items with their track selections.
   final List<FileItem> _files = [];
   String _log = '';
@@ -922,7 +926,10 @@ class _MyHomePageState extends State<MyHomePage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Export Summary'),
-        content: SingleChildScrollView(child: Text(summary)),
+        content: SizedBox(
+          width: _dialogContentWidth,
+          child: SingleChildScrollView(child: Text(summary)),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -1265,61 +1272,64 @@ class _MyHomePageState extends State<MyHomePage> {
 
     return AlertDialog(
       title: const Text('Select Output Directory'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Where would you like to save the exported files?'),
-            const SizedBox(height: 16),
-            ValueListenableBuilder<String?>(
-              valueListenable: selectedPath,
-              builder: (context, path, _) => Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (path != null)
-                    Container(
+      content: SizedBox(
+        width: _dialogContentWidth,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('Where would you like to save the exported files?'),
+              const SizedBox(height: 16),
+              ValueListenableBuilder<String?>(
+                valueListenable: selectedPath,
+                builder: (context, path, _) => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (path != null)
+                      Container(
+                        width: double.maxFinite,
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Selected Directory:',
+                                style: TextStyle(fontWeight: FontWeight.bold)),
+                            const SizedBox(height: 8),
+                            Text(
+                              path,
+                              style: const TextStyle(fontSize: 12),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                    SizedBox(
                       width: double.maxFinite,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Selected Directory:',
-                              style: TextStyle(fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 8),
-                          Text(
-                            path,
-                            style: const TextStyle(fontSize: 12),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                      child: FilledButton.icon(
+                        onPressed: () async {
+                          final dirPath =
+                              await FilePicker.platform.getDirectoryPath();
+                          if (dirPath != null) {
+                            selectedPath.value = dirPath;
+                          }
+                        },
+                        icon: const Icon(Icons.folder_open),
+                        label: const Text('Browse...'),
                       ),
                     ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.maxFinite,
-                    child: FilledButton.icon(
-                      onPressed: () async {
-                        final dirPath =
-                            await FilePicker.platform.getDirectoryPath();
-                        if (dirPath != null) {
-                          selectedPath.value = dirPath;
-                        }
-                      },
-                      icon: const Icon(Icons.folder_open),
-                      label: const Text('Browse...'),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       actions: [
@@ -1970,105 +1980,116 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (context) => AlertDialog(
         title: const Text('Settings'),
         content: StatefulBuilder(
-          builder: (context, setState) => Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Parallel Exports: $_maxConcurrentExports',
-                  style: const TextStyle(fontWeight: FontWeight.bold)),
-              Slider(
-                value: _maxConcurrentExports.toDouble(),
-                min: 1,
-                max: 8,
-                divisions: 7,
-                label: '$_maxConcurrentExports',
-                onChanged: (value) {
-                  setState(() {
-                    _maxConcurrentExports = value.toInt();
-                  });
-                  this.setState(() {});
-                },
+          builder: (context, setState) {
+            // Constrain dialog content height and make it scrollable to avoid overflow
+            final maxHeight = MediaQuery.of(context).size.height * 0.7;
+            return ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: maxHeight, minWidth: 360),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Parallel Exports: $_maxConcurrentExports',
+                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                    Slider(
+                      value: _maxConcurrentExports.toDouble(),
+                      min: 1,
+                      max: 8,
+                      divisions: 7,
+                      label: '$_maxConcurrentExports',
+                      onChanged: (value) {
+                        setState(() {
+                          _maxConcurrentExports = value.toInt();
+                        });
+                        this.setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Output Format:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    DropdownButton<String>(
+                      value: _outputFormat,
+                      isExpanded: true,
+                      items: const [
+                        DropdownMenuItem(
+                            value: 'mkv', child: Text('MKV (Matroska)')),
+                        DropdownMenuItem(value: 'mp4', child: Text('MP4')),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            _outputFormat = value;
+                          });
+                          this.setState(() {});
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Verification:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SwitchListTile(
+                      title: const Text('Verify exports after completion'),
+                      subtitle: const Text('Check exported files for errors'),
+                      value: _enableVerification,
+                      onChanged: (value) {
+                        setState(() {
+                          _enableVerification = value;
+                        });
+                        this.setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Compatibility:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SwitchListTile(
+                      title: const Text('Auto-fix container incompatibilities'),
+                      subtitle: const Text(
+                          'Transcode incompatible audio (e.g., to AAC/Opus) and drop unsupported subtitles when needed'),
+                      value: _autoFixCompatibility,
+                      onChanged: (value) {
+                        setState(() {
+                          _autoFixCompatibility = value;
+                        });
+                        this.setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Notifications:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SwitchListTile(
+                      title: const Text('Desktop notifications'),
+                      subtitle: const Text(
+                          'Show Windows notifications on export completion'),
+                      value: _enableDesktopNotifications,
+                      onChanged: (value) {
+                        setState(() {
+                          _enableDesktopNotifications = value;
+                        });
+                        this.setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Hardware Acceleration:',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                    SwitchListTile(
+                      title: const Text(
+                          'Use hardware acceleration when available'),
+                      subtitle: const Text(
+                          'Automatically use GPU encoders (NVENC, AMF, QSV) for faster encoding'),
+                      value: _useHardwareAcceleration,
+                      onChanged: (value) {
+                        setState(() {
+                          _useHardwareAcceleration = value;
+                        });
+                        this.setState(() {});
+                      },
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              const Text('Output Format:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              DropdownButton<String>(
-                value: _outputFormat,
-                isExpanded: true,
-                items: const [
-                  DropdownMenuItem(value: 'mkv', child: Text('MKV (Matroska)')),
-                  DropdownMenuItem(value: 'mp4', child: Text('MP4')),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _outputFormat = value;
-                    });
-                    this.setState(() {});
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-              const Text('Verification:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              SwitchListTile(
-                title: const Text('Verify exports after completion'),
-                subtitle: const Text('Check exported files for errors'),
-                value: _enableVerification,
-                onChanged: (value) {
-                  setState(() {
-                    _enableVerification = value;
-                  });
-                  this.setState(() {});
-                },
-              ),
-              const SizedBox(height: 16),
-              const Text('Compatibility:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              SwitchListTile(
-                title: const Text('Auto-fix container incompatibilities'),
-                subtitle: const Text(
-                    'Transcode incompatible audio (e.g., to AAC/Opus) and drop unsupported subtitles when needed'),
-                value: _autoFixCompatibility,
-                onChanged: (value) {
-                  setState(() {
-                    _autoFixCompatibility = value;
-                  });
-                  this.setState(() {});
-                },
-              ),
-              const SizedBox(height: 16),
-              const Text('Notifications:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              SwitchListTile(
-                title: const Text('Desktop notifications'),
-                subtitle: const Text(
-                    'Show Windows notifications on export completion'),
-                value: _enableDesktopNotifications,
-                onChanged: (value) {
-                  setState(() {
-                    _enableDesktopNotifications = value;
-                  });
-                  this.setState(() {});
-                },
-              ),
-              const SizedBox(height: 16),
-              const Text('Hardware Acceleration:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              SwitchListTile(
-                title: const Text('Use hardware acceleration when available'),
-                subtitle: const Text(
-                    'Automatically use GPU encoders (NVENC, AMF, QSV) for faster encoding'),
-                value: _useHardwareAcceleration,
-                onChanged: (value) {
-                  setState(() {
-                    _useHardwareAcceleration = value;
-                  });
-                  this.setState(() {});
-                },
-              ),
-            ],
-          ),
+            );
+          },
         ),
         actions: [
           TextButton(

@@ -14,6 +14,7 @@ class Track {
   final int? width;
   final int? height;
   final String? frameRate;
+  final bool isAttachedPic;
 
   Track({
     required this.position,
@@ -27,5 +28,6 @@ class Track {
     this.width,
     this.height,
     this.frameRate,
+    this.isAttachedPic = false,
   }) : streamIndex = streamIndex ?? position;
 }

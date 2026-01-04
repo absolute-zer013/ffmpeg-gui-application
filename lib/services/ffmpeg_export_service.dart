@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import '../models/codec_options.dart';
@@ -10,6 +11,44 @@ import 'ffmpeg_capabilities_service.dart';
 
 /// Service for exporting files using FFmpeg
 class FFmpegExportService {
+  @visibleForTesting
+  static List<String> buildVideoEncodeArgsForTesting({
+    required String inputPath,
+    required FileItem item,
+    required String outputPath,
+    String? outputFormat,
+    bool autoFix = false,
+    HardwareCapabilities? hwCapabilities,
+    bool useHardwareAcceleration = true,
+  }) {
+    return _buildVideoEncodeArgs(
+      inputPath: inputPath,
+      item: item,
+      outputPath: outputPath,
+      outputFormat: outputFormat,
+      autoFix: autoFix,
+      hwCapabilities: hwCapabilities,
+      useHardwareAcceleration: useHardwareAcceleration,
+    );
+  }
+
+  @visibleForTesting
+  static List<String> buildAudioEncodeArgsForTesting({
+    required String inputPath,
+    required FileItem item,
+    required String outputPath,
+    String? outputFormat,
+    bool autoFix = false,
+  }) {
+    return _buildAudioEncodeArgs(
+      inputPath: inputPath,
+      item: item,
+      outputPath: outputPath,
+      outputFormat: outputFormat,
+      autoFix: autoFix,
+    );
+  }
+
   static String _muxerForExtension(String ext) {
     final e = ext.toLowerCase();
     switch (e) {
@@ -79,6 +118,29 @@ class FFmpegExportService {
       }
     }
 
+    // Cover art is exposed as video streams with the attached_pic disposition on MP4/MOV
+    // style containers, but Matroska stores cover art as attachments instead. Only apply
+    // the drop/re-add trick on formats that actually flag cover art as video streams,
+    // otherwise FFmpeg 6+ rejects the stream specifier and stage 1 aborts with exit -22.
+    const coverArtAsVideoContainers = {
+      'mp4',
+      'm4v',
+      'mov',
+      'm4a',
+      'm4b',
+    };
+    final preservesAttachedPicAsVideo =
+        coverArtAsVideoContainers.contains(outputFormat.toLowerCase());
+    final hasAttachedPictures =
+        item.videoTracks.any((track) => track.isAttachedPic);
+    if (preservesAttachedPicAsVideo && hasAttachedPictures) {
+      // Users may deselect extra "video" entries assuming they are duplicate video
+      // tracks, which unintentionally strips the cover. Explicitly drop and re-map
+      // attached pictures so they are preserved irrespective of the selections.
+      args.addAll(['-map', '-0:v:m:attached_pic=1?']);
+      args.addAll(['-map', '0:v:m:attached_pic=1?']);
+    }
+
     // Handle subtitles
     final isMp4Like =
         {'mp4', 'm4v', 'mov'}.contains(outputFormat.toLowerCase());
@@ -103,8 +165,9 @@ class FFmpegExportService {
       }
     }
 
-    // Exclude attachments (e.g., fonts in MKV) to improve container compatibility
-    args.addAll(['-map', '-0:t']);
+    // Keep attachments (cover art, etc.); they're useful and widely supported
+    // Note: if you want to exclude fonts but keep images, add custom filtering logic here
+    // For now, we include all attachments to preserve cover art
 
     // Add file-level metadata if present
     if (item.fileMetadata != null) {
@@ -146,8 +209,97 @@ class FFmpegExportService {
     return args;
   }
 
-  /// Build args for Stage 2: re-encode with codec/quality settings
-  static List<String> _buildStage2Args({
+  static ({bool video, bool audio}) _computeEncodingNeeds(
+    FileItem item, {
+    String? outputFormat,
+    bool autoFix = false,
+  }) {
+    var needsVideo = false;
+    var needsAudio = false;
+
+    if (item.qualityPreset != null) {
+      final preset = item.qualityPreset!;
+      if (preset.crf != null ||
+          preset.preset != null ||
+          preset.videoBitrate != null) {
+        needsVideo = true;
+      }
+      if (preset.audioBitrate != null) {
+        needsAudio = true;
+      }
+    }
+
+    if (item.codecSettings.isNotEmpty) {
+      for (final entry in item.codecSettings.entries) {
+        final streamIndex = entry.key;
+        final settings = entry.value;
+        final isVideo = item.videoTracks.any((t) =>
+            t.streamIndex == streamIndex &&
+            item.selectedVideo.contains(t.position));
+        final isAudio = item.audioTracks.any((t) =>
+            t.streamIndex == streamIndex &&
+            item.selectedAudio.contains(t.position));
+
+        if (isVideo) {
+          if (settings.videoCodec != null ||
+              settings.customVideoCodec != null ||
+              settings.videoCrf != null ||
+              settings.videoPreset != null ||
+              settings.videoBitrateKbps != null) {
+            needsVideo = true;
+          }
+        }
+        if (isAudio) {
+          if (settings.audioCodec != null ||
+              settings.customAudioCodec != null ||
+              settings.audioBitrate != null ||
+              settings.audioChannels != null ||
+              settings.audioSampleRate != null) {
+            needsAudio = true;
+          }
+        }
+      }
+    }
+
+    // Auto-fix may require transcoding incompatible audio even when the user
+    // didn't choose an explicit audio codec.
+    if (!needsAudio && autoFix && outputFormat != null) {
+      final fmt = outputFormat.toLowerCase();
+      final mp4Like = {'mp4', 'm4v', 'mov'}.contains(fmt);
+      final webm = fmt == 'webm';
+      if (mp4Like || webm) {
+        for (final a in item.audioTracks
+            .where((t) => item.selectedAudio.contains(t.position))) {
+          final codec = (a.codec ?? '').toLowerCase();
+          final simple = codec
+              .split(RegExp(r'[^a-z0-9]+'))
+              .where((s) => s.isNotEmpty)
+              .join();
+          bool needsTranscode = false;
+          if (mp4Like) {
+            const ok = {'aac', 'ac3', 'eac3', 'alac', 'mp3'};
+            needsTranscode = !ok.any((k) => simple.contains(k));
+          } else if (webm) {
+            const ok = {'vorbis', 'opus'};
+            needsTranscode = !ok.any((k) => simple.contains(k));
+          }
+          if (needsTranscode) {
+            needsAudio = true;
+            break;
+          }
+        }
+      }
+    }
+
+    // If there are no selected streams of a type, don't run that stage.
+    if (item.selectedVideo.isEmpty) needsVideo = false;
+    if (item.selectedAudio.isEmpty) needsAudio = false;
+
+    return (video: needsVideo, audio: needsAudio);
+  }
+
+  /// Build args for Stage 2: video encode (audio copied)
+  static List<String> _buildVideoEncodeArgs({
     required String inputPath,
     required FileItem item,
     required String outputPath,
@@ -163,6 +315,22 @@ class FFmpegExportService {
       '-y', // Overwrite output files
     ];
 
+    // Never re-encode audio in the video stage.
+    args.addAll(['-c:a', 'copy']);
+
+    // Stage 1 may have removed unselected tracks, causing stream indices to be
+    // renumbered in the temp file. Map original track streamIndex -> output
+    // stream ordinal (per type) for Stage 2 stream specifiers.
+    final selectedVideoTracks = item.videoTracks
+        .where((t) => item.selectedVideo.contains(t.position))
+        .toList()
+      ..sort((a, b) => a.position.compareTo(b.position));
+
+    final outputVideoIndexByStreamIndex = <int, int>{
+      for (var i = 0; i < selectedVideoTracks.length; i++)
+        selectedVideoTracks[i].streamIndex: i,
+    };
+
     // Apply quality preset if present
     if (item.qualityPreset != null) {
       final preset = item.qualityPreset!;
@@ -174,9 +342,6 @@ class FFmpegExportService {
       }
       if (preset.videoBitrate != null) {
         args.addAll(['-b:v', '${preset.videoBitrate}k']);
-      }
-      if (preset.audioBitrate != null) {
-        args.addAll(['-b:a', '${preset.audioBitrate}k']);
       }
     }
 
@@ -267,6 +432,11 @@ class FFmpegExportService {
           for (final e in videoSettings.entries) {
             final streamIndex = e.key;
             final s = e.value;
+            final outVideoIndex = outputVideoIndexByStreamIndex[streamIndex];
+            if (outVideoIndex == null) {
+              // Skip settings for streams that were not selected/mapped into Stage 1 output.
+              continue;
+            }
             var codec = s.videoCodec?.ffmpegName ?? s.customVideoCodec;
             if (codec != null) {
               // Try to use hardware encoder if available and enabled
@@ -287,83 +457,30 @@ class FFmpegExportService {
                 }
               }
 
-              args.addAll(['-c:v:$streamIndex', codec]);
+              args.addAll(['-c:v:$outVideoIndex', codec]);
             }
             if (s.videoCrf != null) {
-              args.addAll(['-crf:v:$streamIndex', s.videoCrf.toString()]);
+              args.addAll(['-crf:v:$outVideoIndex', s.videoCrf.toString()]);
             }
             if (s.videoPreset != null) {
               final presetFlag = (codec != null && codec.contains('libaom-av1'))
-                  ? '-cpu-used:v:$streamIndex'
-                  : '-preset:v:$streamIndex';
+                  ? '-cpu-used:v:$outVideoIndex'
+                  : '-preset:v:$outVideoIndex';
               args.addAll([presetFlag, s.videoPreset!]);
             } else if ((codec ?? '').contains('libaom-av1')) {
               // Apply default AV1 speed per-stream when not specified
-              args.addAll(['-cpu-used:v:$streamIndex', '6']);
+              args.addAll(['-cpu-used:v:$outVideoIndex', '6']);
             }
             if (s.videoBitrateKbps != null) {
               final kb = s.videoBitrateKbps!;
-              args.addAll(['-b:v:$streamIndex', kb == 0 ? '0' : '${kb}k']);
+              args.addAll(['-b:v:$outVideoIndex', kb == 0 ? '0' : '${kb}k']);
             }
           }
         }
       }
 
       // Apply audio codec settings
-      final hasExplicitAudioSettings = audioSettings.isNotEmpty;
-      if (hasExplicitAudioSettings) {
-        for (final entry in audioSettings.entries) {
-          final streamIndex = entry.key;
-          final settings = entry.value;
-
-          final codec =
-              settings.audioCodec?.ffmpegName ?? settings.customAudioCodec;
-          if (codec != null) {
-            args.addAll(['-c:a:$streamIndex', codec]);
-          }
-          if (settings.audioBitrate != null) {
-            args.addAll(['-b:a:$streamIndex', '${settings.audioBitrate}k']);
-          }
-          if (settings.audioChannels != null) {
-            args.addAll(
-                ['-ac:$streamIndex', settings.audioChannels.toString()]);
-          }
-          if (settings.audioSampleRate != null) {
-            args.addAll(
-                ['-ar:$streamIndex', settings.audioSampleRate.toString()]);
-          }
-        }
-      } else if (autoFix && outputFormat != null) {
-        // Auto-fix for container when user didn't specify audio transcodes
-        final fmt = outputFormat.toLowerCase();
-        final mp4Like = {'mp4', 'm4v', 'mov'}.contains(fmt);
-        final webm = fmt == 'webm';
-        if (mp4Like || webm) {
-          for (final a in item.audioTracks
-              .where((t) => item.selectedAudio.contains(t.position))) {
-            final codec = (a.codec ?? '').toLowerCase();
-            final simple = codec
-                .split(RegExp(r'[^a-z0-9]+'))
-                .where((s) => s.isNotEmpty)
-                .join();
-            bool needsTranscode = false;
-            if (mp4Like) {
-              const ok = {'aac', 'ac3', 'eac3', 'alac', 'mp3'};
-              needsTranscode = !ok.any((k) => simple.contains(k));
-            } else if (webm) {
-              const ok = {'vorbis', 'opus'};
-              needsTranscode = !ok.any((k) => simple.contains(k));
-            }
-            if (needsTranscode) {
-              final si = a.streamIndex;
-              final target = mp4Like ? 'aac' : 'libopus';
-              final br = (a.channels ?? 2) >= 6 ? 384 : 192; // kbps
-              args.addAll(['-c:a:$si', target]);
-              args.addAll(['-b:a:$si', '${br}k']);
-            }
-          }
-        }
-      }
+      // Audio settings are intentionally ignored in the video stage.
     }
 
     // Copy subtitle streams during re-encode (or convert if specified)
@@ -397,6 +514,174 @@ class FFmpegExportService {
 
     if (filters.isNotEmpty) {
       args.addAll(['-vf', filters.join(',')]);
+    }
+
+    // Intermediate output files may have a non-standard extension (e.g. *.mkv.video.tmp).
+    // Explicitly set the muxer based on the intended output extension to avoid:
+    // "Unable to choose an output format ... use a standard extension ...".
+    if (outputFormat != null && outputFormat.isNotEmpty) {
+      args.addAll(['-f', _muxerForExtension(outputFormat)]);
+    }
+
+    args.addAll([
+      '-map_chapters',
+      '0',
+      '-map_metadata',
+      '0',
+      '-progress',
+      'pipe:1',
+      outputPath,
+    ]);
+
+    return args;
+  }
+
+  /// Build args for Stage 3: audio encode (video copied)
+  static List<String> _buildAudioEncodeArgs({
+    required String inputPath,
+    required FileItem item,
+    required String outputPath,
+    String? outputFormat,
+    bool autoFix = false,
+  }) {
+    final args = <String>[
+      '-i',
+      inputPath,
+      '-map',
+      '0',
+      '-y',
+    ];
+
+    // Never re-encode video in the audio stage.
+    args.addAll(['-c:v', 'copy']);
+
+    // Map original track streamIndex -> output stream ordinal (per type).
+    final selectedAudioTracks = item.audioTracks
+        .where((t) => item.selectedAudio.contains(t.position))
+        .toList()
+      ..sort((a, b) => a.position.compareTo(b.position));
+    final outputAudioIndexByStreamIndex = <int, int>{
+      for (var i = 0; i < selectedAudioTracks.length; i++)
+        selectedAudioTracks[i].streamIndex: i,
+    };
+
+    // Apply quality preset audio bitrate if present.
+    if (item.qualityPreset != null) {
+      final preset = item.qualityPreset!;
+      if (preset.audioBitrate != null) {
+        args.addAll(['-b:a', '${preset.audioBitrate}k']);
+      }
+    }
+
+    // Collect audio settings by streamIndex
+    final audioSettings = <int, CodecConversionSettings>{};
+    for (final entry in item.codecSettings.entries) {
+      final streamIndex = entry.key;
+      final settings = entry.value;
+      final audioTrack = item.audioTracks
+          .where((t) => t.streamIndex == streamIndex)
+          .firstOrNull;
+      if (audioTrack != null &&
+          (settings.audioCodec != null ||
+              settings.customAudioCodec != null ||
+              settings.audioBitrate != null ||
+              settings.audioChannels != null ||
+              settings.audioSampleRate != null)) {
+        audioSettings[streamIndex] = settings;
+      }
+    }
+
+    final hasExplicitAudioSettings = audioSettings.isNotEmpty;
+    if (hasExplicitAudioSettings) {
+      for (final entry in audioSettings.entries) {
+        final streamIndex = entry.key;
+        final settings = entry.value;
+        final outAudioIndex = outputAudioIndexByStreamIndex[streamIndex];
+        if (outAudioIndex == null) continue;
+
+        final codec =
+            settings.audioCodec?.ffmpegName ?? settings.customAudioCodec;
+        if (codec != null) {
+          args.addAll(['-c:a:$outAudioIndex', codec]);
+        }
+        if (settings.audioBitrate != null) {
+          args.addAll(['-b:a:$outAudioIndex', '${settings.audioBitrate}k']);
+        }
+        if (settings.audioChannels != null) {
+          args.addAll(
+              ['-ac:$outAudioIndex', settings.audioChannels.toString()]);
+        }
+        if (settings.audioSampleRate != null) {
+          args.addAll(
+              ['-ar:$outAudioIndex', settings.audioSampleRate.toString()]);
+        }
+      }
+    } else if (autoFix && outputFormat != null) {
+      // Auto-fix for container when user didn't specify audio transcodes
+      final fmt = outputFormat.toLowerCase();
+      final mp4Like = {'mp4', 'm4v', 'mov'}.contains(fmt);
+      final webm = fmt == 'webm';
+      if (mp4Like || webm) {
+        for (final a in item.audioTracks
+            .where((t) => item.selectedAudio.contains(t.position))) {
+          final codec = (a.codec ?? '').toLowerCase();
+          final simple = codec
+              .split(RegExp(r'[^a-z0-9]+'))
+              .where((s) => s.isNotEmpty)
+              .join();
+          bool needsTranscode = false;
+          if (mp4Like) {
+            const ok = {'aac', 'ac3', 'eac3', 'alac', 'mp3'};
+            needsTranscode = !ok.any((k) => simple.contains(k));
+          } else if (webm) {
+            const ok = {'vorbis', 'opus'};
+            needsTranscode = !ok.any((k) => simple.contains(k));
+          }
+          if (needsTranscode) {
+            final si = outputAudioIndexByStreamIndex[a.streamIndex];
+            if (si == null) continue;
+            final target = mp4Like ? 'aac' : 'libopus';
+            final br = (a.channels ?? 2) >= 6 ? 384 : 192; // kbps
+            args.addAll(['-c:a:$si', target]);
+            args.addAll(['-b:a:$si', '${br}k']);
+          }
+        }
+      }
+    }
+
+    // Copy subtitle streams (or convert if specified)
+    final selectedSubs = item.selectedSubtitles.toList()..sort();
+    for (var i = 0; i < selectedSubs.length; i++) {
+      final pos = selectedSubs[i];
+      final track = item.subtitleTracks[pos];
+      final settings = item.codecSettings[track.streamIndex];
+
+      if (settings?.subtitleFormat != null &&
+          settings!.subtitleFormat != SubtitleFormat.copy) {
+        args.addAll(['-c:s:$i', settings.subtitleFormat!.ffmpegName]);
+      } else {
+        args.addAll(['-c:s:$i', 'copy']);
+      }
+    }
+
+    // Apply resolution/framerate changes (Feature #10)
+    final filters = <String>[];
+    if (item.resolutionSettings != null && item.resolutionSettings!.enabled) {
+      final scaleFilter = item.resolutionSettings!.scaleFilter;
+      if (scaleFilter != null) {
+        filters.add(scaleFilter);
+      }
+      if (item.resolutionSettings!.framerate != null) {
+        args.addAll(['-r', item.resolutionSettings!.framerate.toString()]);
+      }
+    }
+    if (filters.isNotEmpty) {
+      args.addAll(['-vf', filters.join(',')]);
+    }
+
+    // Keep muxer selection stable even if the caller uses a temp suffix.
+    if (outputFormat != null && outputFormat.isNotEmpty) {
+      args.addAll(['-f', _muxerForExtension(outputFormat)]);
     }
 
     args.addAll([
@@ -501,34 +786,6 @@ class FFmpegExportService {
     return issues;
   }
 
-  /// Check if encoding is needed (any codec or quality settings)
-  static bool _needsEncoding(FileItem item) {
-    if (item.qualityPreset != null) {
-      final preset = item.qualityPreset!;
-      if (preset.crf != null ||
-          preset.videoBitrate != null ||
-          preset.audioBitrate != null) {
-        return true;
-      }
-    }
-
-    if (item.codecSettings.isNotEmpty) {
-      for (final settings in item.codecSettings.values) {
-        if (settings.videoCodec != null ||
-            settings.customVideoCodec != null ||
-            settings.audioCodec != null ||
-            settings.customAudioCodec != null ||
-            settings.videoCrf != null ||
-            settings.videoPreset != null ||
-            settings.videoBitrateKbps != null) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
   /// Run FFmpeg process and track progress
   static Future<ExportResult> _runFFmpegProcess(
       List<String> args, String? duration, Function(double progress) onProgress,
@@ -577,6 +834,7 @@ class FFmpegExportService {
       int lastLoggedPercent = -1;
       process.stdout.transform(utf8.decoder).listen((data) {
         stdoutBuffer.write(data);
+        // Primary: out_time_ms (microseconds)
         final match = RegExp(r'out_time_ms=(\d+)').firstMatch(data);
         if (match != null && totalSeconds != null && totalSeconds > 0) {
           try {
@@ -592,6 +850,25 @@ class FFmpegExportService {
             }
           } catch (_) {
             // ignore parse errors
+          }
+        } else {
+          // Some FFmpeg builds emit out_time instead of out_time_ms; handle that too
+          final m2 =
+              RegExp(r'out_time=(\d+:\d+:\d+(?:\.\d+)?)').firstMatch(data);
+          if (m2 != null && totalSeconds != null && totalSeconds > 0) {
+            final t = m2.group(1)!;
+            final secs = parseHms(t);
+            if (secs != null) {
+              final progress = (secs / totalSeconds).clamp(0.0, 1.0);
+              onProgress(progress);
+              final percent = (progress * 100).clamp(0, 100).toInt();
+              if (onLog != null && percent != lastLoggedPercent) {
+                lastLoggedPercent = percent;
+                final label =
+                    stageLabel.isEmpty ? 'Progress' : '$stageLabel progress';
+                onLog('$label: $percent%');
+              }
+            }
           }
         }
       });
@@ -771,7 +1048,16 @@ class FFmpegExportService {
     }
 
     final tempPath = '$outPath.tmp';
-    final needsEncoding = _needsEncoding(item);
+    final needs = _computeEncodingNeeds(
+      item,
+      outputFormat: extension,
+      autoFix: autoFixIncompat,
+    );
+    final needsVideoEncoding = needs.video;
+    final needsAudioEncoding = needs.audio;
+    final totalStages =
+        1 + (needsVideoEncoding ? 1 : 0) + (needsAudioEncoding ? 1 : 0);
+    var completedStages = 0;
 
     // Log plan
     if (onLog != null) {
@@ -779,20 +1065,24 @@ class FFmpegExportService {
       final baseFileName = path.basename(item.path);
       summary.writeln('Export plan for $baseFileName');
       summary.writeln('Stage 1: Copy/re-mux selected streams (no encoding)');
-      if (needsEncoding) {
-        summary.writeln('Stage 2: Re-encode with codec/quality settings');
-      } else {
-        summary.writeln('Stage 2: Skipped (no encoding needed)');
-      }
+      summary.writeln(needsVideoEncoding
+          ? 'Stage 2: Re-encode video (audio copied)'
+          : 'Stage 2: Skipped (no video encoding needed)');
+      summary.writeln(needsAudioEncoding
+          ? 'Stage 3: Re-encode audio (video copied)'
+          : 'Stage 3: Skipped (no audio encoding needed)');
       onLog(summary.toString());
       runLog.writeln(summary.toString());
     } else {
       final baseFileName = path.basename(item.path);
       runLog.writeln('Export plan for $baseFileName');
       runLog.writeln('Stage 1: Copy/re-mux selected streams (no encoding)');
-      runLog.writeln(needsEncoding
-          ? 'Stage 2: Re-encode with codec/quality settings'
-          : 'Stage 2: Skipped (no encoding needed)');
+      runLog.writeln(needsVideoEncoding
+          ? 'Stage 2: Re-encode video (audio copied)'
+          : 'Stage 2: Skipped (no video encoding needed)');
+      runLog.writeln(needsAudioEncoding
+          ? 'Stage 3: Re-encode audio (video copied)'
+          : 'Stage 3: Skipped (no audio encoding needed)');
     }
 
     String argsToCmd(List<String> args) {
@@ -817,7 +1107,7 @@ class FFmpegExportService {
       logToFile('Stage 1 command:');
       logToFile(argsToCmd(stage1Args));
       var result = await _runFFmpegProcess(stage1Args, item.duration, (p) {
-        onProgress(needsEncoding ? p * 0.5 : p);
+        onProgress((completedStages + p) / totalStages);
       },
           onLog: onLog,
           stageLabel: 'Stage 1',
@@ -850,16 +1140,22 @@ class FFmpegExportService {
       if (onLog != null) {
         onLog('Stage 1 complete. Temp file: $tempPath');
       }
+      completedStages++;
 
-      // Stage 2: Re-encode if needed
-      if (needsEncoding) {
+      // Determine the current input for subsequent stages.
+      var currentInputPath = tempPath;
+
+      // Stage 2: Video encode if needed
+      if (needsVideoEncoding) {
         if (onLog != null) {
-          onLog('Stage 2: Re-encode with codec/quality settings...');
+          onLog('Stage 2: Re-encode video (audio copied)...');
         }
-        final stage2Args = _buildStage2Args(
-          inputPath: tempPath,
+        final stage2OutputPath =
+            needsAudioEncoding ? '$outPath.video.tmp' : outPath;
+        final stage2Args = _buildVideoEncodeArgs(
+          inputPath: currentInputPath,
           item: item,
-          outputPath: outPath,
+          outputPath: stage2OutputPath,
           outputFormat: extension,
           autoFix: autoFixIncompat,
           hwCapabilities: hwCapabilities,
@@ -869,10 +1165,10 @@ class FFmpegExportService {
             logToFile(msg);
           },
         );
-        logToFile('Stage 2 command:');
+        logToFile('Stage 2 (Video) command:');
         logToFile(argsToCmd(stage2Args));
         result = await _runFFmpegProcess(stage2Args, item.duration, (p) {
-          onProgress(0.5 + p * 0.5);
+          onProgress((completedStages + p) / totalStages);
         },
             onLog: onLog,
             stageLabel: 'Stage 2',
@@ -905,16 +1201,81 @@ class FFmpegExportService {
         if (onLog != null) {
           onLog('Stage 2 complete.');
         }
+        completedStages++;
 
-        // Clean up temp file
-        try {
-          File(tempPath).deleteSync();
-        } catch (e) {
-          if (onLog != null) {
-            onLog('Warning: Could not delete temp file $tempPath: $e');
+        // Clean up previous input (Stage 1 temp) if Stage 2 produced a new file.
+        if (stage2OutputPath != currentInputPath) {
+          try {
+            File(currentInputPath).deleteSync();
+          } catch (_) {
+            // best effort
           }
         }
-      } else {
+        currentInputPath = stage2OutputPath;
+      }
+
+      // Stage 3: Audio encode if needed
+      if (needsAudioEncoding) {
+        if (onLog != null) {
+          onLog('Stage 3: Re-encode audio (video copied)...');
+        }
+        final stage3Args = _buildAudioEncodeArgs(
+          inputPath: currentInputPath,
+          item: item,
+          outputPath: outPath,
+          outputFormat: extension,
+          autoFix: autoFixIncompat,
+        );
+        logToFile('Stage 3 (Audio) command:');
+        logToFile(argsToCmd(stage3Args));
+        result = await _runFFmpegProcess(stage3Args, item.duration, (p) {
+          onProgress((completedStages + p) / totalStages);
+        },
+            onLog: onLog,
+            stageLabel: 'Stage 3',
+            onProcessStarted: onProcessStarted);
+        if (result.stdoutLog != null && result.stdoutLog!.isNotEmpty) {
+          logToFile('Stage 3 stdout:');
+          logToFile(result.stdoutLog!);
+        }
+        if (result.stderrLog != null && result.stderrLog!.isNotEmpty) {
+          logToFile('Stage 3 stderr:');
+          logToFile(result.stderrLog!);
+        }
+        if (!result.success) {
+          final isCancelled =
+              (result.errorMessage ?? '').toLowerCase().contains('cancelled');
+          if (onLog != null) {
+            onLog(isCancelled
+                ? 'Stage 3 cancelled by user.'
+                : 'Stage 3 failed: ${result.errorMessage}');
+          }
+          final endedAt = DateTime.now();
+          logToFile(isCancelled
+              ? 'Stage 3 cancelled by user.'
+              : 'Stage 3 failed: ${result.errorMessage ?? 'Unknown error'}');
+          logToFile(
+              'Finished: $endedAt (elapsed: ${endedAt.difference(startedAt)})');
+          saveRunLog(runLog.toString());
+          return result;
+        }
+        if (onLog != null) {
+          onLog('Stage 3 complete.');
+        }
+        completedStages++;
+
+        // Clean up the previous intermediate file (Stage 2 output or Stage 1 temp).
+        if (currentInputPath != outPath) {
+          try {
+            File(currentInputPath).deleteSync();
+          } catch (_) {
+            // best effort
+          }
+        }
+      }
+
+      // If no encoding stages ran, finalize by moving temp to output.
+      if (!needsVideoEncoding && !needsAudioEncoding) {
         // No encoding needed; move temp to final output
         try {
           File(tempPath).renameSync(outPath);

@@ -60,7 +60,7 @@ class FFprobeService {
         '-select_streams',
         'v',
         '-show_entries',
-        'stream=index,codec_name,width,height,r_frame_rate:stream_tags=language,title',
+        'stream=index,codec_name,width,height,r_frame_rate:stream_tags=language,title:stream_disposition=attached_pic',
         '-of',
         'csv=p=0:s=|',
         path,
@@ -84,6 +84,9 @@ class FFprobeService {
       final language =
           parts.length > 5 && parts[5].isNotEmpty ? parts[5] : 'und';
       final title = parts.length > 6 && parts[6].isNotEmpty ? parts[6] : null;
+      final attachedPicFlag =
+          parts.length > 7 && parts[7].isNotEmpty ? parts[7] : '0';
+      final isAttachedPic = attachedPicFlag == '1';
 
       final resolutionStr =
           (width != null && height != null) ? '${width}x$height' : '';
@@ -103,6 +106,7 @@ class FFprobeService {
         width: width,
         height: height,
         frameRate: frameRate,
+        isAttachedPic: isAttachedPic,
       ));
       videoPos++;
     }
